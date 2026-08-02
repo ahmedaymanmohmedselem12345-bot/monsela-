@@ -44,9 +44,15 @@ a{color:inherit;text-decoration:none;}
 /* NAV */
 nav{
   position:sticky;top:0;z-index:50;
-  background:rgba(27,20,32,0.85);
-  backdrop-filter:blur(10px);
+  background:rgba(27,20,32,0.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line);
+  transition:box-shadow .3s ease, background .3s ease;
+}
+nav.scrolled{
+  background:rgba(27,20,32,0.92);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
 }
 nav .container{
   display:flex;align-items:center;justify-content:space-between;
@@ -73,19 +79,29 @@ nav .container{
   background:radial-gradient(ellipse at 75% 30%, rgba(192,133,82,0.18), transparent 60%);
   pointer-events:none;
 }
-.hero h1{font-size:clamp(1.9rem, 6vw, 3.4rem);line-height:1.25;margin:14px 0 20px;}
+.hero h1{font-size:clamp(1.9rem, 6vw, 3.4rem);line-height:1.25;margin:14px 0 20px;text-shadow:0 2px 24px rgba(0,0,0,0.3);}
 .hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+  .hero-visual svg{animation:none;}
+}
 .hero-ctas{display:flex;gap:16px;}
 .btn-primary{
-  background:var(--gold);color:var(--ink);padding:16px 32px;border-radius:999px;
+  background:linear-gradient(135deg, var(--gold), #e0bc4f);color:var(--ink);padding:16px 32px;border-radius:999px;
   font-weight:700;font-size:1rem;border:none;cursor:pointer;
-  transition:transform .2s, box-shadow .2s;
+  box-shadow:0 8px 24px rgba(201,162,39,0.25);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,162,39,0.3);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(201,162,39,0.4);}
 .btn-ghost{
   border:1px solid var(--line);padding:16px 32px;border-radius:999px;
-  font-weight:600;color:var(--cream);
+  font-weight:600;color:var(--cream);background:rgba(243,237,228,0.03);
+  transition:border-color .3s ease, background .3s ease, transform .3s ease;
 }
+.btn-ghost:hover{border-color:var(--gold);background:rgba(201,162,39,0.08);transform:translateY(-2px);}
 .hero-visual{position:relative;display:flex;justify-content:center;}
 .hero-visual svg{filter:drop-shadow(0 30px 60px rgba(0,0,0,0.5));animation:float 5s ease-in-out infinite;max-width:220px;width:60vw;height:auto;}
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
@@ -99,10 +115,15 @@ nav .container{
 /* GALLERY */
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 .perfume-card{
-  background:var(--ink-2);border:1px solid var(--line);border-radius:18px;
-  padding:28px;text-align:center;transition:transform .25s, border-color .25s;
+  background:rgba(36,26,41,0.55);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:18px;
+  padding:28px;text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s ease, box-shadow .3s ease;
 }
-.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);}
+.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 18px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,162,39,0.15);}
 .perfume-card .glass{
   width:70px;height:100px;margin:0 auto 20px;border-radius:10px 10px 22px 22px;
   background:linear-gradient(180deg, var(--amber-light), var(--amber));
@@ -121,13 +142,23 @@ nav .container{
 
 /* CUSTOMIZER */
 .customizer{
-  background:var(--ink-2);border-radius:28px;border:1px solid var(--line);
+  background:rgba(36,26,41,0.5);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-radius:28px;border:1px solid var(--line);
+  box-shadow:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(243,237,228,0.05);
   padding:50px;display:grid;grid-template-columns:0.9fr 1.1fr;gap:50px;
 }
 .preview-panel{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at center, rgba(201,162,39,0.08), transparent 70%);
-  border-radius:20px;padding:30px;
+  background:radial-gradient(ellipse at center, rgba(201,162,39,0.1), transparent 70%);
+  border-radius:20px;padding:30px;position:relative;
+}
+.preview-panel::after{
+  content:'';position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+  width:120px;height:18px;border-radius:50%;
+  background:radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%);
+  filter:blur(2px);pointer-events:none;
 }
 .preview-panel svg{transition:all .4s ease;}
 .preview-name{
@@ -277,12 +308,12 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <section class="section" id="gallery">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="eyebrow">المجموعة</div>
       <h2>عطورنا الجاهزة</h2>
       <p>مجموعة مختارة بعناية — أو ابدأ من الصفر واصنع تركيبتك الخاصة تحت.</p>
     </div>
-    <div class="gallery-grid">
+    <div class="gallery-grid reveal">
       <div class="perfume-card">
         <div class="glass"></div>
         <h3>عود ملكي</h3>
@@ -331,14 +362,14 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <section class="section" id="customizer">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="eyebrow">اصنع تصميمك</div>
       <h2>صمم قزازتك خطوة بخطوة</h2>
       <p>اختار الشكل، اللون، اكتب اسمك، وحدد التركيبة — وشوف التصميم بيتغير قدامك أول بأول.</p>
       <div id="sharedBanner" style="display:none;margin-top:18px;background:rgba(201,162,39,0.12);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;color:var(--gold);font-size:0.9rem;"></div>
     </div>
 
-    <div class="customizer">
+    <div class="customizer reveal">
       <div class="preview-panel">
         <div id="rotateWrap" style="cursor:grab;user-select:none;width:180px;height:280px;position:relative;">
           <div id="bottleLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.75rem;color:var(--smoke);padding:10px;">جاري تحميل المعاينة ثلاثية الأبعاد…</div>
@@ -440,7 +471,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <section class="section" id="quiz">
   <div class="container">
-    <div class="quiz-box" id="quizBox" style="flex-direction:column;align-items:stretch;">
+    <div class="quiz-box reveal" id="quizBox" style="flex-direction:column;align-items:stretch;">
       <div style="text-align:center;margin-bottom:20px;">
         <div class="eyebrow">مش عارف تختار؟</div>
         <h3>خليني أرشحلك تركيبة تناسبك</h3>
@@ -499,7 +530,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <section class="section" id="testimonials" style="padding-top:0;">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="eyebrow">آراء عملائنا</div>
       <h2>ناس صممت قزازتها معانا</h2>
       <p style="font-size:0.85rem;opacity:0.7;">* نماذج توضيحية — هتتستبدل بآراء عملاء حقيقية بعد أول دفعة طلبات</p>
@@ -523,7 +554,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <section class="section" id="faq" style="padding-top:0;">
   <div class="container">
-    <div class="section-head">
+    <div class="section-head reveal">
       <div class="eyebrow">أسئلة شائعة</div>
       <h2>محتاج تعرف إيه كمان؟</h2>
     </div>
@@ -578,6 +609,27 @@ menuToggle.addEventListener('click', ()=>{
 navLinks.querySelectorAll('a').forEach(a=>{
   a.addEventListener('click', ()=> navLinks.classList.remove('open'));
 });
+
+// ===== Nav shadow on scroll =====
+const navEl = document.querySelector('nav');
+window.addEventListener('scroll', ()=>{
+  navEl.classList.toggle('scrolled', window.scrollY > 12);
+}, { passive: true });
+
+// ===== Scroll-reveal for section containers =====
+if ('IntersectionObserver' in window) {
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+}
 
 const scentNotes = {
   "عود وخشب": "نوتة علوية: عود خام • نوتة قلب: خشب صندل • نوتة قاعدية: عنبر ومسك",
