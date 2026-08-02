@@ -217,7 +217,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .perfume-card{padding:22px;}
   .customizer{padding:20px;border-radius:18px;}
   .preview-panel{padding:16px;}
-  #bottleSvg{width:130px !important;height:200px !important;}
+  #rotateWrap{width:130px !important;height:200px !important;}
   .option-row{gap:10px;}
   .opt{padding:9px 14px;font-size:0.85rem;flex:1 1 auto;text-align:center;}
   .scent-grid{grid-template-columns:1fr;}
@@ -340,14 +340,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
     <div class="customizer">
       <div class="preview-panel">
-        <div id="rotateWrap" style="perspective:900px;cursor:grab;user-select:none;">
-          <svg id="bottleSvg" width="180" height="280" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg" style="transition:transform .05s linear;transform-style:preserve-3d;">
-          <rect x="90" y="10" width="40" height="26" rx="4" fill="#c9a227"/>
-          <rect x="95" y="0" width="30" height="14" rx="3" fill="#8b3a4a"/>
-          <path id="bottlePath" d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
-            fill="#c08552" stroke="#c9a227" stroke-width="1.5"/>
-          <text id="bottleName" x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="24" fill="#1b1420"></text>
-          </svg>
+        <div id="rotateWrap" style="cursor:grab;user-select:none;width:180px;height:280px;position:relative;">
+          <div id="bottleLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.75rem;color:var(--smoke);padding:10px;">جاري تحميل المعاينة ثلاثية الأبعاد…</div>
         </div>
         <div style="font-size:0.75rem;color:var(--smoke);margin-top:6px;">↔ اسحب القزازة عشان تلفها</div>
         <div class="preview-name" id="previewCaption">اكتب اسمك عشان تشوفه على القزازة</div>
@@ -545,10 +539,6 @@ const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
 const WHATSAPP_NUMBER = "201000000000"; // TODO: غيّر ده لرقم واتساب البراند الحقيقي
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const bottlePath = document.getElementById('bottlePath');
-const bottleName = document.getElementById('bottleName');
-const bottleSvg = document.getElementById('bottleSvg');
-const rotateWrap = document.getElementById('rotateWrap');
 const previewCaption = document.getElementById('previewCaption');
 const summaryBox = document.getElementById('summaryBox');
 const nameInput = document.getElementById('nameInput');
@@ -570,12 +560,6 @@ navLinks.querySelectorAll('a').forEach(a=>{
   a.addEventListener('click', ()=> navLinks.classList.remove('open'));
 });
 
-const shapes = {
-  classic: "M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z",
-  tall: "M85 36 Q85 30 92 30 L128 30 Q135 30 135 36 L135 60 Q150 75 150 100 L150 310 Q150 330 130 330 L90 330 Q70 330 70 310 L70 100 Q70 75 85 60 Z",
-  round: "M75 40 Q75 32 85 32 L135 32 Q145 32 145 40 L145 65 Q175 95 175 160 Q175 260 175 260 Q175 330 130 330 L90 330 Q45 330 45 260 Q45 260 45 160 Q45 95 75 65 Z"
-};
-
 const scentNotes = {
   "عود وخشب": "نوتة علوية: عود خام • نوتة قلب: خشب صندل • نوتة قاعدية: عنبر ومسك",
   "زهور بيضاء": "نوتة علوية: ياسمين • نوتة قلب: زهر البرتقال • نوتة قاعدية: مسك أبيض",
@@ -584,6 +568,7 @@ const scentNotes = {
 };
 
 let state = { shape: 'classic', shapeLabel:'كلاسيك', colorTop:'#e0b083', colorBottom:'#c08552', colorLabel:'عنبري', name:'', scent:'عود وخشب' };
+window.state = state; // exposed for the 3D bottle viewer module
 
 function updateSummary(){
   summaryBox.innerHTML = `<b>الشكل:</b> ${state.shapeLabel} &nbsp; | &nbsp; <b>اللون:</b> ${state.colorLabel} &nbsp; | &nbsp; <b>التركيبة:</b> ${state.scent}`;
@@ -634,7 +619,7 @@ document.querySelectorAll('#shapeOptions .opt').forEach(btn=>{
     btn.classList.add('active');
     state.shape = btn.dataset.shape;
     state.shapeLabel = btn.textContent;
-    bottlePath.setAttribute('d', shapes[state.shape]);
+    window.MonselaBottle?.setShape(state.shape);
     updateSummary();
   });
 });
@@ -645,7 +630,7 @@ document.querySelectorAll('.color-dot').forEach(dot=>{
     dot.classList.add('active');
     const [bottom, top] = dot.dataset.color.split(',');
     state.colorTop = top; state.colorBottom = bottom;
-    bottlePath.setAttribute('fill', bottom);
+    window.MonselaBottle?.setColor(bottom);
     state.colorLabel = dot.style.background;
     updateSummary();
   });
@@ -653,7 +638,7 @@ document.querySelectorAll('.color-dot').forEach(dot=>{
 
 nameInput.addEventListener('input', ()=>{
   state.name = nameInput.value.trim();
-  bottleName.textContent = state.name;
+  window.MonselaBottle?.setName(state.name);
   previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
   updateSummary();
 });
@@ -708,23 +693,6 @@ document.getElementById('quizSubmit').addEventListener('click', ()=>{
 
 updateSummary();
 
-// ===== 3D bottle rotation (drag) =====
-let rotY = 0, dragging = false, startX = 0, startRot = 0;
-rotateWrap.addEventListener('mousedown', (e)=>{ dragging = true; startX = e.clientX; startRot = rotY; rotateWrap.style.cursor='grabbing'; });
-window.addEventListener('mouseup', ()=>{ dragging = false; rotateWrap.style.cursor='grab'; });
-window.addEventListener('mousemove', (e)=>{
-  if(!dragging) return;
-  rotY = startRot + (e.clientX - startX) * 0.6;
-  bottleSvg.style.transform = `rotateY(${rotY}deg)`;
-});
-rotateWrap.addEventListener('touchstart', (e)=>{ dragging = true; startX = e.touches[0].clientX; startRot = rotY; });
-window.addEventListener('touchend', ()=>{ dragging = false; });
-window.addEventListener('touchmove', (e)=>{
-  if(!dragging) return;
-  rotY = startRot + (e.touches[0].clientX - startX) * 0.6;
-  bottleSvg.style.transform = `rotateY(${rotY}deg)`;
-});
-
 // ===== Shareable design link =====
 shareBtn.addEventListener('click', async ()=>{
   shareBtn.disabled = true;
@@ -775,9 +743,9 @@ shareBtn.addEventListener('click', async ()=>{
   state.name = data.engraved_name || '';
   state.scent = data.scent;
 
-  bottlePath.setAttribute('d', shapes[state.shape] || shapes.classic);
-  bottlePath.setAttribute('fill', state.colorBottom);
-  bottleName.textContent = state.name;
+  window.MonselaBottle?.setShape(state.shape);
+  window.MonselaBottle?.setColor(state.colorBottom);
+  window.MonselaBottle?.setName(state.name);
   nameInput.value = state.name;
   previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
   notesText.textContent = scentNotes[state.scent] || '';
@@ -790,6 +758,162 @@ shareBtn.addEventListener('click', async ()=>{
   updateSummary();
   document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
 })();
+</script>
+
+<script type="module">
+// ===== Monsela 3D Bottle Viewer (Three.js) =====
+// Lazy-loaded after page load so it never blocks the initial page paint.
+window.addEventListener('load', () => {
+  import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').then((THREE) => {
+    const wrap = document.getElementById('rotateWrap');
+    const loadingLabel = document.getElementById('bottleLoading');
+    if (!wrap) return;
+
+    const PROFILES = {
+      classic: [[0,0],[0.38,0],[0.40,0.08],[0.37,0.50],[0.30,0.58],[0.35,0.66],[0.40,0.80],[0.40,0.95],[0.20,1.08],[0.16,1.25],[0.16,1.40],[0,1.40]],
+      tall:    [[0,0],[0.27,0],[0.29,0.06],[0.29,1.15],[0.25,1.26],[0.13,1.38],[0.13,1.52],[0,1.52]],
+      round:   [[0,0],[0.44,0],[0.50,0.14],[0.52,0.42],[0.47,0.72],[0.34,0.92],[0.29,1.02],[0.16,1.12],[0.16,1.28],[0,1.28]]
+    };
+
+    function lathePoints(key){
+      return PROFILES[key].map(([x,y]) => new THREE.Vector2(x,y));
+    }
+    function topHeight(key){
+      const pts = PROFILES[key];
+      return pts[pts.length - 1][1];
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, wrap.clientWidth / wrap.clientHeight, 0.1, 100);
+    camera.position.set(0, 0, 3.6);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+    wrap.appendChild(renderer.domElement);
+    renderer.domElement.style.touchAction = 'none';
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x1b1420, 0.7));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+    keyLight.position.set(2, 3, 4);
+    scene.add(keyLight);
+    const goldRim = new THREE.DirectionalLight(0xc9a227, 0.5);
+    goldRim.position.set(-3, 1, -2);
+    scene.add(goldRim);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const startColor = (window.state && window.state.colorBottom) || '#c08552';
+    const bottleMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(startColor),
+      transparent: true,
+      opacity: 0.86,
+      roughness: 0.12,
+      metalness: 0.0,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.2,
+      side: THREE.DoubleSide
+    });
+    const bottleMesh = new THREE.Mesh(new THREE.LatheGeometry(lathePoints('classic'), 48), bottleMaterial);
+    group.add(bottleMesh);
+
+    const capMaterial = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.6, roughness: 0.3 });
+    const capMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.22, 32), capMaterial);
+    group.add(capMesh);
+
+    const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x8b3a4a, metalness: 0.2, roughness: 0.5 });
+    const ringMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.06, 32), ringMaterial);
+    group.add(ringMesh);
+
+    // Engraved name, rendered as a canvas texture on a plane facing the camera
+    const nameCanvas = document.createElement('canvas');
+    nameCanvas.width = 256; nameCanvas.height = 128;
+    const nameCtx = nameCanvas.getContext('2d');
+    const nameTexture = new THREE.CanvasTexture(nameCanvas);
+    const namePlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.7, 0.35),
+      new THREE.MeshBasicMaterial({ map: nameTexture, transparent: true })
+    );
+    group.add(namePlane);
+
+    function drawName(text){
+      nameCtx.clearRect(0, 0, nameCanvas.width, nameCanvas.height);
+      if (text) {
+        nameCtx.fillStyle = '#1b1420';
+        nameCtx.textAlign = 'center';
+        nameCtx.textBaseline = 'middle';
+        nameCtx.font = '48px "Aref Ruqaa", serif';
+        nameCtx.fillText(text, nameCanvas.width / 2, nameCanvas.height / 2);
+      }
+      nameTexture.needsUpdate = true;
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => drawName((window.state && window.state.name) || ''));
+    }
+
+    function layoutForShape(key){
+      const h = topHeight(key);
+      capMesh.position.y = h + 0.11;
+      ringMesh.position.y = h - 0.02;
+      namePlane.position.set(0, h * 0.5, 0.42);
+      group.position.y = -h / 2;
+    }
+
+    function setShape(key){
+      if (!PROFILES[key]) return;
+      bottleMesh.geometry.dispose();
+      bottleMesh.geometry = new THREE.LatheGeometry(lathePoints(key), 48);
+      layoutForShape(key);
+    }
+    function setColor(hex){
+      bottleMaterial.color.set(hex);
+    }
+    function setName(text){
+      drawName(text);
+    }
+
+    layoutForShape((window.state && window.state.shape) || 'classic');
+    drawName((window.state && window.state.name) || '');
+
+    // Drag-to-rotate + gentle auto-rotate, using unified Pointer Events (mouse + touch)
+    let isDragging = false, lastX = 0;
+    wrap.addEventListener('pointerdown', (e) => {
+      isDragging = true; lastX = e.clientX; wrap.style.cursor = 'grabbing';
+      wrap.setPointerCapture(e.pointerId);
+    });
+    window.addEventListener('pointerup', () => { isDragging = false; wrap.style.cursor = 'grab'; });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastX; lastX = e.clientX;
+      group.rotation.y += dx * 0.012;
+    });
+
+    const clock = new THREE.Clock();
+    function animate(){
+      requestAnimationFrame(animate);
+      if (!isDragging) group.rotation.y += clock.getDelta() * 0.35;
+      renderer.render(scene, camera);
+    }
+
+    function onResize(){
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+
+    if (loadingLabel) loadingLabel.style.display = 'none';
+    animate();
+
+    window.MonselaBottle = { setShape, setColor, setName };
+  }).catch((err) => {
+    console.error('3D bottle viewer failed to load:', err);
+    if (loadingLabel) loadingLabel.textContent = 'المعاينة ثلاثية الأبعاد مش متاحة على المتصفح ده';
+  });
+});
 </script>
 
 </body>
