@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monsela | برفانات مصممة خصيصًا ليك</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --ink:#1b1420;
+  --ink-2:#241a29;
+  --amber:#c08552;
+  --amber-light:#e0b083;
+  --gold:#c9a227;
+  --cream:#f3ede4;
+  --rose:#8b3a4a;
+  --smoke:#6b6470;
+  --line:rgba(243,237,228,0.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--cream);
+  font-family:'Cairo',sans-serif;
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{
+  font-family:'Aref Ruqaa',serif;
+  font-weight:700;
+}
+.eyebrow{
+  font-family:'Markazi Text',serif;
+  letter-spacing:2px;
+  color:var(--gold);
+  font-size:1.1rem;
+  text-transform:uppercase;
+}
+a{color:inherit;text-decoration:none;}
+.container{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(27,20,32,0.85);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+nav .container{
+  display:flex;align-items:center;justify-content:space-between;
+  height:76px;
+}
+.logo{font-family:'Aref Ruqaa',serif;font-size:1.8rem;color:var(--cream);}
+.logo span{color:var(--gold);}
+.nav-links{display:flex;gap:32px;font-size:0.95rem;}
+.nav-links a{opacity:0.85;transition:opacity .2s;}
+.nav-links a:hover{opacity:1;color:var(--gold);}
+.nav-cta{
+  background:var(--gold);color:var(--ink);
+  padding:10px 22px;border-radius:999px;font-weight:700;font-size:0.9rem;
+}
+
+/* HERO */
+.hero{
+  position:relative;
+  padding:100px 0 60px;
+  display:grid;grid-template-columns:1.1fr 0.9fr;gap:40px;align-items:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 75% 30%, rgba(192,133,82,0.18), transparent 60%);
+  pointer-events:none;
+}
+.hero h1{font-size:3.4rem;line-height:1.25;margin:14px 0 20px;}
+.hero p.lead{color:var(--smoke);font-size:1.15rem;max-width:480px;line-height:1.9;margin-bottom:32px;}
+.hero-ctas{display:flex;gap:16px;}
+.btn-primary{
+  background:var(--gold);color:var(--ink);padding:16px 32px;border-radius:999px;
+  font-weight:700;font-size:1rem;border:none;cursor:pointer;
+  transition:transform .2s, box-shadow .2s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,162,39,0.3);}
+.btn-ghost{
+  border:1px solid var(--line);padding:16px 32px;border-radius:999px;
+  font-weight:600;color:var(--cream);
+}
+.hero-visual{position:relative;display:flex;justify-content:center;}
+.hero-visual svg{filter:drop-shadow(0 30px 60px rgba(0,0,0,0.5));animation:float 5s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+
+/* SECTION LABELS */
+.section{padding:90px 0;}
+.section-head{text-align:center;max-width:640px;margin:0 auto 56px;}
+.section-head h2{font-size:2.3rem;margin:10px 0 16px;}
+.section-head p{color:var(--smoke);font-size:1.05rem;line-height:1.8;}
+
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.perfume-card{
+  background:var(--ink-2);border:1px solid var(--line);border-radius:18px;
+  padding:28px;text-align:center;transition:transform .25s, border-color .25s;
+}
+.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);}
+.perfume-card .glass{
+  width:70px;height:100px;margin:0 auto 20px;border-radius:10px 10px 22px 22px;
+  background:linear-gradient(180deg, var(--amber-light), var(--amber));
+  position:relative;box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
+}
+.perfume-card .glass::before{
+  content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  width:20px;height:16px;background:var(--gold);border-radius:4px 4px 0 0;
+}
+.perfume-card h3{font-size:1.3rem;margin-bottom:8px;}
+.perfume-card p{color:var(--smoke);font-size:0.9rem;margin-bottom:14px;}
+.tag{
+  display:inline-block;font-size:0.75rem;color:var(--gold);
+  border:1px solid var(--gold);padding:4px 12px;border-radius:999px;
+}
+
+/* CUSTOMIZER */
+.customizer{
+  background:var(--ink-2);border-radius:28px;border:1px solid var(--line);
+  padding:50px;display:grid;grid-template-columns:0.9fr 1.1fr;gap:50px;
+}
+.preview-panel{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center, rgba(201,162,39,0.08), transparent 70%);
+  border-radius:20px;padding:30px;
+}
+.preview-panel svg{transition:all .4s ease;}
+.preview-name{
+  margin-top:24px;font-family:'Aref Ruqaa',serif;font-size:1.4rem;color:var(--gold);
+  min-height:32px;
+}
+.form-panel .field{margin-bottom:30px;}
+.form-panel label.field-label{
+  display:block;font-weight:700;margin-bottom:14px;font-size:1.05rem;
+}
+.field-label small{display:block;color:var(--smoke);font-weight:400;font-size:0.85rem;margin-top:4px;}
+.option-row{display:flex;gap:14px;flex-wrap:wrap;}
+.opt{
+  border:1px solid var(--line);background:transparent;color:var(--cream);
+  padding:10px 16px;border-radius:12px;cursor:pointer;font-family:'Cairo';font-size:0.9rem;
+  transition:all .2s;
+}
+.opt.active, .opt:hover{border-color:var(--gold);background:rgba(201,162,39,0.1);}
+.color-dot{
+  width:34px;height:34px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+  transition:transform .2s;
+}
+.color-dot.active{border-color:var(--cream);transform:scale(1.12);}
+input[type=text]{
+  width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);
+  padding:14px 16px;border-radius:12px;font-family:'Cairo';font-size:1rem;
+}
+input[type=text]:focus{outline:none;border-color:var(--gold);}
+.scent-card{
+  border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;
+}
+.scent-card.active{border-color:var(--gold);background:rgba(201,162,39,0.08);}
+.scent-card h4{font-size:1rem;margin-bottom:4px;}
+.scent-card p{font-size:0.8rem;color:var(--smoke);}
+.scent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.notes-pyramid{margin-top:12px;font-size:0.82rem;color:var(--amber-light);display:none;}
+.notes-pyramid.show{display:block;}
+
+.submit-bar{
+  margin-top:10px;display:flex;gap:14px;align-items:center;
+}
+.summary-box{
+  background:var(--ink);border:1px dashed var(--line);border-radius:14px;
+  padding:16px 18px;font-size:0.85rem;color:var(--smoke);line-height:1.8;margin-top:20px;
+}
+.summary-box b{color:var(--cream);}
+
+/* QUIZ TEASER */
+.quiz-box{
+  display:flex;align-items:center;justify-content:space-between;gap:40px;
+  background:linear-gradient(120deg, rgba(139,58,74,0.25), rgba(192,133,82,0.15));
+  border:1px solid var(--line);border-radius:24px;padding:44px;
+}
+.quiz-box h3{font-size:1.8rem;margin-bottom:12px;}
+.quiz-box p{color:var(--smoke);max-width:460px;line-height:1.8;}
+
+footer{
+  border-top:1px solid var(--line);padding:50px 0;text-align:center;color:var(--smoke);font-size:0.9rem;
+}
+footer .logo{margin-bottom:10px;justify-content:center;display:block;}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;text-align:center;}
+  .hero p.lead{margin:0 auto 32px;}
+  .hero-ctas{justify-content:center;}
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+  .customizer{grid-template-columns:1fr;padding:28px;}
+  .quiz-box{flex-direction:column;text-align:center;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="logo">Mon<span>sela</span></div>
+    <div class="nav-links">
+      <a href="#gallery">مجموعتنا</a>
+      <a href="#customizer">صمم قزازتك</a>
+      <a href="#testimonials">آراء العملاء</a>
+      <a href="#quiz">مش عارف تختار؟</a>
+    </div>
+    <a href="#customizer" class="nav-cta">ابدأ التصميم</a>
+  </div>
+</nav>
+
+<header class="hero container">
+  <div>
+    <div class="eyebrow">Monsela — عطرك، شكلك</div>
+    <h1>قزازتك... مش بس عطر،<br>توقيعك الخاص</h1>
+    <p class="lead">اختار شكل القزازة، اكتب اسمك عليها، وحدد التركيبة اللي تناسبك — إحنا نصممها ونبعتهالك جاهزة.</p>
+    <div class="hero-ctas">
+      <a href="#customizer" class="btn-primary">صمم قزازتك دلوقتي</a>
+      <a href="#gallery" class="btn-ghost">شوف المجموعة</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg">
+      <rect x="90" y="10" width="40" height="26" rx="4" fill="#c9a227"/>
+      <rect x="95" y="0" width="30" height="14" rx="3" fill="#8b3a4a"/>
+      <path d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
+        fill="url(#g1)" stroke="#c9a227" stroke-width="1.5" opacity="0.95"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e0b083"/>
+          <stop offset="100%" stop-color="#c08552"/>
+        </linearGradient>
+      </defs>
+      <text x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="26" fill="#1b1420">Monsela</text>
+    </svg>
+  </div>
+</header>
+
+<section class="section" id="gallery">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">المجموعة</div>
+      <h2>عطورنا الجاهزة</h2>
+      <p>مجموعة مختارة بعناية — أو ابدأ من الصفر واصنع تركيبتك الخاصة تحت.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="perfume-card">
+        <div class="glass"></div>
+        <h3>عود ملكي</h3>
+        <p>عود، عنبر، خشب صندل — دافئ وثقيل</p>
+        <span class="tag">شرقي</span>
+      </div>
+      <div class="perfume-card">
+        <div class="glass" style="background:linear-gradient(180deg,#f2e2c4,#d8b978)"></div>
+        <h3>نسيم الياسمين</h3>
+        <p>ياسمين، حمضيات، مسك أبيض — خفيف ومنعش</p>
+        <span class="tag">زهري</span>
+      </div>
+      <div class="perfume-card">
+        <div class="glass" style="background:linear-gradient(180deg,#d9c2c8,#8b3a4a)"></div>
+        <h3>ليالي روز</h3>
+        <p>ورد، فانيليا، خشب — جريء ومغري</p>
+        <span class="tag">حريمي</span>
+      </div>
+      <div class="perfume-card">
+        <div class="glass" style="background:linear-gradient(180deg,#f2e2c4,#c9a227)"></div>
+        <h3>شمس الصيف</h3>
+        <p>ليمون، برغموت، نعناع — منعش وخفيف</p>
+        <span class="tag">حمضي</span>
+      </div>
+      <div class="perfume-card">
+        <div class="glass" style="background:linear-gradient(180deg,#c9b8a8,#5c3a2e)"></div>
+        <h3>دفء الشتا</h3>
+        <p>قرفة، فانيليا، عنبر — حلو ودافئ</p>
+        <span class="tag">شرقي حلو</span>
+      </div>
+      <div class="perfume-card">
+        <div class="glass" style="background:linear-gradient(180deg,#7a9784,#3a4a3f)"></div>
+        <h3>غابة الصندل</h3>
+        <p>صندل، فيتيفر، مسك — هادئ ورجالي</p>
+        <span class="tag">خشبي</span>
+      </div>
+      <div class="perfume-card">
+        <div class="glass" style="background:linear-gradient(180deg,#f4e6d8,#c08552)"></div>
+        <h3>لمسة حرير</h3>
+        <p>مسك أبيض، عنبر خفيف — يومي وناعم</p>
+        <span class="tag">يومي</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="customizer">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">اصنع تصميمك</div>
+      <h2>صمم قزازتك خطوة بخطوة</h2>
+      <p>اختار الشكل، اللون، اكتب اسمك، وحدد التركيبة — وشوف التصميم بيتغير قدامك أول بأول.</p>
+      <div id="sharedBanner" style="display:none;margin-top:18px;background:rgba(201,162,39,0.12);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;color:var(--gold);font-size:0.9rem;"></div>
+    </div>
+
+    <div class="customizer">
+      <div class="preview-panel">
+        <div id="rotateWrap" style="perspective:900px;cursor:grab;user-select:none;">
+          <svg id="bottleSvg" width="180" height="280" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg" style="transition:transform .05s linear;transform-style:preserve-3d;">
+          <rect x="90" y="10" width="40" height="26" rx="4" fill="#c9a227"/>
+          <rect x="95" y="0" width="30" height="14" rx="3" fill="#8b3a4a"/>
+          <path id="bottlePath" d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
+            fill="#c08552" stroke="#c9a227" stroke-width="1.5"/>
+          <text id="bottleName" x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="24" fill="#1b1420"></text>
+          </svg>
+        </div>
+        <div style="font-size:0.75rem;color:var(--smoke);margin-top:6px;">↔ اسحب القزازة عشان تلفها</div>
+        <div class="preview-name" id="previewCaption">اكتب اسمك عشان تشوفه على القزازة</div>
+        <div class="summary-box" id="summaryBox">
+          <b>الشكل:</b> كلاسيك &nbsp; | &nbsp; <b>اللون:</b> عنبري &nbsp; | &nbsp; <b>التركيبة:</b> لسه ما اخترتش
+        </div>
+      </div>
+
+      <div class="form-panel">
+        <div class="field">
+          <label class="field-label">1. شكل القزازة</label>
+          <div class="option-row" id="shapeOptions">
+            <button class="opt active" data-shape="classic">كلاسيك</button>
+            <button class="opt" data-shape="tall">طويلة</button>
+            <button class="opt" data-shape="round">مدورة</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">2. لون الزجاج</label>
+          <div class="option-row" id="colorOptions">
+            <span class="color-dot active" style="background:#c08552" data-color="#c08552,#e0b083"></span>
+            <span class="color-dot" style="background:#8b3a4a" data-color="#8b3a4a,#d9c2c8"></span>
+            <span class="color-dot" style="background:#3a4a3f" data-color="#3a4a3f,#7a9784"></span>
+            <span class="color-dot" style="background:#2c2c34" data-color="#2c2c34,#5c5c68"></span>
+            <span class="color-dot" style="background:#c9a227" data-color="#c9a227,#f2e2c4"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">3. اكتب اسمك على القزازة
+            <small>هيتنقش زي ما هيبان بالظبط في المعاينة</small>
+          </label>
+          <input type="text" id="nameInput" placeholder="مثال: سارة" maxlength="14">
+        </div>
+
+        <div class="field">
+          <label class="field-label">4. اختار التركيبة
+            <small>لو محتار، جرب "مش عارف تختار" تحت</small>
+          </label>
+          <div class="scent-grid" id="scentOptions">
+            <div class="scent-card active" data-scent="عود وخشب">
+              <h4>عود وخشب</h4><p>دافئ، شرقي، للسهرة</p>
+            </div>
+            <div class="scent-card" data-scent="زهور بيضاء">
+              <h4>زهور بيضاء</h4><p>ياسمين ومسك، للنهار</p>
+            </div>
+            <div class="scent-card" data-scent="حمضيات منعشة">
+              <h4>حمضيات منعشة</h4><p>ليمون وبرغموت، للصيف</p>
+            </div>
+            <div class="scent-card" data-scent="فانيليا وعنبر">
+              <h4>فانيليا وعنبر</h4><p>حلو وجذاب، للشتا</p>
+            </div>
+          </div>
+          <div class="notes-pyramid show" id="notesText">
+            نوتة علوية: عود خام &nbsp;•&nbsp; نوتة قلب: خشب صندل &nbsp;•&nbsp; نوتة قاعدية: عنبر ومسك
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">5. رقم موبايلك
+            <small>عشان نأكدلك الطلب ونتواصل معاك</small>
+          </label>
+          <input type="text" id="phoneInput" placeholder="01xxxxxxxxx">
+        </div>
+
+        <div class="submit-bar">
+          <button id="saveOrderBtn" class="btn-primary">✓ احفظ الطلب وابعته لينا</button>
+          <button id="shareBtn" class="btn-ghost" type="button">🔗 اعمل رابط مشاركة</button>
+        </div>
+        <div id="orderStatus" style="margin-top:14px;font-size:0.9rem;"></div>
+        <div id="shareStatus" style="margin-top:8px;font-size:0.85rem;color:var(--gold);"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="quiz">
+  <div class="container">
+    <div class="quiz-box" id="quizBox" style="flex-direction:column;align-items:stretch;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="eyebrow">مش عارف تختار؟</div>
+        <h3>خليني أرشحلك تركيبة تناسبك</h3>
+        <p style="margin:0 auto;">جاوب 3 أسئلة بسيطة، وهنختارلك التركيبة المناسبة تلقائيًا في قسم التصميم.</p>
+      </div>
+      <div class="field">
+        <label class="field-label">1. إيه المناسبة؟</label>
+        <div class="option-row" id="q1">
+          <button class="opt" data-v="سهرة">سهرة</button>
+          <button class="opt" data-v="يومي">يومي / شغل</button>
+          <button class="opt" data-v="صيف">جو حر / صيف</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">2. تحب الروايح إيه أكتر؟</label>
+        <div class="option-row" id="q2">
+          <button class="opt" data-v="دافئة">دافئة وثقيلة</button>
+          <button class="opt" data-v="خفيفة">خفيفة ومنعشة</button>
+          <button class="opt" data-v="حلوة">حلوة وجذابة</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">3. الجو دلوقتي؟</label>
+        <div class="option-row" id="q3">
+          <button class="opt" data-v="شتا">برد / شتا</button>
+          <button class="opt" data-v="صيفي">حر / صيف</button>
+          <button class="opt" data-v="معتدل">معتدل</button>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <button id="quizSubmit" class="btn-primary">✓ اطلع التوصية بتاعتي</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;">
+    <div>
+      <div class="eyebrow">من احنا</div>
+      <h2 style="font-size:2.1rem;margin:14px 0 18px;">Monsela مش براند برفانات عادي</h2>
+      <p style="color:var(--smoke);line-height:2;">بدأنا Monsela عشان نؤمن إن العطر حاجة شخصية جدًا — مش لازم تشترى قزازة جاهزة زي ماهي. عندنا كل قزازة بتتصمم من الأول، من الشكل للون للاسم المنقوش عليها، وبنراعي إن كل تركيبة تتعمل بجودة عالية وخامات أصلية.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="perfume-card" style="padding:24px;">
+        <h3 style="font-size:1.8rem;color:var(--gold);">+500</h3>
+        <p style="margin:0;">قزازة اتصممت لعملائنا</p>
+      </div>
+      <div class="perfume-card" style="padding:24px;">
+        <h3 style="font-size:1.8rem;color:var(--gold);">12</h3>
+        <p style="margin:0;">تركيبة مختلفة متاحة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="testimonials" style="padding-top:0;">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">آراء عملائنا</div>
+      <h2>ناس صممت قزازتها معانا</h2>
+      <p style="font-size:0.85rem;opacity:0.7;">* نماذج توضيحية — هتتستبدل بآراء عملاء حقيقية بعد أول دفعة طلبات</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="perfume-card" style="text-align:right;">
+        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"صممت قزازة لأمي في عيد ميلادها وحطيت اسمها عليها بالعربي — لما فتحتها بجد عيطت من الفرحة"</p>
+        <p style="color:var(--gold);font-weight:700;margin:0;">— مريم، القاهرة</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"جربت التركيبة اللي رشحوها ليا في الكويز وطلعت بجد على مزاجي، والشكل مختلف عن أي حاجة شفتها قبل كده"</p>
+        <p style="color:var(--gold);font-weight:700;margin:0;">— أحمد، الإسكندرية</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"الفكرة إني أصمم القزازة بنفسي من على الموبايل قبل ما أطلبها كانت حاجة جديدة عليا خالص"</p>
+        <p style="color:var(--gold);font-weight:700;margin:0;">— نور، الجيزة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" style="padding-top:0;">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">أسئلة شائعة</div>
+      <h2>محتاج تعرف إيه كمان؟</h2>
+    </div>
+    <div style="display:grid;gap:16px;max-width:760px;margin:0 auto;">
+      <div class="perfume-card" style="text-align:right;">
+        <h3 style="font-size:1.05rem;margin-bottom:8px;">هيوصلني التصميم امتى بعد ما أطلب؟</h3>
+        <p style="margin:0;">بعد ما تحفظ طلبك، فريقنا هيتواصل معاك على الواتساب أو رقمك خلال 24 ساعة لتأكيد الطلب وميعاد التسليم.</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <h3 style="font-size:1.05rem;margin-bottom:8px;">أقدر أغيّر التصميم بعد ما أبعته؟</h3>
+        <p style="margin:0;">أيوه، لحد ما نبدأ التصنيع الفعلي، تقدر تكلمنا على الواتساب وتعدّل أي تفصيلة.</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <h3 style="font-size:1.05rem;margin-bottom:8px;">التوصيل بيغطي مصر كلها؟</h3>
+        <p style="margin:0;">أيوه، بنوصل لكل المحافظات، وبنأكد المكان والتكلفة معاك وقت تأكيد الطلب.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="container">
+    <div class="logo">Mon<span>sela</span></div>
+    <p>صُنع بحب في مصر — كل قزازة ليها حكاية</p>
+    <p style="margin-top:14px;">تواصل معانا: <a href="https://wa.me/201000000000" style="color:var(--gold);" target="_blank">واتساب</a> &nbsp;|&nbsp; <a href="#" style="color:var(--gold);">Instagram</a></p>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
+const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
+const WHATSAPP_NUMBER = "201000000000"; // TODO: غيّر ده لرقم واتساب البراند الحقيقي
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const bottlePath = document.getElementById('bottlePath');
+const bottleName = document.getElementById('bottleName');
+const bottleSvg = document.getElementById('bottleSvg');
+const rotateWrap = document.getElementById('rotateWrap');
+const previewCaption = document.getElementById('previewCaption');
+const summaryBox = document.getElementById('summaryBox');
+const nameInput = document.getElementById('nameInput');
+const phoneInput = document.getElementById('phoneInput');
+const saveOrderBtn = document.getElementById('saveOrderBtn');
+const shareBtn = document.getElementById('shareBtn');
+const shareStatus = document.getElementById('shareStatus');
+const sharedBanner = document.getElementById('sharedBanner');
+const orderStatus = document.getElementById('orderStatus');
+const notesText = document.getElementById('notesText');
+
+const shapes = {
+  classic: "M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z",
+  tall: "M85 36 Q85 30 92 30 L128 30 Q135 30 135 36 L135 60 Q150 75 150 100 L150 310 Q150 330 130 330 L90 330 Q70 330 70 310 L70 100 Q70 75 85 60 Z",
+  round: "M75 40 Q75 32 85 32 L135 32 Q145 32 145 40 L145 65 Q175 95 175 160 Q175 260 175 260 Q175 330 130 330 L90 330 Q45 330 45 260 Q45 260 45 160 Q45 95 75 65 Z"
+};
+
+const scentNotes = {
+  "عود وخشب": "نوتة علوية: عود خام • نوتة قلب: خشب صندل • نوتة قاعدية: عنبر ومسك",
+  "زهور بيضاء": "نوتة علوية: ياسمين • نوتة قلب: زهر البرتقال • نوتة قاعدية: مسك أبيض",
+  "حمضيات منعشة": "نوتة علوية: ليمون وبرغموت • نوتة قلب: نعناع • نوتة قاعدية: خشب أبيض",
+  "فانيليا وعنبر": "نوتة علوية: قرفة • نوتة قلب: فانيليا • نوتة قاعدية: عنبر دافئ"
+};
+
+let state = { shape: 'classic', shapeLabel:'كلاسيك', colorTop:'#e0b083', colorBottom:'#c08552', colorLabel:'عنبري', name:'', scent:'عود وخشب' };
+
+function updateSummary(){
+  summaryBox.innerHTML = `<b>الشكل:</b> ${state.shapeLabel} &nbsp; | &nbsp; <b>اللون:</b> ${state.colorLabel} &nbsp; | &nbsp; <b>التركيبة:</b> ${state.scent}`;
+}
+
+saveOrderBtn.addEventListener('click', async ()=>{
+  const phone = phoneInput.value.trim();
+  if(!phone){
+    orderStatus.style.color = '#d98787';
+    orderStatus.textContent = 'من فضلك اكتب رقم موبايلك الأول عشان نقدر نأكدلك الطلب.';
+    return;
+  }
+  saveOrderBtn.disabled = true;
+  saveOrderBtn.textContent = 'جاري الحفظ...';
+  orderStatus.style.color = '#c9a227';
+  orderStatus.textContent = '';
+
+  const { error } = await sb.from('orders').insert({
+    bottle_shape: state.shape,
+    bottle_shape_label: state.shapeLabel,
+    glass_color_hex: state.colorBottom,
+    glass_color_label: state.colorLabel,
+    engraved_name: state.name || null,
+    scent: state.scent,
+    customer_phone: phone
+  });
+
+  saveOrderBtn.disabled = false;
+  saveOrderBtn.textContent = '✓ احفظ الطلب وابعته لينا';
+
+  if(error){
+    orderStatus.style.color = '#d98787';
+    orderStatus.textContent = 'حصلت مشكلة في حفظ الطلب، حاول تاني كمان شوية.';
+    console.error(error);
+    return;
+  }
+
+  orderStatus.style.color = '#8fd98f';
+  orderStatus.textContent = '✓ الطلب اتحفظ! هنتواصل معاك على رقمك في أقرب وقت.';
+
+  const msg = `مرحبا Monsela! عايز اطلب قزازة بالتصميم ده:%0aالشكل: ${state.shapeLabel}%0aاللون: ${state.colorLabel}%0aالاسم المنقوش: ${state.name || 'بدون اسم'}%0aالتركيبة: ${state.scent}%0aرقمي: ${phone}`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+});
+
+document.querySelectorAll('#shapeOptions .opt').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.shape = btn.dataset.shape;
+    state.shapeLabel = btn.textContent;
+    bottlePath.setAttribute('d', shapes[state.shape]);
+    updateSummary();
+  });
+});
+
+document.querySelectorAll('.color-dot').forEach(dot=>{
+  dot.addEventListener('click', ()=>{
+    document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+    dot.classList.add('active');
+    const [bottom, top] = dot.dataset.color.split(',');
+    state.colorTop = top; state.colorBottom = bottom;
+    bottlePath.setAttribute('fill', bottom);
+    state.colorLabel = dot.style.background;
+    updateSummary();
+  });
+});
+
+nameInput.addEventListener('input', ()=>{
+  state.name = nameInput.value.trim();
+  bottleName.textContent = state.name;
+  previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
+  updateSummary();
+});
+
+document.querySelectorAll('.scent-card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    document.querySelectorAll('.scent-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    state.scent = card.dataset.scent;
+    notesText.textContent = scentNotes[state.scent];
+    updateSummary();
+  });
+});
+
+// ===== Quiz logic =====
+let quizAnswers = { q1:null, q2:null, q3:null };
+['q1','q2','q3'].forEach(qid=>{
+  document.querySelectorAll(`#${qid} .opt`).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll(`#${qid} .opt`).forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      quizAnswers[qid] = btn.dataset.v;
+    });
+  });
+});
+
+document.getElementById('quizSubmit').addEventListener('click', ()=>{
+  if(!quizAnswers.q1 || !quizAnswers.q2 || !quizAnswers.q3){
+    alert('جاوب على الأسئلة التلاتة الأول عشان نقدر نرشحلك صح 🙂');
+    return;
+  }
+  let recommended = 'عود وخشب';
+  if(quizAnswers.q1 === 'سهرة' || quizAnswers.q2 === 'دافئة'){
+    recommended = quizAnswers.q3 === 'شتا' ? 'فانيليا وعنبر' : 'عود وخشب';
+  } else if(quizAnswers.q1 === 'صيف' || quizAnswers.q3 === 'صيفي' || quizAnswers.q2 === 'خفيفة'){
+    recommended = 'حمضيات منعشة';
+  } else if(quizAnswers.q2 === 'حلوة'){
+    recommended = 'فانيليا وعنبر';
+  } else {
+    recommended = 'زهور بيضاء';
+  }
+
+  document.querySelectorAll('.scent-card').forEach(c=>{
+    c.classList.toggle('active', c.dataset.scent === recommended);
+  });
+  state.scent = recommended;
+  notesText.textContent = scentNotes[recommended];
+  updateSummary();
+
+  document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+updateSummary();
+
+// ===== 3D bottle rotation (drag) =====
+let rotY = 0, dragging = false, startX = 0, startRot = 0;
+rotateWrap.addEventListener('mousedown', (e)=>{ dragging = true; startX = e.clientX; startRot = rotY; rotateWrap.style.cursor='grabbing'; });
+window.addEventListener('mouseup', ()=>{ dragging = false; rotateWrap.style.cursor='grab'; });
+window.addEventListener('mousemove', (e)=>{
+  if(!dragging) return;
+  rotY = startRot + (e.clientX - startX) * 0.6;
+  bottleSvg.style.transform = `rotateY(${rotY}deg)`;
+});
+rotateWrap.addEventListener('touchstart', (e)=>{ dragging = true; startX = e.touches[0].clientX; startRot = rotY; });
+window.addEventListener('touchend', ()=>{ dragging = false; });
+window.addEventListener('touchmove', (e)=>{
+  if(!dragging) return;
+  rotY = startRot + (e.touches[0].clientX - startX) * 0.6;
+  bottleSvg.style.transform = `rotateY(${rotY}deg)`;
+});
+
+// ===== Shareable design link =====
+shareBtn.addEventListener('click', async ()=>{
+  shareBtn.disabled = true;
+  const originalText = shareBtn.textContent;
+  shareBtn.textContent = 'جاري إنشاء الرابط...';
+  const { data, error } = await sb.from('designs').insert({
+    bottle_shape: state.shape,
+    bottle_shape_label: state.shapeLabel,
+    glass_color_hex: state.colorBottom,
+    glass_color_label: state.colorLabel,
+    engraved_name: state.name || null,
+    scent: state.scent
+  }).select().single();
+
+  shareBtn.disabled = false;
+  shareBtn.textContent = originalText;
+
+  if(error || !data){
+    shareStatus.style.color = '#d98787';
+    shareStatus.textContent = 'حصلت مشكلة في إنشاء الرابط، حاول تاني.';
+    console.error(error);
+    return;
+  }
+  const shareUrl = `${window.location.origin}${window.location.pathname}?design=${data.id}`;
+  try{
+    await navigator.clipboard.writeText(shareUrl);
+    shareStatus.style.color = '#8fd98f';
+    shareStatus.textContent = `✓ اتنسخ الرابط! ${shareUrl}`;
+  }catch(e){
+    shareStatus.style.color = '#c9a227';
+    shareStatus.textContent = shareUrl;
+  }
+});
+
+// ===== Load a shared design from URL (?design=ID) =====
+(async function loadSharedDesign(){
+  const params = new URLSearchParams(window.location.search);
+  const designId = params.get('design');
+  if(!designId) return;
+
+  const { data, error } = await sb.from('designs').select('*').eq('id', designId).single();
+  if(error || !data) return;
+
+  state.shape = data.bottle_shape;
+  state.shapeLabel = data.bottle_shape_label;
+  state.colorBottom = data.glass_color_hex;
+  state.colorLabel = data.glass_color_label;
+  state.name = data.engraved_name || '';
+  state.scent = data.scent;
+
+  bottlePath.setAttribute('d', shapes[state.shape] || shapes.classic);
+  bottlePath.setAttribute('fill', state.colorBottom);
+  bottleName.textContent = state.name;
+  nameInput.value = state.name;
+  previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
+  notesText.textContent = scentNotes[state.scent] || '';
+
+  document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.shape === state.shape));
+  document.querySelectorAll('.scent-card').forEach(c=>c.classList.toggle('active', c.dataset.scent === state.scent));
+
+  sharedBanner.style.display = 'block';
+  sharedBanner.textContent = `👀 ده تصميم اتبعتلك من صاحبك — عدّل فيه زي ما تحب أو اطلبه زي ما هو`;
+  updateSummary();
+  document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
+})();
+</script>
+
+</body>
+</html>
