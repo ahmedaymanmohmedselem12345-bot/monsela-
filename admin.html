@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monsela | لوحة التحكم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --ink:#1b1420; --ink-2:#241a29; --amber:#c08552; --gold:#c9a227;
+  --cream:#f3ede4; --rose:#8b3a4a; --smoke:#6b6470; --line:rgba(243,237,228,0.14);
+  --danger:#d98787; --success:#8fd98f;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--ink);color:var(--cream);font-family:'Cairo',sans-serif;min-height:100vh;}
+.container{max-width:900px;margin:0 auto;padding:40px 24px 80px;}
+.logo{font-family:'Aref Ruqaa',serif;font-size:1.8rem;margin-bottom:6px;}
+.logo span{color:var(--gold);}
+.subtitle{color:var(--smoke);margin-bottom:36px;font-size:0.95rem;}
+h2{font-family:'Aref Ruqaa',serif;font-size:1.5rem;margin-bottom:18px;}
+.card{background:var(--ink-2);border:1px solid var(--line);border-radius:18px;padding:28px;margin-bottom:24px;}
+label{display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;}
+input[type=text], input[type=email], input[type=password], input[type=number], textarea{
+  width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);
+  padding:12px 14px;border-radius:10px;font-family:'Cairo';font-size:0.95rem;margin-bottom:18px;
+}
+textarea{min-height:70px;resize:vertical;}
+input[type=file]{margin-bottom:18px;color:var(--smoke);}
+.btn{background:var(--gold);color:var(--ink);padding:13px 28px;border-radius:999px;font-weight:700;border:none;cursor:pointer;font-size:0.95rem;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-danger{background:var(--danger);color:var(--ink);}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--cream);}
+.row{display:flex;gap:12px;flex-wrap:wrap;}
+.row > *{flex:1;min-width:150px;}
+.status{margin-top:10px;font-size:0.9rem;min-height:20px;}
+.tabs{display:flex;gap:10px;margin-bottom:20px;}
+.tabs button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--cream);cursor:pointer;}
+.tabs button.active{background:var(--gold);color:var(--ink);font-weight:700;border-color:var(--gold);}
+.product-item{display:flex;gap:16px;align-items:center;border-bottom:1px solid var(--line);padding:16px 0;}
+.product-item img{width:64px;height:64px;object-fit:cover;border-radius:10px;background:var(--ink);}
+.product-item .info{flex:1;}
+.product-item .info h4{font-size:1rem;margin-bottom:4px;}
+.product-item .info p{font-size:0.82rem;color:var(--smoke);}
+.product-item .actions{display:flex;gap:8px;}
+.product-item .actions button{padding:8px 14px;font-size:0.8rem;border-radius:8px;}
+#authScreen, #adminScreen{display:none;}
+#authScreen.show, #adminScreen.show{display:block;}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">Mon<span>sela</span> — لوحة التحكم</div>
+  <div class="subtitle">من هنا تضيف وتعدّل وتشيل أي برفان بتاعك، وهيظهر على الموقع فورًا.</div>
+
+  <div id="authScreen" class="show">
+    <div class="card">
+      <div class="tabs">
+        <button id="tabLogin" class="active">تسجيل الدخول</button>
+        <button id="tabSignup">حساب جديد (أول مرة بس)</button>
+      </div>
+
+      <div id="loginForm">
+        <label>الإيميل</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com">
+        <label>كلمة المرور</label>
+        <input type="password" id="loginPassword">
+        <button class="btn" id="loginBtn">دخول</button>
+        <div class="status" id="loginStatus"></div>
+      </div>
+
+      <div id="signupForm" style="display:none;">
+        <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">اعمل الحساب ده مرة واحدة بس أول ما تستخدم اللوحة، وبعد كده استخدم "تسجيل الدخول" دايمًا.</p>
+        <label>الإيميل</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com">
+        <label>كلمة المرور (6 حروف/أرقام على الأقل)</label>
+        <input type="password" id="signupPassword">
+        <button class="btn" id="signupBtn">إنشاء الحساب</button>
+        <div class="status" id="signupStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminScreen">
+    <div class="top-bar">
+      <span id="whoami" style="color:var(--smoke);font-size:0.9rem;"></span>
+      <button class="btn btn-ghost" id="logoutBtn">تسجيل الخروج</button>
+    </div>
+
+    <div class="card">
+      <h2 id="formTitle">إضافة برفان جديد</h2>
+      <input type="hidden" id="productId">
+      <label>اسم البرفان</label>
+      <input type="text" id="pName" placeholder="مثال: عود ملكي">
+      <div class="row">
+        <div>
+          <label>السعر (جنيه)</label>
+          <input type="number" id="pPrice" placeholder="450">
+        </div>
+        <div>
+          <label>تصنيف قصير</label>
+          <input type="text" id="pTag" placeholder="مثال: شرقي">
+        </div>
+      </div>
+      <label>النوتات / الوصف القصير (ظاهر تحت الاسم في الموقع)</label>
+      <textarea id="pNotes" placeholder="مثال: عود، عنبر، خشب صندل — دافئ وثقيل"></textarea>
+      <label>وصف تفصيلي (اختياري، مش ظاهر في الكارت)</label>
+      <textarea id="pDescription"></textarea>
+      <label>صورة المنتج</label>
+      <input type="file" id="pImage" accept="image/*">
+      <div id="currentImagePreview" style="margin-bottom:14px;"></div>
+      <label style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="pFeatured" style="width:auto;margin:0;"> منتج مميز (يظهر الأول)
+      </label>
+      <br>
+      <button class="btn" id="saveProductBtn">حفظ المنتج</button>
+      <button class="btn btn-ghost" id="cancelEditBtn" style="display:none;">إلغاء التعديل</button>
+      <div class="status" id="productStatus"></div>
+    </div>
+
+    <div class="card">
+      <h2>منتجاتك الحالية</h2>
+      <div id="productsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
+const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const authScreen = document.getElementById('authScreen');
+const adminScreen = document.getElementById('adminScreen');
+const tabLogin = document.getElementById('tabLogin');
+const tabSignup = document.getElementById('tabSignup');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+
+tabLogin.addEventListener('click', ()=>{
+  tabLogin.classList.add('active'); tabSignup.classList.remove('active');
+  loginForm.style.display='block'; signupForm.style.display='none';
+});
+tabSignup.addEventListener('click', ()=>{
+  tabSignup.classList.add('active'); tabLogin.classList.remove('active');
+  signupForm.style.display='block'; loginForm.style.display='none';
+});
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const statusEl = document.getElementById('loginStatus');
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الدخول...';
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الإيميل أو كلمة المرور غلط.'; return; }
+  statusEl.textContent = '';
+  showAdmin();
+});
+
+document.getElementById('signupBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('signupEmail').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const statusEl = document.getElementById('signupStatus');
+  if (password.length < 6) { statusEl.style.color='var(--danger)'; statusEl.textContent='كلمة المرور لازم تكون 6 حروف على الأقل.'; return; }
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الإنشاء...';
+  const { error } = await sb.auth.signUp({ email, password });
+  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = error.message; return; }
+  statusEl.style.color = 'var(--success)';
+  statusEl.textContent = 'تم! لو طلب تأكيد بالإيميل، افتح بريدك ودوس على الرابط، وبعدين سجّل دخول عادي.';
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  location.reload();
+});
+
+async function showAdmin(){
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  document.getElementById('whoami').textContent = `مسجل دخول كـ ${user.email}`;
+  authScreen.classList.remove('show');
+  adminScreen.classList.add('show');
+  loadProductsList();
+}
+
+// Check existing session on load
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) { showAdmin(); }
+  else { authScreen.classList.add('show'); }
+});
+
+// ===== Product form =====
+let editingImageUrl = null;
+
+document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+function resetForm(){
+  document.getElementById('formTitle').textContent = 'إضافة برفان جديد';
+  document.getElementById('productId').value = '';
+  document.getElementById('pName').value = '';
+  document.getElementById('pPrice').value = '';
+  document.getElementById('pTag').value = '';
+  document.getElementById('pNotes').value = '';
+  document.getElementById('pDescription').value = '';
+  document.getElementById('pImage').value = '';
+  document.getElementById('pFeatured').checked = false;
+  document.getElementById('currentImagePreview').innerHTML = '';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  editingImageUrl = null;
+}
+
+document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('productStatus');
+  const name = document.getElementById('pName').value.trim();
+  if (!name) { statusEl.style.color='var(--danger)'; statusEl.textContent='لازم تكتب اسم المنتج على الأقل.'; return; }
+
+  const saveBtn = document.getElementById('saveProductBtn');
+  saveBtn.disabled = true;
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الحفظ...';
+
+  let imageUrl = editingImageUrl;
+  const fileInput = document.getElementById('pImage');
+  if (fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const path = `${Date.now()}-${file.name}`;
+    const { error: uploadError } = await sb.storage.from('product-images').upload(path, file);
+    if (uploadError) {
+      statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة في رفع الصورة: ' + uploadError.message;
+      saveBtn.disabled = false;
+      return;
+    }
+    const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+    imageUrl = urlData.publicUrl;
+  }
+
+  const payload = {
+    name,
+    price: document.getElementById('pPrice').value ? Number(document.getElementById('pPrice').value) : null,
+    tag: document.getElementById('pTag').value.trim() || null,
+    notes: document.getElementById('pNotes').value.trim() || null,
+    description: document.getElementById('pDescription').value.trim() || null,
+    featured: document.getElementById('pFeatured').checked,
+    image_url: imageUrl
+  };
+
+  const id = document.getElementById('productId').value;
+  let error;
+  if (id) {
+    ({ error } = await sb.from('products').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('products').insert(payload));
+  }
+
+  saveBtn.disabled = false;
+  if (error) {
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'حصلت مشكلة: ' + error.message;
+    return;
+  }
+  statusEl.style.color = 'var(--success)'; statusEl.textContent = 'اتحفظ بنجاح ✓';
+  resetForm();
+  loadProductsList();
+});
+
+async function loadProductsList(){
+  const listEl = document.getElementById('productsList');
+  const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+  if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في تحميل المنتجات.</p>'; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش منتجات مضافة.</p>'; return; }
+
+  listEl.innerHTML = data.map(p => `
+    <div class="product-item">
+      ${p.image_url ? `<img src="${p.image_url}" alt="">` : `<div style="width:64px;height:64px;border-radius:10px;background:var(--ink);"></div>`}
+      <div class="info">
+        <h4>${p.name} ${p.featured ? '⭐' : ''}</h4>
+        <p>${p.tag || ''} ${p.price ? '· ' + p.price + ' جنيه' : ''}</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-edit="${p.id}">تعديل</button>
+        <button class="btn btn-danger" data-delete="${p.id}">حذف</button>
+      </div>
+    </div>
+  `).join('');
+
+  listEl.querySelectorAll('[data-edit]').forEach(btn=>{
+    btn.addEventListener('click', ()=> editProduct(data.find(p => p.id === btn.dataset.edit)));
+  });
+  listEl.querySelectorAll('[data-delete]').forEach(btn=>{
+    btn.addEventListener('click', ()=> deleteProduct(btn.dataset.delete));
+  });
+}
+
+function editProduct(p){
+  if (!p) return;
+  document.getElementById('formTitle').textContent = 'تعديل: ' + p.name;
+  document.getElementById('productId').value = p.id;
+  document.getElementById('pName').value = p.name || '';
+  document.getElementById('pPrice').value = p.price || '';
+  document.getElementById('pTag').value = p.tag || '';
+  document.getElementById('pNotes').value = p.notes || '';
+  document.getElementById('pDescription').value = p.description || '';
+  document.getElementById('pFeatured').checked = !!p.featured;
+  editingImageUrl = p.image_url || null;
+  document.getElementById('currentImagePreview').innerHTML = p.image_url
+    ? `<img src="${p.image_url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;"><div style="font-size:0.75rem;color:var(--smoke);margin-top:4px;">الصورة الحالية — اختار صورة جديدة بس لو عايز تغيّرها</div>`
+    : '';
+  document.getElementById('cancelEditBtn').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteProduct(id){
+  if (!confirm('متأكد إنك عايز تمسح المنتج ده؟')) return;
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) { alert('حصلت مشكلة: ' + error.message); return; }
+  loadProductsList();
+}
+</script>
+</body>
+</html>

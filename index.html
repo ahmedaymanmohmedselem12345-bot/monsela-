@@ -313,49 +313,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <h2>عطورنا الجاهزة</h2>
       <p>مجموعة مختارة بعناية — أو ابدأ من الصفر واصنع تركيبتك الخاصة تحت.</p>
     </div>
-    <div class="gallery-grid reveal">
-      <div class="perfume-card">
-        <div class="glass"></div>
-        <h3>عود ملكي</h3>
-        <p>عود، عنبر، خشب صندل — دافئ وثقيل</p>
-        <span class="tag">شرقي</span>
-      </div>
-      <div class="perfume-card">
-        <div class="glass" style="background:linear-gradient(180deg,#f2e2c4,#d8b978)"></div>
-        <h3>نسيم الياسمين</h3>
-        <p>ياسمين، حمضيات، مسك أبيض — خفيف ومنعش</p>
-        <span class="tag">زهري</span>
-      </div>
-      <div class="perfume-card">
-        <div class="glass" style="background:linear-gradient(180deg,#d9c2c8,#8b3a4a)"></div>
-        <h3>ليالي روز</h3>
-        <p>ورد، فانيليا، خشب — جريء ومغري</p>
-        <span class="tag">حريمي</span>
-      </div>
-      <div class="perfume-card">
-        <div class="glass" style="background:linear-gradient(180deg,#f2e2c4,#c9a227)"></div>
-        <h3>شمس الصيف</h3>
-        <p>ليمون، برغموت، نعناع — منعش وخفيف</p>
-        <span class="tag">حمضي</span>
-      </div>
-      <div class="perfume-card">
-        <div class="glass" style="background:linear-gradient(180deg,#c9b8a8,#5c3a2e)"></div>
-        <h3>دفء الشتا</h3>
-        <p>قرفة، فانيليا، عنبر — حلو ودافئ</p>
-        <span class="tag">شرقي حلو</span>
-      </div>
-      <div class="perfume-card">
-        <div class="glass" style="background:linear-gradient(180deg,#7a9784,#3a4a3f)"></div>
-        <h3>غابة الصندل</h3>
-        <p>صندل، فيتيفر، مسك — هادئ ورجالي</p>
-        <span class="tag">خشبي</span>
-      </div>
-      <div class="perfume-card">
-        <div class="glass" style="background:linear-gradient(180deg,#f4e6d8,#c08552)"></div>
-        <h3>لمسة حرير</h3>
-        <p>مسك أبيض، عنبر خفيف — يومي وناعم</p>
-        <span class="tag">يومي</span>
-      </div>
+    <div class="gallery-grid reveal" id="productsGrid">
+      <p style="grid-column:1/-1;text-align:center;color:var(--smoke);">جاري تحميل المنتجات…</p>
     </div>
   </div>
 </section>
@@ -588,6 +547,39 @@ const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
 const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
 const WHATSAPP_NUMBER = "201000000000"; // TODO: غيّر ده لرقم واتساب البراند الحقيقي
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== Load real products (added via the admin panel) into the gallery =====
+async function loadProducts(){
+  const grid = document.getElementById('productsGrid');
+  const { data, error } = await sb
+    .from('products')
+    .select('*')
+    .order('featured', { ascending: false })
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">حصلت مشكلة في تحميل المنتجات، حاول تحدّث الصفحة.</p>';
+    console.error(error);
+    return;
+  }
+  if (!data || data.length === 0) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات مضافة — قريبًا هتلاقي هنا مجموعتنا كاملة.</p>';
+    return;
+  }
+  grid.innerHTML = data.map(p => `
+    <div class="perfume-card">
+      ${p.image_url
+        ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:20px;">`
+        : `<div class="glass"></div>`}
+      <h3>${p.name}</h3>
+      <p>${p.notes || p.description || ''}</p>
+      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin-bottom:10px;">${p.price} جنيه</p>` : ''}
+      ${p.tag ? `<span class="tag">${p.tag}</span>` : ''}
+    </div>
+  `).join('');
+}
+loadProducts();
 
 const previewCaption = document.getElementById('previewCaption');
 const summaryBox = document.getElementById('summaryBox');
