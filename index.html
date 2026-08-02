@@ -402,7 +402,26 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
         </div>
 
         <div class="field">
-          <label class="field-label">5. رقم موبايلك
+          <label class="field-label">5. لون الغطاء</label>
+          <div class="option-row" id="capColorOptions">
+            <span class="color-dot active" style="background:#c9a227" data-color="#c9a227" data-label="ذهبي"></span>
+            <span class="color-dot" style="background:#b6b6bd" data-color="#b6b6bd" data-label="فضي"></span>
+            <span class="color-dot" style="background:#1b1420" data-color="#1b1420" data-label="أسود"></span>
+            <span class="color-dot" style="background:#8b3a4a" data-color="#8b3a4a" data-label="روز غولد"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">6. التغليف</label>
+          <div class="option-row" id="packagingOptions">
+            <button class="opt active" data-v="علبة هدايا فاخرة">علبة هدايا فاخرة</button>
+            <button class="opt" data-v="علبة بسيطة">علبة بسيطة</button>
+            <button class="opt" data-v="من غير علبة">من غير علبة</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">7. رقم موبايلك
             <small>عشان نأكدلك الطلب ونتواصل معاك</small>
           </label>
           <input type="text" id="phoneInput" placeholder="01xxxxxxxxx">
@@ -567,11 +586,11 @@ const scentNotes = {
   "فانيليا وعنبر": "نوتة علوية: قرفة • نوتة قلب: فانيليا • نوتة قاعدية: عنبر دافئ"
 };
 
-let state = { shape: 'classic', shapeLabel:'كلاسيك', colorTop:'#e0b083', colorBottom:'#c08552', colorLabel:'عنبري', name:'', scent:'عود وخشب' };
+let state = { shape: 'classic', shapeLabel:'كلاسيك', colorTop:'#e0b083', colorBottom:'#c08552', colorLabel:'عنبري', name:'', scent:'عود وخشب', capColor:'#c9a227', capColorLabel:'ذهبي', packaging:'علبة هدايا فاخرة' };
 window.state = state; // exposed for the 3D bottle viewer module
 
 function updateSummary(){
-  summaryBox.innerHTML = `<b>الشكل:</b> ${state.shapeLabel} &nbsp; | &nbsp; <b>اللون:</b> ${state.colorLabel} &nbsp; | &nbsp; <b>التركيبة:</b> ${state.scent}`;
+  summaryBox.innerHTML = `<b>الشكل:</b> ${state.shapeLabel} &nbsp; | &nbsp; <b>اللون:</b> ${state.colorLabel} &nbsp; | &nbsp; <b>الغطاء:</b> ${state.capColorLabel} &nbsp; | &nbsp; <b>التركيبة:</b> ${state.scent} &nbsp; | &nbsp; <b>التغليف:</b> ${state.packaging}`;
 }
 
 saveOrderBtn.addEventListener('click', async ()=>{
@@ -593,6 +612,9 @@ saveOrderBtn.addEventListener('click', async ()=>{
     glass_color_label: state.colorLabel,
     engraved_name: state.name || null,
     scent: state.scent,
+    cap_color_hex: state.capColor,
+    cap_color_label: state.capColorLabel,
+    packaging: state.packaging,
     customer_phone: phone
   });
 
@@ -609,7 +631,7 @@ saveOrderBtn.addEventListener('click', async ()=>{
   orderStatus.style.color = '#8fd98f';
   orderStatus.textContent = '✓ الطلب اتحفظ! هنتواصل معاك على رقمك في أقرب وقت.';
 
-  const msg = `مرحبا Monsela! عايز اطلب قزازة بالتصميم ده:%0aالشكل: ${state.shapeLabel}%0aاللون: ${state.colorLabel}%0aالاسم المنقوش: ${state.name || 'بدون اسم'}%0aالتركيبة: ${state.scent}%0aرقمي: ${phone}`;
+  const msg = `مرحبا Monsela! عايز اطلب قزازة بالتصميم ده:%0aالشكل: ${state.shapeLabel}%0aاللون: ${state.colorLabel}%0aالغطاء: ${state.capColorLabel}%0aالاسم المنقوش: ${state.name || 'بدون اسم'}%0aالتركيبة: ${state.scent}%0aالتغليف: ${state.packaging}%0aرقمي: ${phone}`;
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
 });
 
@@ -624,14 +646,34 @@ document.querySelectorAll('#shapeOptions .opt').forEach(btn=>{
   });
 });
 
-document.querySelectorAll('.color-dot').forEach(dot=>{
+document.querySelectorAll('#colorOptions .color-dot').forEach(dot=>{
   dot.addEventListener('click', ()=>{
-    document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+    document.querySelectorAll('#colorOptions .color-dot').forEach(d=>d.classList.remove('active'));
     dot.classList.add('active');
     const [bottom, top] = dot.dataset.color.split(',');
     state.colorTop = top; state.colorBottom = bottom;
     window.MonselaBottle?.setColor(bottom);
     state.colorLabel = dot.style.background;
+    updateSummary();
+  });
+});
+
+document.querySelectorAll('#capColorOptions .color-dot').forEach(dot=>{
+  dot.addEventListener('click', ()=>{
+    document.querySelectorAll('#capColorOptions .color-dot').forEach(d=>d.classList.remove('active'));
+    dot.classList.add('active');
+    state.capColor = dot.dataset.color;
+    state.capColorLabel = dot.dataset.label;
+    window.MonselaBottle?.setCapColor(state.capColor);
+    updateSummary();
+  });
+});
+
+document.querySelectorAll('#packagingOptions .opt').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#packagingOptions .opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.packaging = btn.dataset.v;
     updateSummary();
   });
 });
@@ -704,7 +746,10 @@ shareBtn.addEventListener('click', async ()=>{
     glass_color_hex: state.colorBottom,
     glass_color_label: state.colorLabel,
     engraved_name: state.name || null,
-    scent: state.scent
+    scent: state.scent,
+    cap_color_hex: state.capColor,
+    cap_color_label: state.capColorLabel,
+    packaging: state.packaging
   }).select().single();
 
   shareBtn.disabled = false;
@@ -742,16 +787,22 @@ shareBtn.addEventListener('click', async ()=>{
   state.colorLabel = data.glass_color_label;
   state.name = data.engraved_name || '';
   state.scent = data.scent;
+  state.capColor = data.cap_color_hex || state.capColor;
+  state.capColorLabel = data.cap_color_label || state.capColorLabel;
+  state.packaging = data.packaging || state.packaging;
 
   window.MonselaBottle?.setShape(state.shape);
   window.MonselaBottle?.setColor(state.colorBottom);
   window.MonselaBottle?.setName(state.name);
+  window.MonselaBottle?.setCapColor(state.capColor);
   nameInput.value = state.name;
   previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
   notesText.textContent = scentNotes[state.scent] || '';
 
   document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.shape === state.shape));
   document.querySelectorAll('.scent-card').forEach(c=>c.classList.toggle('active', c.dataset.scent === state.scent));
+  document.querySelectorAll('#capColorOptions .color-dot').forEach(d=>d.classList.toggle('active', d.dataset.color === state.capColor));
+  document.querySelectorAll('#packagingOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.v === state.packaging));
 
   sharedBanner.style.display = 'block';
   sharedBanner.textContent = `👀 ده تصميم اتبعتلك من صاحبك — عدّل فيه زي ما تحب أو اطلبه زي ما هو`;
@@ -869,12 +920,16 @@ window.addEventListener('load', () => {
     function setColor(hex){
       bottleMaterial.color.set(hex);
     }
+    function setCapColor(hex){
+      capMaterial.color.set(hex);
+    }
     function setName(text){
       drawName(text);
     }
 
     layoutForShape((window.state && window.state.shape) || 'classic');
     drawName((window.state && window.state.name) || '');
+    if (window.state && window.state.capColor) capMaterial.color.set(window.state.capColor);
 
     // Drag-to-rotate + gentle auto-rotate, using unified Pointer Events (mouse + touch)
     let isDragging = false, lastX = 0;
@@ -908,7 +963,7 @@ window.addEventListener('load', () => {
     if (loadingLabel) loadingLabel.style.display = 'none';
     animate();
 
-    window.MonselaBottle = { setShape, setColor, setName };
+    window.MonselaBottle = { setShape, setColor, setCapColor, setName };
   }).catch((err) => {
     console.error('3D bottle viewer failed to load:', err);
     if (loadingLabel) loadingLabel.textContent = 'المعاينة ثلاثية الأبعاد مش متاحة على المتصفح ده';
