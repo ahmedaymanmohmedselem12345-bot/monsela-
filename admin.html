@@ -139,6 +139,39 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <h2>الطلبات الواردة</h2>
       <div id="ordersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
+
+    <div class="card">
+      <h2>أكواد الخصم</h2>
+      <div class="row">
+        <div><label>الكود</label><input type="text" id="cCode" placeholder="WELCOME10"></div>
+        <div><label>النوع</label>
+          <select id="cType" style="width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px;border-radius:10px;margin-bottom:18px;">
+            <option value="percentage">نسبة %</option>
+            <option value="fixed">مبلغ ثابت</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div><label>القيمة</label><input type="number" id="cValue" placeholder="10"></div>
+        <div><label>أقل قيمة طلب (اختياري)</label><input type="number" id="cMinOrder" placeholder="0"></div>
+      </div>
+      <label>وصف قصير (اختياري)</label>
+      <input type="text" id="cLabel" placeholder="خصم ١٠٪ على أول طلب">
+      <button class="btn" id="saveCouponBtn">إضافة الكود</button>
+      <div class="status" id="couponFormStatus"></div>
+      <div id="couponsList" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>مناطق التوصيل</h2>
+      <div class="row">
+        <div><label>اسم المنطقة</label><input type="text" id="zName" placeholder="القاهرة الكبرى"></div>
+        <div><label>سعر التوصيل (جنيه)</label><input type="number" id="zFee" placeholder="30"></div>
+      </div>
+      <button class="btn" id="saveZoneBtn">إضافة المنطقة</button>
+      <div class="status" id="zoneFormStatus"></div>
+      <div id="zonesList" style="margin-top:16px;"></div>
+    </div>
   </div>
 </div>
 
@@ -199,6 +232,8 @@ async function showAdmin(){
   adminScreen.classList.add('show');
   loadProductsList();
   loadOrdersList();
+  loadCoupons();
+  loadZones();
 }
 
 // Check existing session on load
@@ -373,6 +408,103 @@ async function loadOrdersList(){
     sel.addEventListener('change', async ()=>{
       const { error } = await sb.from('store_orders').update({ status: sel.value }).eq('id', sel.dataset.order);
       if (error) alert('حصلت مشكلة في تحديث الحالة: ' + error.message);
+    });
+  });
+}
+
+// ===== Coupons =====
+document.getElementById('saveCouponBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('couponFormStatus');
+  const code = document.getElementById('cCode').value.trim().toUpperCase();
+  const value = Number(document.getElementById('cValue').value);
+  if (!code || !value) { statusEl.style.color='var(--danger)'; statusEl.textContent='لازم تكتب الكود والقيمة.'; return; }
+
+  const { error } = await sb.from('coupons').insert({
+    code,
+    type: document.getElementById('cType').value,
+    value,
+    min_order: Number(document.getElementById('cMinOrder').value) || 0,
+    label: document.getElementById('cLabel').value.trim() || null
+  });
+  if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: ' + error.message; return; }
+  statusEl.style.color='var(--success)'; statusEl.textContent='اتضاف ✓';
+  document.getElementById('cCode').value=''; document.getElementById('cValue').value='';
+  document.getElementById('cMinOrder').value=''; document.getElementById('cLabel').value='';
+  loadCoupons();
+});
+
+async function loadCoupons(){
+  const listEl = document.getElementById('couponsList');
+  const { data, error } = await sb.from('coupons').select('*').order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش أكواد.</p>'; return; }
+  listEl.innerHTML = data.map(c => `
+    <div class="product-item">
+      <div class="info">
+        <h4>${c.code} ${c.active ? '' : '(معطّل)'}</h4>
+        <p>${c.type === 'percentage' ? c.value + '%' : c.value + ' جنيه'} ${c.min_order ? '· أقل طلب ' + c.min_order + ' جنيه' : ''}</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-toggle-coupon="${c.id}" data-active="${c.active}">${c.active ? 'تعطيل' : 'تفعيل'}</button>
+        <button class="btn btn-danger" data-delete-coupon="${c.id}">حذف</button>
+      </div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-toggle-coupon]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('coupons').update({ active: btn.dataset.active !== 'true' }).eq('id', btn.dataset.toggleCoupon);
+      loadCoupons();
+    });
+  });
+  listEl.querySelectorAll('[data-delete-coupon]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تمسح الكود ده؟')) return;
+      await sb.from('coupons').delete().eq('id', btn.dataset.deleteCoupon);
+      loadCoupons();
+    });
+  });
+}
+
+// ===== Delivery zones =====
+document.getElementById('saveZoneBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('zoneFormStatus');
+  const name = document.getElementById('zName').value.trim();
+  const fee = Number(document.getElementById('zFee').value);
+  if (!name) { statusEl.style.color='var(--danger)'; statusEl.textContent='لازم تكتب اسم المنطقة.'; return; }
+
+  const { error } = await sb.from('delivery_zones').insert({ name, fee: fee || 0 });
+  if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: ' + error.message; return; }
+  statusEl.style.color='var(--success)'; statusEl.textContent='اتضافت ✓';
+  document.getElementById('zName').value=''; document.getElementById('zFee').value='';
+  loadZones();
+});
+
+async function loadZones(){
+  const listEl = document.getElementById('zonesList');
+  const { data, error } = await sb.from('delivery_zones').select('*').order('sort_order', { ascending: true });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش مناطق مضافة.</p>'; return; }
+  listEl.innerHTML = data.map(z => `
+    <div class="product-item">
+      <div class="info">
+        <h4>${z.name} ${z.active ? '' : '(معطّلة)'}</h4>
+        <p>${z.fee} جنيه توصيل</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-toggle-zone="${z.id}" data-active="${z.active}">${z.active ? 'تعطيل' : 'تفعيل'}</button>
+        <button class="btn btn-danger" data-delete-zone="${z.id}">حذف</button>
+      </div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-toggle-zone]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('delivery_zones').update({ active: btn.dataset.active !== 'true' }).eq('id', btn.dataset.toggleZone);
+      loadZones();
+    });
+  });
+  listEl.querySelectorAll('[data-delete-zone]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تمسح المنطقة دي؟')) return;
+      await sb.from('delivery_zones').delete().eq('id', btn.dataset.deleteZone);
+      loadZones();
     });
   });
 }

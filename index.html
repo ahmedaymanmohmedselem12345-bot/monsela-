@@ -310,7 +310,18 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل</label>
     <input type="text" id="checkoutPhone" placeholder="01xxxxxxxxx" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
     <label style="display:block;font-weight:700;margin-bottom:8px;">العنوان</label>
-    <textarea id="checkoutAddress" placeholder="المحافظة، المنطقة، تفاصيل العنوان" style="width:100%;min-height:70px;margin-bottom:20px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+    <textarea id="checkoutAddress" placeholder="المحافظة، المنطقة، تفاصيل العنوان" style="width:100%;min-height:70px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+    <label style="display:block;font-weight:700;margin-bottom:8px;">منطقة التوصيل</label>
+    <select id="checkoutZone" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+      <option value="">بدون تحديد (هنأكد التوصيل معاك)</option>
+    </select>
+    <label style="display:block;font-weight:700;margin-bottom:8px;">كود خصم (لو عندك)</label>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="text" id="checkoutCoupon" placeholder="مثال: WELCOME10" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+      <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;">تطبيق</button>
+    </div>
+    <div id="couponStatus" style="font-size:0.8rem;margin-bottom:14px;"></div>
+    <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);margin-bottom:16px;line-height:1.9;"></div>
     <div style="display:flex;gap:10px;">
       <button id="confirmOrderBtn" class="btn-primary" style="flex:1;">تأكيد الطلب</button>
       <button id="cancelCheckout" class="btn-ghost" style="flex:0;">إلغاء</button>
@@ -352,6 +363,9 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <div class="eyebrow">المتجر</div>
       <h2>تسوق مجموعتنا</h2>
       <p>اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.</p>
+    </div>
+    <div style="max-width:420px;margin:0 auto 20px;">
+      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
     </div>
     <div class="option-row reveal" id="categoryFilters" style="justify-content:center;margin-bottom:28px;"></div>
     <div class="gallery-grid reveal" id="productsGrid">
@@ -632,7 +646,15 @@ function renderCategoryFilters(){
 
 function renderProducts(){
   const grid = document.getElementById('productsGrid');
-  const list = activeCategory === 'الكل' ? allProducts : allProducts.filter(p => p.category === activeCategory);
+  const query = (document.getElementById('productSearch').value || '').trim().toLowerCase();
+  let list = activeCategory === 'الكل' ? allProducts : allProducts.filter(p => p.category === activeCategory);
+  if (query) {
+    list = list.filter(p =>
+      (p.name || '').toLowerCase().includes(query) ||
+      (p.notes || '').toLowerCase().includes(query) ||
+      (p.tag || '').toLowerCase().includes(query)
+    );
+  }
 
   if (list.length === 0) {
     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات في القسم ده.</p>';
@@ -762,9 +784,72 @@ document.getElementById('cartFab').addEventListener('click', openCart);
 document.getElementById('closeCart').addEventListener('click', closeCartUI);
 document.getElementById('cartOverlay').addEventListener('click', closeCartUI);
 
+// ----- Delivery zones & coupons -----
+let deliveryZones = [];
+let appliedCoupon = null;
+
+async function loadDeliveryZones(){
+  const { data } = await sb.from('delivery_zones').select('*').eq('active', true).order('sort_order', { ascending: true });
+  deliveryZones = data || [];
+  const sel = document.getElementById('checkoutZone');
+  sel.innerHTML = '<option value="">بدون تحديد (هنأكد التوصيل معاك)</option>' +
+    deliveryZones.map(z => `<option value="${z.id}">${z.name} — ${z.fee} جنيه</option>`).join('');
+}
+loadDeliveryZones();
+
+document.getElementById('checkoutZone').addEventListener('change', updateCheckoutSummary);
+
+document.getElementById('applyCouponBtn').addEventListener('click', async ()=>{
+  const code = document.getElementById('checkoutCoupon').value.trim();
+  const statusEl = document.getElementById('couponStatus');
+  if (!code) { appliedCoupon = null; statusEl.textContent=''; updateCheckoutSummary(); return; }
+
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const { data, error } = await sb.from('coupons').select('*').eq('code', code).eq('active', true).maybeSingle();
+  if (error || !data) {
+    appliedCoupon = null;
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده مش موجود أو مش شغال.';
+    updateCheckoutSummary();
+    return;
+  }
+  if (subtotal < data.min_order) {
+    appliedCoupon = null;
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = `الكود ده يشتغل بس فوق ${data.min_order} جنيه.`;
+    updateCheckoutSummary();
+    return;
+  }
+  appliedCoupon = data;
+  statusEl.style.color = 'var(--success)'; statusEl.textContent = `✓ ${data.label || 'الكود اتفعل'}`;
+  updateCheckoutSummary();
+});
+
+function calcOrderTotals(){
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  let discount = 0;
+  if (appliedCoupon && subtotal >= appliedCoupon.min_order) {
+    discount = appliedCoupon.type === 'percentage' ? subtotal * (appliedCoupon.value/100) : appliedCoupon.value;
+    discount = Math.min(discount, subtotal);
+  }
+  const zoneId = document.getElementById('checkoutZone').value;
+  const zone = deliveryZones.find(z => z.id === zoneId);
+  const deliveryFee = zone ? zone.fee : 0;
+  const total = subtotal - discount + deliveryFee;
+  return { subtotal, discount, deliveryFee, total, zone };
+}
+
+function updateCheckoutSummary(){
+  const { subtotal, discount, deliveryFee, total } = calcOrderTotals();
+  document.getElementById('checkoutSummary').innerHTML =
+    `المنتجات: ${subtotal} جنيه` +
+    (discount > 0 ? `<br>الخصم: -${discount.toFixed(0)} جنيه` : '') +
+    (deliveryFee > 0 ? `<br>التوصيل: ${deliveryFee} جنيه` : '') +
+    `<br><b style="color:var(--cream);">الإجمالي: ${total.toFixed(0)} جنيه</b>`;
+}
+
 // ----- Checkout -----
 document.getElementById('checkoutBtn').addEventListener('click', ()=>{
   document.getElementById('checkoutOverlay').style.display = 'flex';
+  updateCheckoutSummary();
 });
 document.getElementById('cancelCheckout').addEventListener('click', ()=>{
   document.getElementById('checkoutOverlay').style.display = 'none';
@@ -781,7 +866,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     statusEl.textContent = 'من فضلك اكتب الاسم ورقم الموبايل.';
     return;
   }
-  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const { subtotal, discount, deliveryFee, total, zone } = calcOrderTotals();
   const btn = document.getElementById('confirmOrderBtn');
   btn.disabled = true;
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري تأكيد الطلب...';
@@ -791,7 +876,11 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     customer_phone: phone,
     customer_address: address || null,
     items: cart,
-    total
+    total,
+    coupon_code: appliedCoupon ? appliedCoupon.code : null,
+    discount,
+    delivery_zone: zone ? zone.name : null,
+    delivery_fee: deliveryFee
   });
 
   btn.disabled = false;
@@ -803,10 +892,16 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   }
 
   const itemsList = cart.map(i => `- ${i.name} × ${i.qty} (${i.price * i.qty} جنيه)`).join('%0a');
-  const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${itemsList}%0aالإجمالي: ${total} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
+  const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${itemsList}%0aالمنتجات: ${subtotal} جنيه` +
+    (discount > 0 ? `%0aالخصم: -${discount.toFixed(0)} جنيه (${appliedCoupon.code})` : '') +
+    (deliveryFee > 0 ? `%0aالتوصيل: ${deliveryFee} جنيه (${zone.name})` : '') +
+    `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
   window.open(`https://wa.me/201000000000?text=${msg}`, '_blank');
 
   cart = [];
+  appliedCoupon = null;
+  document.getElementById('checkoutCoupon').value = '';
+  document.getElementById('couponStatus').textContent = '';
   saveCart();
   document.getElementById('checkoutOverlay').style.display = 'none';
   closeCartUI();
@@ -819,6 +914,8 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
 
 renderCartUI();
 loadProducts();
+
+document.getElementById('productSearch').addEventListener('input', renderProducts);
 
 const previewCaption = document.getElementById('previewCaption');
 const summaryBox = document.getElementById('summaryBox');
