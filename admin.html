@@ -100,8 +100,18 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
           <input type="number" id="pPrice" placeholder="450">
         </div>
         <div>
-          <label>تصنيف قصير</label>
+          <label>تصنيف قصير (كارت المنتج)</label>
           <input type="text" id="pTag" placeholder="مثال: شرقي">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>الكمية المتاحة (المخزون)</label>
+          <input type="number" id="pStock" placeholder="10" value="0">
+        </div>
+        <div>
+          <label>قسم الفلترة (اختياري)</label>
+          <input type="text" id="pCategory" placeholder="مثال: عطور رجالي">
         </div>
       </div>
       <label>النوتات / الوصف القصير (ظاهر تحت الاسم في الموقع)</label>
@@ -123,6 +133,11 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
     <div class="card">
       <h2>منتجاتك الحالية</h2>
       <div id="productsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>الطلبات الواردة</h2>
+      <div id="ordersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
   </div>
 </div>
@@ -183,6 +198,7 @@ async function showAdmin(){
   authScreen.classList.remove('show');
   adminScreen.classList.add('show');
   loadProductsList();
+  loadOrdersList();
 }
 
 // Check existing session on load
@@ -202,6 +218,8 @@ function resetForm(){
   document.getElementById('pName').value = '';
   document.getElementById('pPrice').value = '';
   document.getElementById('pTag').value = '';
+  document.getElementById('pStock').value = '0';
+  document.getElementById('pCategory').value = '';
   document.getElementById('pNotes').value = '';
   document.getElementById('pDescription').value = '';
   document.getElementById('pImage').value = '';
@@ -239,6 +257,8 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     name,
     price: document.getElementById('pPrice').value ? Number(document.getElementById('pPrice').value) : null,
     tag: document.getElementById('pTag').value.trim() || null,
+    stock: document.getElementById('pStock').value ? Number(document.getElementById('pStock').value) : 0,
+    category: document.getElementById('pCategory').value.trim() || null,
     notes: document.getElementById('pNotes').value.trim() || null,
     description: document.getElementById('pDescription').value.trim() || null,
     featured: document.getElementById('pFeatured').checked,
@@ -274,7 +294,8 @@ async function loadProductsList(){
       ${p.image_url ? `<img src="${p.image_url}" alt="">` : `<div style="width:64px;height:64px;border-radius:10px;background:var(--ink);"></div>`}
       <div class="info">
         <h4>${p.name} ${p.featured ? '⭐' : ''}</h4>
-        <p>${p.tag || ''} ${p.price ? '· ' + p.price + ' جنيه' : ''}</p>
+        <p>${p.tag || ''} ${p.price ? '· ' + p.price + ' جنيه' : ''} · مخزون: ${p.stock ?? 0}</p>
+        ${p.category ? `<p style="font-size:0.75rem;">${p.category}</p>` : ''}
       </div>
       <div class="actions">
         <button class="btn btn-ghost" data-edit="${p.id}">تعديل</button>
@@ -298,6 +319,8 @@ function editProduct(p){
   document.getElementById('pName').value = p.name || '';
   document.getElementById('pPrice').value = p.price || '';
   document.getElementById('pTag').value = p.tag || '';
+  document.getElementById('pStock').value = p.stock ?? 0;
+  document.getElementById('pCategory').value = p.category || '';
   document.getElementById('pNotes').value = p.notes || '';
   document.getElementById('pDescription').value = p.description || '';
   document.getElementById('pFeatured').checked = !!p.featured;
@@ -314,6 +337,42 @@ async function deleteProduct(id){
   const { error } = await sb.from('products').delete().eq('id', id);
   if (error) { alert('حصلت مشكلة: ' + error.message); return; }
   loadProductsList();
+}
+
+// ===== Incoming store orders =====
+const ORDER_STATUSES = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم'];
+
+async function loadOrdersList(){
+  const listEl = document.getElementById('ordersList');
+  const { data, error } = await sb.from('store_orders').select('*').order('created_at', { ascending: false });
+  if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في تحميل الطلبات.</p>'; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات واردة.</p>'; return; }
+
+  listEl.innerHTML = data.map(o => {
+    const itemsText = (o.items || []).map(i => `${i.name} × ${i.qty}`).join('، ');
+    const statusOptions = ORDER_STATUSES.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('');
+    return `
+    <div class="product-item" style="align-items:flex-start;">
+      <div class="info">
+        <h4>${o.customer_name} — ${o.total} جنيه</h4>
+        <p>${itemsText}</p>
+        <p>📞 ${o.customer_phone} ${o.customer_address ? '· ' + o.customer_address : ''}</p>
+        <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
+      </div>
+      <div class="actions">
+        <select data-order="${o.id}" class="order-status" style="background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;">
+          ${statusOptions}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
+
+  listEl.querySelectorAll('.order-status').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      const { error } = await sb.from('store_orders').update({ status: sel.value }).eq('id', sel.dataset.order);
+      if (error) alert('حصلت مشكلة في تحديث الحالة: ' + error.message);
+    });
+  });
 }
 </script>
 </body>
