@@ -50,18 +50,24 @@
 :root{
   --ink:#1b1420;
   --ink-2:#241a29;
+  --ink-3:#150f19;
   --amber:#c08552;
   --amber-light:#e0b083;
   --gold:#c9a227;
+  --gold-light:#e0bc4f;
+  --gold-dark:#9c7c1f;
   --cream:#f3ede4;
   --rose:#8b3a4a;
+  --rose-light:#a85465;
   --smoke:#8a8390;
   --line:rgba(243,237,228,0.14);
+  --success:#6fbf73;
+  --danger:#e0787a;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 body{
-  background:var(--ink);
+  background: radial-gradient(ellipse at top, var(--ink-2) 0%, var(--ink) 45%, var(--ink-3) 100%) fixed;
   color:var(--cream);
   font-family:'Cairo',sans-serif;
   overflow-x:hidden;
@@ -147,7 +153,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 }
 .hero-ctas{display:flex;gap:16px;}
 .btn-primary{
-  background:linear-gradient(135deg, var(--gold), #e0bc4f);color:var(--ink);padding:16px 32px;border-radius:999px;
+  background:linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-dark));color:var(--ink);padding:16px 32px;border-radius:999px;
   font-weight:700;font-size:1rem;border:none;cursor:pointer;
   box-shadow:0 8px 24px rgba(201,162,39,0.25);
   transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
@@ -378,6 +384,10 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
   <div id="freeShippingBar" style="display:none;margin-bottom:16px;"></div>
   <div id="cartItems"></div>
+  <div id="savedForLaterSection" style="display:none;margin-top:20px;border-top:1px solid var(--line);padding-top:16px;">
+    <h4 style="font-size:0.9rem;margin-bottom:10px;color:var(--smoke);">محفوظ لبعدين</h4>
+    <div id="savedForLaterList"></div>
+  </div>
   <div id="cartEmpty" style="color:var(--smoke);text-align:center;padding:30px 0;">
     السلة فاضية لسه
     <br><br>
@@ -425,6 +435,10 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     </div>
     <div id="couponStatus" style="font-size:0.8rem;margin-bottom:14px;"></div>
     <label for="checkoutNotes" style="display:block;font-weight:700;margin-bottom:8px;">عندك ملاحظة على طلبك؟</label>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <input type="checkbox" id="checkoutGift" style="width:auto;margin:0;"> ده هدية؟ (تغليف خاص + رسالة)
+    </label>
+    <textarea id="checkoutGiftMessage" placeholder="اكتب رسالة الإهداء هنا..." style="display:none;width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
     <textarea id="checkoutNotes" placeholder="مثال: يريت التغليف يبقى هدية" style="width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
     <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);margin-bottom:16px;line-height:1.9;"></div>
     <div style="display:flex;gap:10px;">
@@ -505,6 +519,10 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </header>
 
 <section id="bannerCarousel" style="display:none;overflow:hidden;position:relative;"></section>
+
+<div id="flashSaleBanner" style="display:none;background:linear-gradient(90deg, var(--rose), var(--gold-dark));text-align:center;padding:12px 20px;font-weight:700;font-size:0.9rem;">
+  <span id="flashSaleText"></span> — <span id="flashSaleCountdown"></span>
+</div>
 
 <section class="section" id="bestSellers" style="display:none;">
   <div class="container">
@@ -770,6 +788,17 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <div style="text-align:center;margin-top:20px;">
       <a href="faq.html" style="color:var(--gold);">شوف كل الأسئلة الشائعة ←</a>
     </div>
+  </div>
+</section>
+
+<section class="section" style="padding:50px 0;">
+  <div class="container" style="max-width:500px;text-align:center;">
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:10px;">اشترك عشان توصلك عروضنا الجديدة</h3>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <input type="email" id="newsletterEmail" placeholder="إيميلك" style="flex:1;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';">
+      <button id="newsletterBtn" class="btn-primary" style="padding:12px 24px;">اشترك</button>
+    </div>
+    <div id="newsletterStatus" style="font-size:0.8rem;margin-top:10px;"></div>
   </div>
 </section>
 
@@ -1127,6 +1156,13 @@ async function openProductDetail(productId){
       ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.85rem;margin-right:8px;">${p.original_price} جنيه</span>` : ''}
     </p>
     <p style="color:var(--smoke);line-height:1.8;margin-bottom:20px;">${p.description || p.notes || ''}</p>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
+      <div style="font-size:0.8rem;">
+        <p style="color:var(--cream);margin-bottom:6px;">شارك المنتج ده</p>
+        <button id="pdCopyLink" class="btn-ghost" style="padding:6px 14px;font-size:0.78rem;">نسخ الرابط</button>
+      </div>
+    </div>
     <div id="pdReviewsSummary" style="margin-bottom:16px;"></div>
     <div id="pdReviewsList" style="margin-bottom:20px;"></div>
     <details style="margin-bottom:10px;">
@@ -1149,6 +1185,16 @@ async function openProductDetail(productId){
 
   content.querySelectorAll('.pd-thumb').forEach(thumb=>{
     thumb.addEventListener('click', ()=>{ document.getElementById('pdMainImage').src = thumb.src; });
+  });
+  document.getElementById('pdCopyLink').addEventListener('click', async ()=>{
+    const url = location.origin + location.pathname + '?product=' + p.id;
+    try {
+      await navigator.clipboard.writeText(url);
+      const btn = document.getElementById('pdCopyLink');
+      const original = btn.textContent;
+      btn.textContent = '✓ اتنسخ!';
+      setTimeout(()=> btn.textContent = original, 2000);
+    } catch(e) { alert(url); }
   });
 
   document.getElementById('pdSubmitReview').addEventListener('click', async ()=>{
@@ -1255,6 +1301,26 @@ async function loadAboutStatsDisplay(){
   if (data.stat2_value) {
     document.getElementById('stat2ValueEl').textContent = data.stat2_value;
     document.getElementById('stat2LabelEl').textContent = data.stat2_label || '';
+  }
+
+  // Flash sale countdown
+  const banner = document.getElementById('flashSaleBanner');
+  if (data.sale_end_at && new Date(data.sale_end_at).getTime() > Date.now()) {
+    banner.style.display = 'block';
+    document.getElementById('flashSaleText').textContent = data.sale_label || 'عرض لفترة محدودة';
+    const endTime = new Date(data.sale_end_at).getTime();
+    const tick = () => {
+      const diff = endTime - Date.now();
+      if (diff <= 0) { banner.style.display = 'none'; clearInterval(timer); return; }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('flashSaleCountdown').textContent = `${h}س ${m}د ${s}ث`;
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+  } else {
+    banner.style.display = 'none';
   }
 }
 
@@ -1400,6 +1466,43 @@ function addToCart(product, qty, variant){
   saveCart();
   openCart();
 }
+let savedForLater = [];
+try { savedForLater = JSON.parse(localStorage.getItem('monsela_saved_later') || '[]'); } catch(e) { savedForLater = []; }
+function persistSavedForLater(){
+  try { localStorage.setItem('monsela_saved_later', JSON.stringify(savedForLater)); } catch(e) {}
+}
+function moveToSavedForLater(cartKey){
+  const item = cart.find(i => i.cartKey === cartKey);
+  if (!item) return;
+  cart = cart.filter(i => i.cartKey !== cartKey);
+  savedForLater.push(item);
+  persistSavedForLater();
+  saveCart();
+}
+function moveBackToCart(cartKey){
+  const item = savedForLater.find(i => i.cartKey === cartKey);
+  if (!item) return;
+  savedForLater = savedForLater.filter(i => i.cartKey !== cartKey);
+  persistSavedForLater();
+  cart.push(item);
+  saveCart();
+}
+function renderSavedForLater(){
+  const section = document.getElementById('savedForLaterSection');
+  const list = document.getElementById('savedForLaterList');
+  if (savedForLater.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = savedForLater.map(i => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:0.82rem;">
+      <span>${i.name}</span>
+      <button class="move-to-cart" data-key="${i.cartKey}" style="background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:0.78rem;">رجّعه للسلة</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.move-to-cart').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ moveBackToCart(btn.dataset.key); renderSavedForLater(); });
+  });
+}
+
 function removeFromCart(cartKey){
   cart = cart.filter(i => i.cartKey !== cartKey);
   saveCart();
@@ -1456,6 +1559,7 @@ function renderCartUI(){
         <span>${i.qty}</span>
         <button class="opt cart-plus" data-key="${i.cartKey}" aria-label="زود الكمية" style="width:28px;padding:4px 0;">+</button>
         <button class="cart-remove" data-key="${i.cartKey}" aria-label="احذف من السلة" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-right:6px;">✕</button>
+        <button class="cart-save-later" data-key="${i.cartKey}" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:0.75rem;">احفظ لبعدين</button>
       </div>
     </div>
   `).join('');
@@ -1465,6 +1569,7 @@ function renderCartUI(){
   itemsEl.querySelectorAll('.cart-minus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,-1)));
   itemsEl.querySelectorAll('.cart-plus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,1)));
   itemsEl.querySelectorAll('.cart-remove').forEach(b=>b.addEventListener('click', ()=>removeFromCart(b.dataset.key)));
+  itemsEl.querySelectorAll('.cart-save-later').forEach(b=>b.addEventListener('click', ()=>{ moveToSavedForLater(b.dataset.key); renderSavedForLater(); }));
 }
 
 function openCart(){
@@ -1583,6 +1688,9 @@ document.getElementById('checkoutBtn').addEventListener('click', ()=>{
   document.getElementById('checkoutOverlay').style.display = 'flex';
   updateCheckoutSummary();
 });
+document.getElementById('checkoutGift').addEventListener('change', (e)=>{
+  document.getElementById('checkoutGiftMessage').style.display = e.target.checked ? 'block' : 'none';
+});
 document.getElementById('cancelCheckout').addEventListener('click', ()=>{
   document.getElementById('checkoutOverlay').style.display = 'none';
 });
@@ -1647,7 +1755,9 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     coupon_code: appliedCoupon ? appliedCoupon.code : null,
     discount,
     delivery_zone: zone ? zone.name : null,
-    delivery_fee: deliveryFee
+    delivery_fee: deliveryFee,
+    is_gift: document.getElementById('checkoutGift').checked,
+    gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null
   });
 
   if (currentCustomer) {
@@ -1663,9 +1773,12 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   }
 
   const itemsList = cart.map(i => `- ${i.name} × ${i.qty} (${i.price * i.qty} جنيه)`).join('%0a');
+  const isGift = document.getElementById('checkoutGift').checked;
+  const giftMsg = document.getElementById('checkoutGiftMessage').value.trim();
   const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${itemsList}%0aالمنتجات: ${subtotal} جنيه` +
     (discount > 0 ? `%0aالخصم: -${discount.toFixed(0)} جنيه (${appliedCoupon.code})` : '') +
     (deliveryFee > 0 ? `%0aالتوصيل: ${deliveryFee} جنيه (${zone.name})` : '') +
+    (isGift ? `%0a🎁 ده هدية${giftMsg ? ' — الرسالة: ' + giftMsg : ''}` : '') +
     `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
   openWhatsAppMessage(msg);
 
@@ -1681,11 +1794,30 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   document.getElementById('checkoutPhone').value = '';
   document.getElementById('checkoutAddress').value = '';
   document.getElementById('checkoutNotes').value = '';
+  document.getElementById('checkoutGift').checked = false;
+  document.getElementById('checkoutGiftMessage').value = '';
+  document.getElementById('checkoutGiftMessage').style.display = 'none';
   alert('تم تأكيد طلبك! هنتواصل معاك قريب.');
 });
 
 renderCartUI();
+renderSavedForLater();
 loadProducts();
+
+document.getElementById('newsletterBtn').addEventListener('click', async ()=>{
+  const email = document.getElementById('newsletterEmail').value.trim();
+  const statusEl = document.getElementById('newsletterStatus');
+  if (!email || !email.includes('@')) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب إيميل صحيح.'; return; }
+  const { error } = await sb.from('newsletter_subscribers').insert({ email });
+  if (error) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = error.code === '23505' ? 'الإيميل ده مشترك بالفعل.' : 'حصلت مشكلة، حاول تاني.';
+    return;
+  }
+  statusEl.style.color = 'var(--success)';
+  statusEl.textContent = '✓ تم الاشتراك، شكرًا!';
+  document.getElementById('newsletterEmail').value = '';
+});
 sb.rpc('increment_page_view').then(()=>{}).catch(()=>{});
 
 // ===== Customer accounts =====
