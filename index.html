@@ -19,6 +19,7 @@
      scripts, framing attacks, and unexpected data exfiltration destinations. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://oujdveezelfokelyptza.supabase.co https://api.qrserver.com; frame-ancestors 'self'; base-uri 'self';">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="canonical" href="https://monsela-selim-s-projects2.vercel.app/">
 <script type="application/ld+json">
 {
@@ -167,7 +168,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 }
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(201,162,39,0.4);}
 .btn-ghost{
-  border:1px solid var(--line);padding:16px 32px;border-radius:999px;
+  border:1px solid var(--line);padding:16px 32px;border-radius:12px;
   font-weight:600;color:var(--cream);background:rgba(243,237,228,0.03);
   transition:border-color .3s ease, background .3s ease, transform .3s ease;
 }
@@ -305,7 +306,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .nav-links.open{display:flex;}
   .nav-links a{padding:14px 28px;border-bottom:1px solid var(--line);opacity:1;}
   .nav-cta{display:none;}
-  #menuToggle{display:block !important;}
+  #menuToggle{display:flex !important;}
 }
 
 @media(max-width:640px){
@@ -348,19 +349,27 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <a href="#quiz">مش عارف تختار؟</a>
       <a href="contact.html">تواصل معنا</a>
     </div>
-    <button id="accountBtn" style="background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">👤 حسابي</button>
+    <button id="accountBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      حسابي
+    </button>
     <a href="#gallery" class="nav-cta">تسوق دلوقتي</a>
-    <button id="menuToggle" aria-label="القائمة" style="display:none;background:none;border:1px solid var(--line);color:var(--cream);width:42px;height:42px;border-radius:10px;font-size:1.2rem;cursor:pointer;">☰</button>
+    <button id="menuToggle" aria-label="القائمة" style="display:none;background:none;border:1px solid var(--line);color:var(--cream);width:42px;height:42px;border-radius:10px;cursor:pointer;align-items:center;justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
   </div>
 </nav>
 
 <!-- Floating cart button -->
-<button id="cartFab" aria-label="السلة" style="position:fixed;bottom:24px;left:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--ink);border:none;box-shadow:0 10px 30px rgba(201,162,39,0.4);cursor:pointer;font-size:1.4rem;">
-  🛒<span id="cartCount" style="position:absolute;top:-4px;left:-4px;background:var(--rose);color:var(--cream);border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:none;align-items:center;justify-content:center;">0</span>
+<button id="cartFab" aria-label="السلة" style="position:fixed;bottom:24px;left:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--ink);border:none;box-shadow:0 10px 30px rgba(201,162,39,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+  <span id="cartCount" style="position:absolute;top:-4px;left:-4px;background:var(--rose);color:var(--cream);border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:none;align-items:center;justify-content:center;">0</span>
 </button>
 
 <!-- Back to top -->
-<button id="backToTop" aria-label="ارجع لفوق" style="display:none;position:fixed;bottom:24px;right:24px;z-index:60;width:46px;height:46px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;font-size:1.1rem;">↑</button>
+<button id="backToTop" aria-label="ارجع لفوق" style="display:none;position:fixed;bottom:24px;right:24px;z-index:60;width:46px;height:46px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;align-items:center;justify-content:center;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
 
 <!-- Compare bar -->
 <div id="compareBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--ink-2);border-top:1px solid var(--gold);z-index:65;padding:14px 20px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -493,8 +502,15 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <button id="custLogoutBtn" class="btn-ghost" style="width:100%;margin-top:18px;">تسجيل الخروج</button>
     </div>
 
-    <h4 style="margin:20px 0 12px;">❤️ المفضلة</h4>
+    <h4 style="margin:20px 0 12px;display:flex;align-items:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--rose)" stroke="var(--rose)" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+      المفضلة
+    </h4>
     <div id="wishlistInAccount"></div>
+    <div id="wishlistActions" style="display:none;gap:8px;margin-top:10px;">
+      <button id="wishlistShareBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;">مشاركة كرابط</button>
+      <button id="wishlistPrintBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;">طباعة / PDF</button>
+    </div>
   </div>
 </div>
 
@@ -927,6 +943,17 @@ async function loadProducts(){
   if (sharedProductId && allProducts.some(p => p.id === sharedProductId)) {
     openProductDetail(sharedProductId);
   }
+
+  const sharedWishlist = new URLSearchParams(location.search).get('wishlist');
+  if (sharedWishlist) {
+    const ids = sharedWishlist.split(',').filter(id => allProducts.some(p => p.id === id));
+    let added = false;
+    ids.forEach(id => { if (!wishlist.includes(id)) { wishlist.push(id); added = true; } });
+    if (added) {
+      try { localStorage.setItem('monsela_wishlist', JSON.stringify(wishlist)); } catch(e) {}
+      renderProducts();
+    }
+  }
 }
 
 function renderBrandFilter(){
@@ -1068,9 +1095,14 @@ function renderProducts(){
       `}
       <div style="display:flex;gap:8px;">
         <button class="btn-ghost view-details" data-id="${p.id}" style="flex:1;">عرض التفاصيل</button>
-        <button class="wishlist-toggle" data-id="${p.id}" aria-label="أضف للمفضلة" style="width:44px;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;font-size:1.1rem;">${wishlist.includes(p.id) ? '❤️' : '🤍'}</button>
-        <button class="compare-toggle opt ${compareList.includes(p.id) ? 'active' : ''}" data-id="${p.id}" style="width:44px;padding:0;font-size:0.85rem;">⚖️</button>
+        <button class="wishlist-toggle" data-id="${p.id}" aria-label="أضف للمفضلة" style="width:44px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? 'var(--rose)' : 'none'}" stroke="var(--rose)" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        </button>
+        <button class="compare-toggle opt ${compareList.includes(p.id) ? 'active' : ''}" data-id="${p.id}" style="width:44px;padding:0;display:flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 16v3a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3"/></svg>
+        </button>
       </div>
+      ${!hasDiscount ? `<button class="price-alert-btn" data-id="${p.id}" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:none;color:var(--smoke);font-size:0.75rem;cursor:pointer;margin-top:8px;width:100%;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> نبّهني لو السعر قلّ</button>` : ''}
     </div>`;
   }).join('');
 
@@ -1084,6 +1116,15 @@ function renderProducts(){
       btn.textContent = '✓ هنبلغك أول ما يتوفر';
       btn.disabled = true;
       emailInput.style.display = 'none';
+    });
+  });
+
+  grid.querySelectorAll('.price-alert-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const email = prompt('اكتب إيميلك وهنبلغك أول ما السعر ينزل:');
+      if (!email || !email.includes('@')) return;
+      const { error } = await sb.from('price_alerts').insert({ product_id: btn.dataset.id, email });
+      btn.textContent = error ? 'حصلت مشكلة، حاول تاني' : '✓ هنبلغك لو السعر قلّ';
     });
   });
 
@@ -1208,6 +1249,7 @@ async function openProductDetail(productId){
     </div>
     <div id="pdReviewsSummary" style="margin-bottom:16px;"></div>
     <div id="pdReviewsList" style="margin-bottom:20px;"></div>
+        <div id="pdFragranceProfile" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px;font-size:0.82rem;"></div>
     <div id="pdRelatedWrap" style="display:none;margin-bottom:20px;">
       <h4 style="margin-bottom:10px;color:var(--gold);">منتجات مشابهة</h4>
       <div id="pdRelatedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
@@ -1229,6 +1271,21 @@ async function openProductDetail(productId){
       </div>
     </details>
   `;
+
+  const profileRows = [
+    ['نوتة علوية', p.top_notes], ['نوتة قلب', p.heart_notes], ['نوتة قاعدية', p.base_notes],
+    ['العائلة', p.fragrance_family], ['الثبات', p.longevity], ['الانتشار', p.projection],
+    ['الموسم', p.season], ['المناسبة', p.occasion], ['التركيز', p.concentration], ['بلد المنشأ', p.origin_country]
+  ].filter(([,v]) => v);
+  const profileEl = document.getElementById('pdFragranceProfile');
+  if (profileRows.length > 0) {
+    profileEl.style.display = 'block';
+    profileEl.innerHTML = profileRows.map(([label, val]) =>
+      `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);"><span style="color:var(--smoke);">${label}</span><span>${escapeHTML(val)}</span></div>`
+    ).join('');
+  } else {
+    profileEl.style.display = 'none';
+  }
 
   content.querySelectorAll('.pd-thumb').forEach(thumb=>{
     thumb.addEventListener('click', ()=>{ document.getElementById('pdMainImage').src = thumb.src; });
@@ -1432,10 +1489,12 @@ function toggleWishlist(productId){
 
 function renderWishlistInAccount(){
   const el = document.getElementById('wishlistInAccount');
+  const actionsEl = document.getElementById('wishlistActions');
   if (!el) return;
-  if (wishlist.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش منتجات في المفضلة.</p>'; return; }
+  if (wishlist.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش منتجات في المفضلة.</p>'; actionsEl.style.display = 'none'; return; }
   const items = wishlist.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
-  if (items.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش منتجات في المفضلة.</p>'; return; }
+  if (items.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش منتجات في المفضلة.</p>'; actionsEl.style.display = 'none'; return; }
+  actionsEl.style.display = 'flex';
   el.innerHTML = items.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:10px 0;font-size:0.85rem;">
       <span>${p.name} ${p.price ? '— ' + p.price + ' جنيه' : ''}</span>
@@ -1954,6 +2013,25 @@ document.getElementById('custSignupBtn').addEventListener('click', async ()=>{
   statusEl.textContent = 'اتعمل الحساب! لو محتاج تأكيد بالإيميل، دوس على اللينك اللي هيوصلك وبعدين سجّل دخول.';
 });
 
+document.getElementById('wishlistShareBtn').addEventListener('click', async ()=>{
+  const url = `${location.origin}${location.pathname}?wishlist=${wishlist.join(',')}`;
+  try { await navigator.clipboard.writeText(url); alert('اتنسخ الرابط! ' + url); }
+  catch(e) { alert(url); }
+});
+document.getElementById('wishlistPrintBtn').addEventListener('click', ()=>{
+  const items = wishlist.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة أمنياتي - Monsela</title>
+    <style>body{font-family:Arial;padding:40px;} h1{color:#8b3a4a;} li{margin-bottom:10px;font-size:16px;}</style></head>
+    <body><h1>قائمة أمنياتي - Monsela</h1><ul>
+    ${items.map(p => `<li>${p.name} ${p.price ? '— ' + p.price + ' جنيه' : ''}</li>`).join('')}
+    </ul></body></html>
+  `);
+  win.document.close();
+  win.print();
+});
+
 document.getElementById('custLogoutBtn').addEventListener('click', async ()=>{
   await sb.auth.signOut();
   currentCustomer = null;
@@ -2005,7 +2083,14 @@ sb.auth.getSession().then(({ data }) => { if (data.session) refreshAccountView()
 let searchDebounceTimer;
 document.getElementById('productSearch').addEventListener('input', ()=>{
   clearTimeout(searchDebounceTimer);
-  searchDebounceTimer = setTimeout(()=>{ visibleCount = 12; renderProducts(); }, 250);
+  searchDebounceTimer = setTimeout(()=>{
+    visibleCount = 12;
+    renderProducts();
+    const term = document.getElementById('productSearch').value.trim();
+    if (term.length >= 2) {
+      sb.from('search_logs').insert({ term }).then(()=>{}).catch(()=>{});
+    }
+  }, 800);
 });
 document.getElementById('productSort').addEventListener('change', ()=>{ visibleCount = 12; renderProducts(); });
 document.getElementById('productBrandFilter').addEventListener('change', (e)=>{ activeBrand = e.target.value; visibleCount = 12; renderProducts(); });
@@ -2036,7 +2121,7 @@ const navEl = document.querySelector('nav');
 const backToTopBtn = document.getElementById('backToTop');
 window.addEventListener('scroll', ()=>{
   navEl.classList.toggle('scrolled', window.scrollY > 12);
-  backToTopBtn.style.display = window.scrollY > 600 ? 'block' : 'none';
+  backToTopBtn.style.display = window.scrollY > 600 ? 'flex' : 'none';
 }, { passive: true });
 backToTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 'smooth' }));
 

@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Monsela | لوحة التحكم</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -130,6 +131,28 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <textarea id="pNotes" placeholder="مثال: عود، عنبر، خشب صندل — دافئ وثقيل"></textarea>
       <label>وصف تفصيلي (اختياري، مش ظاهر في الكارت)</label>
       <textarea id="pDescription"></textarea>
+
+      <label style="margin-top:6px;">هرم النوتات والملف الكامل (اختياري - يظهر في صفحة تفاصيل المنتج)</label>
+      <div class="row">
+        <div><label>نوتة علوية</label><input type="text" id="pTopNotes" placeholder="برغموت، ليمون"></div>
+        <div><label>نوتة قلب</label><input type="text" id="pHeartNotes" placeholder="ياسمين، ورد"></div>
+      </div>
+      <div class="row">
+        <div><label>نوتة قاعدية</label><input type="text" id="pBaseNotes" placeholder="عود، مسك"></div>
+        <div><label>عائلة العطر</label><input type="text" id="pFragranceFamily" placeholder="شرقي / زهري / خشبي"></div>
+      </div>
+      <div class="row">
+        <div><label>الثبات (Longevity)</label><input type="text" id="pLongevity" placeholder="6-8 ساعات"></div>
+        <div><label>الانتشار (Projection)</label><input type="text" id="pProjection" placeholder="متوسط إلى قوي"></div>
+      </div>
+      <div class="row">
+        <div><label>الموسم المناسب</label><input type="text" id="pSeason" placeholder="شتوي / صيفي / كل المواسم"></div>
+        <div><label>المناسبة</label><input type="text" id="pOccasion" placeholder="سهرة / يومي"></div>
+      </div>
+      <div class="row">
+        <div><label>التركيز</label><input type="text" id="pConcentration" placeholder="Eau de Parfum"></div>
+        <div><label>بلد المنشأ</label><input type="text" id="pOriginCountry" placeholder="فرنسا"></div>
+      </div>
       <label>صورة المنتج (أول صورة هتبقى الغلاف، والباقي معرض صور إضافي)</label>
       <input type="file" id="pImage" accept="image/*" multiple>
       <div id="currentImagePreview" style="margin-bottom:14px;"></div>
@@ -151,6 +174,21 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <button class="btn btn-ghost" id="exportProductsBtn" style="margin-bottom:14px;">⬇ تصدير المنتجات Excel</button>
       <div id="lowStockAlert" style="margin-bottom:14px;"></div>
       <div id="productsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>لوحة المعلومات</h2>
+      <div class="row" id="dashboardStats" style="margin-bottom:20px;"></div>
+      <div class="row">
+        <div>
+          <h3 style="font-size:1rem;margin-bottom:10px;">أكتر الماركات مبيعًا</h3>
+          <div id="topBrandsList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
+        </div>
+        <div>
+          <h3 style="font-size:1rem;margin-bottom:10px;">أكتر كلمات البحث</h3>
+          <div id="topSearchesList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -357,6 +395,7 @@ async function showAdmin(){
   loadFlashSale();
   loadNewsletterSubscribers();
   loadStockNotifications();
+  loadDashboard();
 }
 
 async function loadViewCounter(){
@@ -419,6 +458,35 @@ document.getElementById('clearSaleBtn').addEventListener('click', async ()=>{
   statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتلغى العرض ✓';
   document.getElementById('saleEndAt').value = '';
 });
+
+// ===== Real dashboard (revenue, returning customers, top brands, top searches) =====
+async function loadDashboard(){
+  const { data: stats } = await sb.rpc('get_dashboard_stats');
+  const s = (stats && stats[0]) || { total_revenue: 0, total_orders: 0, returning_customers: 0, avg_order_value: 0 };
+  document.getElementById('dashboardStats').innerHTML = `
+    <div><h3 style="font-size:1.4rem;color:var(--gold);">${Number(s.total_revenue).toFixed(0)}</h3><p style="font-size:0.8rem;color:var(--smoke);">إجمالي الإيرادات (جنيه)</p></div>
+    <div><h3 style="font-size:1.4rem;color:var(--gold);">${s.total_orders}</h3><p style="font-size:0.8rem;color:var(--smoke);">عدد الطلبات</p></div>
+    <div><h3 style="font-size:1.4rem;color:var(--gold);">${s.returning_customers}</h3><p style="font-size:0.8rem;color:var(--smoke);">عملاء متكررين</p></div>
+    <div><h3 style="font-size:1.4rem;color:var(--gold);">${Number(s.avg_order_value).toFixed(0)}</h3><p style="font-size:0.8rem;color:var(--smoke);">متوسط قيمة الطلب</p></div>
+  `;
+
+  const { data: brands } = await sb.rpc('get_top_brands', { limit_count: 5 });
+  document.getElementById('topBrandsList').innerHTML = (brands && brands.length)
+    ? brands.map(b => `<div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:6px 0;border-bottom:1px solid var(--line);"><span>${b.brand}</span><span style="color:var(--gold);">${b.total_sold}</span></div>`).join('')
+    : '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش بيانات كافية.</p>';
+
+  const { data: searches } = await sb.from('search_logs').select('term');
+  if (searches && searches.length) {
+    const counts = {};
+    searches.forEach(s => { counts[s.term] = (counts[s.term] || 0) + 1; });
+    const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0, 5);
+    document.getElementById('topSearchesList').innerHTML = top.map(([term, count]) =>
+      `<div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:6px 0;border-bottom:1px solid var(--line);"><span>${term}</span><span style="color:var(--gold);">${count}</span></div>`
+    ).join('');
+  } else {
+    document.getElementById('topSearchesList').innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش بيانات كافية.</p>';
+  }
+}
 
 // ===== Back-in-stock notification requests =====
 async function loadStockNotifications(){
@@ -682,6 +750,16 @@ function resetForm(){
   document.getElementById('pCategory').value = '';
   document.getElementById('pNotes').value = '';
   document.getElementById('pDescription').value = '';
+  document.getElementById('pTopNotes').value = '';
+  document.getElementById('pHeartNotes').value = '';
+  document.getElementById('pBaseNotes').value = '';
+  document.getElementById('pFragranceFamily').value = '';
+  document.getElementById('pLongevity').value = '';
+  document.getElementById('pProjection').value = '';
+  document.getElementById('pSeason').value = '';
+  document.getElementById('pOccasion').value = '';
+  document.getElementById('pConcentration').value = '';
+  document.getElementById('pOriginCountry').value = '';
   document.getElementById('pImage').value = '';
   document.getElementById('pFeatured').checked = false;
   document.getElementById('currentImagePreview').innerHTML = '';
@@ -765,6 +843,16 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     category: document.getElementById('pCategory').value.trim() || null,
     notes: document.getElementById('pNotes').value.trim() || null,
     description: document.getElementById('pDescription').value.trim() || null,
+    top_notes: document.getElementById('pTopNotes').value.trim() || null,
+    heart_notes: document.getElementById('pHeartNotes').value.trim() || null,
+    base_notes: document.getElementById('pBaseNotes').value.trim() || null,
+    fragrance_family: document.getElementById('pFragranceFamily').value.trim() || null,
+    longevity: document.getElementById('pLongevity').value.trim() || null,
+    projection: document.getElementById('pProjection').value.trim() || null,
+    season: document.getElementById('pSeason').value.trim() || null,
+    occasion: document.getElementById('pOccasion').value.trim() || null,
+    concentration: document.getElementById('pConcentration').value.trim() || null,
+    origin_country: document.getElementById('pOriginCountry').value.trim() || null,
     featured: document.getElementById('pFeatured').checked,
     gallery_images: galleryUrls.length ? galleryUrls : null,
     variants: readVariantsFromForm(),
@@ -847,6 +935,16 @@ function editProduct(p){
   document.getElementById('pCategory').value = p.category || '';
   document.getElementById('pNotes').value = p.notes || '';
   document.getElementById('pDescription').value = p.description || '';
+  document.getElementById('pTopNotes').value = p.top_notes || '';
+  document.getElementById('pHeartNotes').value = p.heart_notes || '';
+  document.getElementById('pBaseNotes').value = p.base_notes || '';
+  document.getElementById('pFragranceFamily').value = p.fragrance_family || '';
+  document.getElementById('pLongevity').value = p.longevity || '';
+  document.getElementById('pProjection').value = p.projection || '';
+  document.getElementById('pSeason').value = p.season || '';
+  document.getElementById('pOccasion').value = p.occasion || '';
+  document.getElementById('pConcentration').value = p.concentration || '';
+  document.getElementById('pOriginCountry').value = p.origin_country || '';
   document.getElementById('pFeatured').checked = !!p.featured;
   clearVariantRows();
   if (Array.isArray(p.variants)) {

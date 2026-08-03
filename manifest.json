@@ -7,5 +7,7 @@
   "theme_color": "#1b1420",
   "lang": "ar",
   "dir": "rtl",
-  "icons": []
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
 }
