@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monsela | برفانات مصممة خصيصًا ليك</title>
+<meta name="description" content="Monsela - متجر برفانات أصلية أونلاين في مصر. تسوق مجموعتنا، وكميزة إضافية، صمم قزازتك الخاصة واحط اسمك عليها.">
+<meta property="og:title" content="Monsela | برفانات أصلية">
+<meta property="og:description" content="تسوق برفانات أصلية، وصمم قزازتك الخاصة كميزة إضافية.">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "Monsela",
+  "description": "متجر برفانات أصلية أونلاين في مصر مع خدمة تصميم القزازة الشخصية",
+  "priceRange": "$$"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --ink:#1b1420;
+  --ink-2:#241a29;
+  --amber:#c08552;
+  --amber-light:#e0b083;
+  --gold:#c9a227;
+  --cream:#f3ede4;
+  --rose:#8b3a4a;
+  --smoke:#8a8390;
+  --line:rgba(243,237,228,0.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--cream);
+  font-family:'Cairo',sans-serif;
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{
+  font-family:'Aref Ruqaa',serif;
+  font-weight:700;
+}
+.eyebrow{
+  font-family:'Markazi Text',serif;
+  letter-spacing:2px;
+  color:var(--gold);
+  font-size:1.1rem;
+  text-transform:uppercase;
+}
+a{color:inherit;text-decoration:none;}
+.container{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(27,20,32,0.72);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  transition:box-shadow .3s ease, background .3s ease;
+}
+nav.scrolled{
+  background:rgba(27,20,32,0.92);
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+}
+nav .container{
+  display:flex;align-items:center;justify-content:space-between;
+  height:76px;
+}
+.logo{font-family:'Aref Ruqaa',serif;font-size:1.8rem;color:var(--cream);}
+.logo span{color:var(--gold);}
+.nav-links{display:flex;gap:32px;font-size:0.95rem;}
+.nav-links a{opacity:0.85;transition:opacity .2s;}
+.nav-links a:hover{opacity:1;color:var(--gold);}
+.nav-cta{
+  background:var(--gold);color:var(--ink);
+  padding:10px 22px;border-radius:999px;font-weight:700;font-size:0.9rem;
+}
+
+/* HERO */
+.hero{
+  position:relative;
+  padding:100px 0 60px;
+  display:grid;grid-template-columns:1.1fr 0.9fr;gap:40px;align-items:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 75% 30%, rgba(192,133,82,0.18), transparent 60%);
+  pointer-events:none;
+}
+.hero h1{font-size:clamp(1.9rem, 6vw, 3.4rem);line-height:1.25;margin:14px 0 20px;text-shadow:0 2px 24px rgba(0,0,0,0.3);}
+.hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+  .hero-visual svg{animation:none;}
+}
+.hero-ctas{display:flex;gap:16px;}
+.btn-primary{
+  background:linear-gradient(135deg, var(--gold), #e0bc4f);color:var(--ink);padding:16px 32px;border-radius:999px;
+  font-weight:700;font-size:1rem;border:none;cursor:pointer;
+  box-shadow:0 8px 24px rgba(201,162,39,0.25);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(201,162,39,0.4);}
+.btn-ghost{
+  border:1px solid var(--line);padding:16px 32px;border-radius:999px;
+  font-weight:600;color:var(--cream);background:rgba(243,237,228,0.03);
+  transition:border-color .3s ease, background .3s ease, transform .3s ease;
+}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(201,162,39,0.08);transform:translateY(-2px);}
+.hero-visual{position:relative;display:flex;justify-content:center;}
+.hero-visual svg{filter:drop-shadow(0 30px 60px rgba(0,0,0,0.5));animation:float 5s ease-in-out infinite;max-width:220px;width:60vw;height:auto;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+
+/* SECTION LABELS */
+.section{padding:clamp(50px, 8vw, 90px) 0;}
+.section-head{text-align:center;max-width:640px;margin:0 auto 56px;}
+.section-head h2{font-size:clamp(1.6rem, 4.5vw, 2.3rem);margin:10px 0 16px;}
+.section-head p{color:var(--smoke);font-size:clamp(0.9rem, 2vw, 1.05rem);line-height:1.8;}
+
+/* GALLERY */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.perfume-card{
+  background:rgba(36,26,41,0.55);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-radius:18px;
+  padding:28px;text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s ease, box-shadow .3s ease;
+}
+.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 18px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,162,39,0.15);}
+.perfume-card .glass{
+  width:70px;height:100px;margin:0 auto 20px;border-radius:10px 10px 22px 22px;
+  background:linear-gradient(180deg, var(--amber-light), var(--amber));
+  position:relative;box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
+}
+.perfume-card .glass::before{
+  content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  width:20px;height:16px;background:var(--gold);border-radius:4px 4px 0 0;
+}
+.perfume-card h3{font-size:1.3rem;margin-bottom:8px;}
+.perfume-card p{color:var(--smoke);font-size:0.9rem;margin-bottom:14px;}
+.tag{
+  display:inline-block;font-size:0.75rem;color:var(--gold);
+  border:1px solid var(--gold);padding:4px 12px;border-radius:999px;
+}
+
+/* CUSTOMIZER */
+.customizer{
+  background:rgba(36,26,41,0.5);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-radius:28px;border:1px solid var(--line);
+  box-shadow:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(243,237,228,0.05);
+  padding:50px;display:grid;grid-template-columns:0.9fr 1.1fr;gap:50px;
+}
+.preview-panel{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center, rgba(201,162,39,0.1), transparent 70%);
+  border-radius:20px;padding:30px;position:relative;
+}
+.preview-panel::after{
+  content:'';position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
+  width:120px;height:18px;border-radius:50%;
+  background:radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%);
+  filter:blur(2px);pointer-events:none;
+}
+.preview-panel svg{transition:all .4s ease;}
+.preview-name{
+  margin-top:24px;font-family:'Aref Ruqaa',serif;font-size:1.4rem;color:var(--gold);
+  min-height:32px;
+}
+.form-panel .field{margin-bottom:30px;}
+.form-panel label.field-label{
+  display:block;font-weight:700;margin-bottom:14px;font-size:1.05rem;
+}
+.field-label small{display:block;color:var(--smoke);font-weight:400;font-size:0.85rem;margin-top:4px;}
+.option-row{display:flex;gap:14px;flex-wrap:wrap;}
+.opt{
+  border:1px solid var(--line);background:transparent;color:var(--cream);
+  padding:10px 16px;border-radius:12px;cursor:pointer;font-family:'Cairo';font-size:0.9rem;
+  transition:all .2s;
+}
+.opt.active, .opt:hover{border-color:var(--gold);background:rgba(201,162,39,0.1);}
+.color-dot{
+  width:34px;height:34px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+  transition:transform .2s;
+}
+.color-dot.active{border-color:var(--cream);transform:scale(1.12);}
+input[type=text]{
+  width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);
+  padding:14px 16px;border-radius:12px;font-family:'Cairo';font-size:1rem;
+}
+input[type=text]:focus{outline:none;border-color:var(--gold);}
+.scent-card{
+  border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;
+}
+.scent-card.active{border-color:var(--gold);background:rgba(201,162,39,0.08);}
+.scent-card h4{font-size:1rem;margin-bottom:4px;}
+.scent-card p{font-size:0.8rem;color:var(--smoke);}
+.scent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.notes-pyramid{margin-top:12px;font-size:0.82rem;color:var(--amber-light);display:none;}
+.notes-pyramid.show{display:block;}
+
+.submit-bar{
+  margin-top:10px;display:flex;gap:14px;align-items:center;
+}
+.summary-box{
+  background:var(--ink);border:1px dashed var(--line);border-radius:14px;
+  padding:16px 18px;font-size:0.85rem;color:var(--smoke);line-height:1.8;margin-top:20px;
+}
+.summary-box b{color:var(--cream);}
+
+/* QUIZ TEASER */
+.quiz-box{
+  display:flex;align-items:center;justify-content:space-between;gap:40px;
+  background:linear-gradient(120deg, rgba(139,58,74,0.25), rgba(192,133,82,0.15));
+  border:1px solid var(--line);border-radius:24px;padding:44px;
+}
+.quiz-box h3{font-size:1.8rem;margin-bottom:12px;}
+.quiz-box p{color:var(--smoke);max-width:460px;line-height:1.8;}
+
+footer{
+  border-top:1px solid var(--line);padding:50px 0;text-align:center;color:var(--smoke);font-size:0.9rem;
+}
+footer .logo{margin-bottom:10px;justify-content:center;display:block;}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;text-align:center;padding-top:40px;}
+  .hero p.lead{margin:0 auto 32px;}
+  .hero-ctas{justify-content:center;flex-wrap:wrap;}
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+  .customizer{grid-template-columns:1fr;padding:28px;}
+  .quiz-box{padding:28px;}
+  .nav-links{
+    display:none;position:absolute;top:76px;right:0;left:0;
+    background:var(--ink-2);flex-direction:column;gap:0;
+    border-bottom:1px solid var(--line);padding:8px 0;
+  }
+  .nav-links.open{display:flex;}
+  .nav-links a{padding:14px 28px;border-bottom:1px solid var(--line);opacity:1;}
+  .nav-cta{display:none;}
+  #menuToggle{display:block !important;}
+}
+
+@media(max-width:640px){
+  .container{padding:0 18px;}
+  .hero{padding:28px 0 40px;}
+  .hero-ctas{flex-direction:column;width:100%;}
+  .hero-ctas a{width:100%;text-align:center;}
+  .btn-primary, .btn-ghost{padding:14px 20px;font-size:0.95rem;}
+  .gallery-grid{grid-template-columns:1fr;gap:16px;}
+  .perfume-card{padding:22px;}
+  .customizer{padding:20px;border-radius:18px;}
+  .preview-panel{padding:16px;}
+  #rotateWrap{width:130px !important;height:200px !important;}
+  .option-row{gap:10px;}
+  .opt{padding:9px 14px;font-size:0.85rem;flex:1 1 auto;text-align:center;}
+  .scent-grid{grid-template-columns:1fr;}
+  .submit-bar{flex-direction:column;align-items:stretch;}
+  .submit-bar button{width:100%;text-align:center;}
+  .quiz-box{padding:20px;}
+  #about .container{grid-template-columns:1fr !important;text-align:center;}
+  #about > .container > div:last-child{grid-template-columns:1fr 1fr !important;}
+  nav .container{padding:0 18px;}
+  .logo{font-size:1.5rem;}
+}
+
+</style>
+</head>
+<body>
+<a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--ink);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
+<style>a[href="#main-content"]:focus{right:0;}</style>
+
+<nav>
+  <div class="container">
+    <div class="logo">Mon<span>sela</span></div>
+    <div class="nav-links" id="navLinks">
+      <a href="#gallery">مجموعتنا</a>
+      <a href="#customizer">صمم قزازتك</a>
+      <a href="#testimonials">آراء العملاء</a>
+      <a href="#quiz">مش عارف تختار؟</a>
+    </div>
+    <a href="#gallery" class="nav-cta">تسوق دلوقتي</a>
+    <button id="menuToggle" aria-label="القائمة" style="display:none;background:none;border:1px solid var(--line);color:var(--cream);width:42px;height:42px;border-radius:10px;font-size:1.2rem;cursor:pointer;">☰</button>
+  </div>
+</nav>
+
+<!-- Floating cart button -->
+<button id="cartFab" aria-label="السلة" style="position:fixed;bottom:24px;left:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--ink);border:none;box-shadow:0 10px 30px rgba(201,162,39,0.4);cursor:pointer;font-size:1.4rem;">
+  🛒<span id="cartCount" style="position:absolute;top:-4px;left:-4px;background:var(--rose);color:var(--cream);border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:none;align-items:center;justify-content:center;">0</span>
+</button>
+
+<!-- Cart drawer -->
+<div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:70;"></div>
+<div id="cartDrawer" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(0,0,0,0.5);padding:26px;overflow-y:auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;">سلة التسوق</h3>
+    <button id="closeCart" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
+  </div>
+  <div id="cartItems"></div>
+  <div id="cartEmpty" style="color:var(--smoke);text-align:center;padding:30px 0;">
+    السلة فاضية لسه
+    <br><br>
+    <a href="#gallery" class="btn-primary" id="cartEmptyShopBtn" style="display:inline-block;">تصفح المنتجات</a>
+  </div>
+  <div id="cartFooter" style="display:none;border-top:1px solid var(--line);margin-top:16px;padding-top:16px;">
+    <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:16px;">
+      <span>الإجمالي</span><span id="cartTotal">0 جنيه</span>
+    </div>
+    <button id="checkoutBtn" class="btn-primary" style="width:100%;">إتمام الطلب</button>
+  </div>
+</div>
+
+<!-- Checkout modal -->
+<div id="checkoutOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:18px;">بيانات التوصيل</h3>
+    <!-- honeypot field: invisible to humans, bots tend to fill every field -->
+    <input type="text" id="hpField" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+    <label for="checkoutName" style="display:block;font-weight:700;margin-bottom:8px;">الاسم <span style="color:var(--rose);">*</span></label>
+    <input type="text" id="checkoutName" placeholder="اسمك بالكامل" required style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+    <label for="checkoutPhone" style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل <span style="color:var(--rose);">*</span></label>
+    <input type="text" id="checkoutPhone" placeholder="01xxxxxxxxx" required style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+    <label for="checkoutAddress" style="display:block;font-weight:700;margin-bottom:8px;">العنوان</label>
+    <textarea id="checkoutAddress" placeholder="المحافظة، المنطقة، تفاصيل العنوان" style="width:100%;min-height:70px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+    <label for="checkoutZone" style="display:block;font-weight:700;margin-bottom:8px;">منطقة التوصيل</label>
+    <select id="checkoutZone" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+      <option value="">بدون تحديد (هنأكد التوصيل معاك)</option>
+    </select>
+    <label for="checkoutCoupon" style="display:block;font-weight:700;margin-bottom:8px;">كود خصم (لو عندك)</label>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="text" id="checkoutCoupon" placeholder="مثال: WELCOME10" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+      <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;">تطبيق</button>
+    </div>
+    <div id="couponStatus" style="font-size:0.8rem;margin-bottom:14px;"></div>
+    <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);margin-bottom:16px;line-height:1.9;"></div>
+    <div style="display:flex;gap:10px;">
+      <button id="confirmOrderBtn" class="btn-primary" style="flex:1;">تأكيد الطلب</button>
+      <button id="cancelCheckout" class="btn-ghost" style="flex:0;">إلغاء</button>
+    </div>
+    <div id="checkoutStatus" style="margin-top:12px;font-size:0.85rem;"></div>
+  </div>
+</div>
+
+<header class="hero container" id="main-content">
+  <div>
+    <div class="eyebrow">Monsela — برفاناتك المفضلة</div>
+    <h1>عطور أصلية،<br>وبصمتك لو حبيت</h1>
+    <p class="lead">تسوق مجموعتنا من البرفانات الأصلية، وكميزة إضافية اختيارية، اصمم قزازتك الخاصة واحط اسمك عليها.</p>
+    <div class="hero-ctas">
+      <a href="#gallery" class="btn-primary">تسوق دلوقتي</a>
+      <a href="#customizer" class="btn-ghost">صمم قزازتك</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg">
+      <rect x="90" y="10" width="40" height="26" rx="4" fill="#c9a227"/>
+      <rect x="95" y="0" width="30" height="14" rx="3" fill="#8b3a4a"/>
+      <path d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
+        fill="url(#g1)" stroke="#c9a227" stroke-width="1.5" opacity="0.95"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e0b083"/>
+          <stop offset="100%" stop-color="#c08552"/>
+        </linearGradient>
+      </defs>
+      <text x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="26" fill="#1b1420">Monsela</text>
+    </svg>
+  </div>
+</header>
+
+<section class="section" id="gallery">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">المتجر</div>
+      <h2>تسوق مجموعتنا</h2>
+      <p>اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.</p>
+    </div>
+    <div style="max-width:420px;margin:0 auto 20px;display:flex;gap:10px;">
+      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." style="flex:1;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
+      <select id="productSort" style="background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.9rem;">
+        <option value="default">الترتيب الافتراضي</option>
+        <option value="newest">الأحدث</option>
+        <option value="price_asc">السعر: من الأقل</option>
+        <option value="price_desc">السعر: من الأعلى</option>
+      </select>
+    </div>
+    <div class="option-row reveal" id="categoryFilters" style="justify-content:center;margin-bottom:28px;"></div>
+    <div class="gallery-grid reveal" id="productsGrid">
+      <p style="grid-column:1/-1;text-align:center;color:var(--smoke);">جاري تحميل المنتجات…</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="customizer">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">ميزة إضافية</div>
+      <h2>حابب تحط بصمتك الشخصية؟ صمم قزازتك</h2>
+      <p>ميزة اختيارية: اختار شكل ولون القزازة، اكتب اسمك عليها، وحدد التركيبة — وابعتلنا التصميم كطلب منفصل.</p>
+      <div id="sharedBanner" style="display:none;margin-top:18px;background:rgba(201,162,39,0.12);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;color:var(--gold);font-size:0.9rem;"></div>
+    </div>
+
+    <div class="customizer reveal">
+      <div class="preview-panel">
+        <div id="rotateWrap" style="cursor:grab;user-select:none;width:180px;height:280px;position:relative;">
+          <div id="bottleLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.75rem;color:var(--smoke);padding:10px;">جاري تحميل المعاينة ثلاثية الأبعاد…</div>
+        </div>
+        <div style="font-size:0.75rem;color:var(--smoke);margin-top:6px;">↔ اسحب القزازة عشان تلفها</div>
+        <div class="preview-name" id="previewCaption">اكتب اسمك عشان تشوفه على القزازة</div>
+        <div class="summary-box" id="summaryBox">
+          <b>الشكل:</b> كلاسيك &nbsp; | &nbsp; <b>اللون:</b> عنبري &nbsp; | &nbsp; <b>التركيبة:</b> لسه ما اخترتش
+        </div>
+      </div>
+
+      <div class="form-panel">
+        <div class="field">
+          <label class="field-label">1. شكل القزازة</label>
+          <div class="option-row" id="shapeOptions">
+            <button class="opt active" data-shape="classic">كلاسيك</button>
+            <button class="opt" data-shape="tall">طويلة</button>
+            <button class="opt" data-shape="round">مدورة</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">2. لون الزجاج</label>
+          <div class="option-row" id="colorOptions">
+            <span class="color-dot active" style="background:#c08552" data-color="#c08552,#e0b083"></span>
+            <span class="color-dot" style="background:#8b3a4a" data-color="#8b3a4a,#d9c2c8"></span>
+            <span class="color-dot" style="background:#3a4a3f" data-color="#3a4a3f,#7a9784"></span>
+            <span class="color-dot" style="background:#2c2c34" data-color="#2c2c34,#5c5c68"></span>
+            <span class="color-dot" style="background:#c9a227" data-color="#c9a227,#f2e2c4"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">3. اكتب اسمك على القزازة
+            <small>هيتنقش زي ما هيبان بالظبط في المعاينة</small>
+          </label>
+          <input type="text" id="nameInput" placeholder="مثال: سارة" maxlength="14">
+        </div>
+
+        <div class="field">
+          <label class="field-label">4. اختار التركيبة
+            <small>لو محتار، جرب "مش عارف تختار" تحت</small>
+          </label>
+          <div class="scent-grid" id="scentOptions">
+            <div class="scent-card active" data-scent="عود وخشب">
+              <h4>عود وخشب</h4><p>دافئ، شرقي، للسهرة</p>
+            </div>
+            <div class="scent-card" data-scent="زهور بيضاء">
+              <h4>زهور بيضاء</h4><p>ياسمين ومسك، للنهار</p>
+            </div>
+            <div class="scent-card" data-scent="حمضيات منعشة">
+              <h4>حمضيات منعشة</h4><p>ليمون وبرغموت، للصيف</p>
+            </div>
+            <div class="scent-card" data-scent="فانيليا وعنبر">
+              <h4>فانيليا وعنبر</h4><p>حلو وجذاب، للشتا</p>
+            </div>
+          </div>
+          <div class="notes-pyramid show" id="notesText">
+            نوتة علوية: عود خام &nbsp;•&nbsp; نوتة قلب: خشب صندل &nbsp;•&nbsp; نوتة قاعدية: عنبر ومسك
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">5. لون الغطاء</label>
+          <div class="option-row" id="capColorOptions">
+            <span class="color-dot active" style="background:#c9a227" data-color="#c9a227" data-label="ذهبي"></span>
+            <span class="color-dot" style="background:#b6b6bd" data-color="#b6b6bd" data-label="فضي"></span>
+            <span class="color-dot" style="background:#1b1420" data-color="#1b1420" data-label="أسود"></span>
+            <span class="color-dot" style="background:#8b3a4a" data-color="#8b3a4a" data-label="روز غولد"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">6. التغليف</label>
+          <div class="option-row" id="packagingOptions">
+            <button class="opt active" data-v="علبة هدايا فاخرة">علبة هدايا فاخرة</button>
+            <button class="opt" data-v="علبة بسيطة">علبة بسيطة</button>
+            <button class="opt" data-v="من غير علبة">من غير علبة</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label">7. رقم موبايلك
+            <small>عشان نأكدلك الطلب ونتواصل معاك</small>
+          </label>
+          <input type="text" id="phoneInput" placeholder="01xxxxxxxxx">
+        </div>
+
+        <div class="submit-bar">
+          <button id="saveOrderBtn" class="btn-primary">✓ احفظ الطلب وابعته لينا</button>
+          <button id="shareBtn" class="btn-ghost" type="button">🔗 اعمل رابط مشاركة</button>
+        </div>
+        <div id="orderStatus" style="margin-top:14px;font-size:0.9rem;"></div>
+        <div id="shareStatus" style="margin-top:8px;font-size:0.85rem;color:var(--gold);"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="quiz">
+  <div class="container">
+    <div class="quiz-box reveal" id="quizBox" style="flex-direction:column;align-items:stretch;">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div class="eyebrow">مش عارف تختار؟</div>
+        <h3>خليني أرشحلك تركيبة تناسبك</h3>
+        <p style="margin:0 auto;">جاوب 3 أسئلة بسيطة، وهنختارلك التركيبة المناسبة تلقائيًا في قسم التصميم.</p>
+      </div>
+      <div class="field">
+        <label class="field-label">1. إيه المناسبة؟</label>
+        <div class="option-row" id="q1">
+          <button class="opt" data-v="سهرة">سهرة</button>
+          <button class="opt" data-v="يومي">يومي / شغل</button>
+          <button class="opt" data-v="صيف">جو حر / صيف</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">2. تحب الروايح إيه أكتر؟</label>
+        <div class="option-row" id="q2">
+          <button class="opt" data-v="دافئة">دافئة وثقيلة</button>
+          <button class="opt" data-v="خفيفة">خفيفة ومنعشة</button>
+          <button class="opt" data-v="حلوة">حلوة وجذابة</button>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">3. الجو دلوقتي؟</label>
+        <div class="option-row" id="q3">
+          <button class="opt" data-v="شتا">برد / شتا</button>
+          <button class="opt" data-v="صيفي">حر / صيف</button>
+          <button class="opt" data-v="معتدل">معتدل</button>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <button id="quizSubmit" class="btn-primary">✓ اطلع التوصية بتاعتي</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;">
+    <div>
+      <div class="eyebrow">من احنا</div>
+      <h2 style="font-size:2.1rem;margin:14px 0 18px;">Monsela مش براند برفانات عادي</h2>
+      <p style="color:var(--smoke);line-height:2;">بدأنا Monsela عشان نؤمن إن العطر حاجة شخصية جدًا — مش لازم تشترى قزازة جاهزة زي ماهي. عندنا كل قزازة بتتصمم من الأول، من الشكل للون للاسم المنقوش عليها، وبنراعي إن كل تركيبة تتعمل بجودة عالية وخامات أصلية.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="perfume-card" style="padding:24px;">
+        <h3 style="font-size:1.8rem;color:var(--gold);">+500</h3>
+        <p style="margin:0;">قزازة اتصممت لعملائنا</p>
+      </div>
+      <div class="perfume-card" style="padding:24px;">
+        <h3 style="font-size:1.8rem;color:var(--gold);">12</h3>
+        <p style="margin:0;">تركيبة مختلفة متاحة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="testimonials" style="padding-top:0;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">آراء عملائنا</div>
+      <h2>ناس صممت قزازتها معانا</h2>
+      <p style="font-size:0.85rem;opacity:0.7;">* نماذج توضيحية — هتتستبدل بآراء عملاء حقيقية بعد أول دفعة طلبات</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="perfume-card" style="text-align:right;">
+        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"صممت قزازة لأمي في عيد ميلادها وحطيت اسمها عليها بالعربي — لما فتحتها بجد عيطت من الفرحة"</p>
+        <p style="color:var(--gold);font-weight:700;margin:0;">— مريم، القاهرة</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"جربت التركيبة اللي رشحوها ليا في الكويز وطلعت بجد على مزاجي، والشكل مختلف عن أي حاجة شفتها قبل كده"</p>
+        <p style="color:var(--gold);font-weight:700;margin:0;">— أحمد، الإسكندرية</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"الفكرة إني أصمم القزازة بنفسي من على الموبايل قبل ما أطلبها كانت حاجة جديدة عليا خالص"</p>
+        <p style="color:var(--gold);font-weight:700;margin:0;">— نور، الجيزة</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" style="padding-top:0;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">أسئلة شائعة</div>
+      <h2>محتاج تعرف إيه كمان؟</h2>
+    </div>
+    <div style="display:grid;gap:16px;max-width:760px;margin:0 auto;">
+      <div class="perfume-card" style="text-align:right;">
+        <h3 style="font-size:1.05rem;margin-bottom:8px;">هيوصلني التصميم امتى بعد ما أطلب؟</h3>
+        <p style="margin:0;">بعد ما تحفظ طلبك، فريقنا هيتواصل معاك على الواتساب أو رقمك خلال 24 ساعة لتأكيد الطلب وميعاد التسليم.</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <h3 style="font-size:1.05rem;margin-bottom:8px;">أقدر أغيّر التصميم بعد ما أبعته؟</h3>
+        <p style="margin:0;">أيوه، لحد ما نبدأ التصنيع الفعلي، تقدر تكلمنا على الواتساب وتعدّل أي تفصيلة.</p>
+      </div>
+      <div class="perfume-card" style="text-align:right;">
+        <h3 style="font-size:1.05rem;margin-bottom:8px;">التوصيل بيغطي مصر كلها؟</h3>
+        <p style="margin:0;">أيوه، بنوصل لكل المحافظات، وبنأكد المكان والتكلفة معاك وقت تأكيد الطلب.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="container">
+    <div class="logo">Mon<span>sela</span></div>
+    <p>صُنع بحب في مصر — كل قزازة ليها حكاية</p>
+    <p style="margin-top:14px;">تواصل معانا: <a href="#" id="footerWhatsapp" style="color:var(--gold);" target="_blank">واتساب</a> &nbsp;|&nbsp; <a href="#" style="color:var(--gold);">Instagram</a></p>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
+const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
+const WHATSAPP_NUMBER = "201000000000"; // TODO: غيّر ده لرقم واتساب البراند الحقيقي — ده المكان الوحيد اللي محتاج تغيّره
+document.getElementById('footerWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}`;
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== Load real products (added via the admin panel) into the gallery =====
+// ===== Shop: products, categories, cart, checkout =====
+let allProducts = [];
+let activeCategory = 'الكل';
+
+async function loadProducts(){
+  const grid = document.getElementById('productsGrid');
+  const { data, error } = await sb
+    .from('products')
+    .select('*')
+    .order('featured', { ascending: false })
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">حصلت مشكلة في تحميل المنتجات، حاول تحدّث الصفحة.</p>';
+    console.error(error);
+    return;
+  }
+  allProducts = data || [];
+  renderCategoryFilters();
+  renderProducts();
+}
+
+function renderCategoryFilters(){
+  const wrap = document.getElementById('categoryFilters');
+  const cats = ['الكل', ...new Set(allProducts.map(p => p.category).filter(Boolean))];
+  if (cats.length <= 1) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = cats.map(c => {
+    const count = c === 'الكل' ? allProducts.length : allProducts.filter(p => p.category === c).length;
+    return `<button class="opt ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c} (${count})</button>`;
+  }).join('');
+  wrap.querySelectorAll('[data-cat]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeCategory = btn.dataset.cat;
+      wrap.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts();
+    });
+  });
+}
+
+function renderProducts(){
+  const grid = document.getElementById('productsGrid');
+  const query = (document.getElementById('productSearch').value || '').trim().toLowerCase();
+  let list = activeCategory === 'الكل' ? allProducts : allProducts.filter(p => p.category === activeCategory);
+  if (query) {
+    list = list.filter(p =>
+      (p.name || '').toLowerCase().includes(query) ||
+      (p.notes || '').toLowerCase().includes(query) ||
+      (p.tag || '').toLowerCase().includes(query)
+    );
+  }
+
+  const sortBy = document.getElementById('productSort').value;
+  list = [...list];
+  if (sortBy === 'newest') {
+    list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  } else if (sortBy === 'price_asc') {
+    list.sort((a,b) => (a.price||0) - (b.price||0));
+  } else if (sortBy === 'price_desc') {
+    list.sort((a,b) => (b.price||0) - (a.price||0));
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات في القسم ده.</p>';
+    return;
+  }
+
+  function stockBadgeHTML(stock, id){
+    const outOfStock = (stock ?? 0) <= 0;
+    const lowStock = !outOfStock && stock <= 5;
+    return `<p id="stockBadge-${id}" style="font-size:0.78rem;margin-bottom:12px;color:${outOfStock ? 'var(--danger)' : lowStock ? '#e0a83c' : '#8fd98f'};">
+      ${outOfStock ? 'خلصت الكمية' : lowStock ? `متبقي ${stock} بس` : 'متوفر'}
+    </p>`;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const hasVariants = Array.isArray(p.variants) && p.variants.length > 0;
+    const firstVariant = hasVariants ? p.variants[0] : null;
+    const price = hasVariants ? firstVariant.price : p.price;
+    const stock = hasVariants ? firstVariant.stock : (p.stock ?? 0);
+    const outOfStock = (stock ?? 0) <= 0;
+
+    return `
+    <div class="perfume-card">
+      ${p.image_url
+        ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
+        : `<div class="glass"></div>`}
+      <h3>${p.name} ${p.featured ? '<span style="color:var(--gold);font-size:0.8rem;">⭐ مميز</span>' : ''}</h3>
+      <p>${p.notes || p.description || ''}</p>
+      ${hasVariants ? `
+        <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin:8px 0;">
+          ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+        </select>
+      ` : (p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : '')}
+      ${stockBadgeHTML(stock, p.id)}
+      ${!outOfStock ? `
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
+          <button class="opt qty-minus" data-id="${p.id}" aria-label="نقص الكمية" style="width:34px;padding:6px 0;">−</button>
+          <span id="qty-${p.id}" style="min-width:24px;text-align:center;">1</span>
+          <button class="opt qty-plus" data-id="${p.id}" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
+        </div>
+        <button class="btn-primary add-to-cart" data-id="${p.id}" style="width:100%;">أضف للسلة</button>
+      ` : `<button class="btn-ghost" disabled style="width:100%;opacity:0.5;">غير متاح حاليًا</button>`}
+    </div>`;
+  }).join('');
+
+  function currentVariantOf(productId){
+    const sel = grid.querySelector(`.variant-select[data-id="${productId}"]`);
+    const product = allProducts.find(p => p.id === productId);
+    if (sel && Array.isArray(product.variants)) return product.variants[Number(sel.value)];
+    return null;
+  }
+  function currentStockLimit(productId){
+    const product = allProducts.find(p => p.id === productId);
+    const variant = currentVariantOf(productId);
+    return variant ? variant.stock : (product.stock ?? 0);
+  }
+
+  grid.querySelectorAll('.variant-select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const id = sel.dataset.id;
+      const variant = currentVariantOf(id);
+      const badge = document.getElementById(`stockBadge-${id}`);
+      const outOfStock = (variant.stock ?? 0) <= 0;
+      const lowStock = !outOfStock && variant.stock <= 5;
+      badge.style.color = outOfStock ? 'var(--danger)' : lowStock ? '#e0a83c' : '#8fd98f';
+      badge.textContent = outOfStock ? 'خلصت الكمية' : lowStock ? `متبقي ${variant.stock} بس` : 'متوفر';
+      const qtyEl = document.getElementById(`qty-${id}`);
+      if (qtyEl) qtyEl.textContent = Math.min(Math.max(1, variant.stock), parseInt(qtyEl.textContent) || 1);
+    });
+  });
+
+  grid.querySelectorAll('.qty-minus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const el = document.getElementById(`qty-${btn.dataset.id}`);
+      el.textContent = Math.max(1, parseInt(el.textContent) - 1);
+    });
+  });
+  grid.querySelectorAll('.qty-plus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const el = document.getElementById(`qty-${btn.dataset.id}`);
+      const max = currentStockLimit(btn.dataset.id);
+      el.textContent = Math.min(max, parseInt(el.textContent) + 1);
+    });
+  });
+  grid.querySelectorAll('.add-to-cart').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const product = allProducts.find(p => p.id === btn.dataset.id);
+      const qty = parseInt(document.getElementById(`qty-${btn.dataset.id}`).textContent);
+      const variant = currentVariantOf(btn.dataset.id);
+      addToCart(product, qty, variant);
+    });
+  });
+}
+
+// ----- Cart (persisted in localStorage so it survives page reloads) -----
+let cart = [];
+try { cart = JSON.parse(localStorage.getItem('monsela_cart') || '[]'); } catch(e) { cart = []; }
+cart.forEach(i => { if (!i.cartKey) i.cartKey = i.id; });
+
+function saveCart(){
+  try { localStorage.setItem('monsela_cart', JSON.stringify(cart)); } catch(e) {}
+  renderCartUI();
+}
+
+function addToCart(product, qty, variant){
+  const cartKey = variant ? `${product.id}::${variant.label}` : product.id;
+  const displayName = variant ? `${product.name} (${variant.label})` : product.name;
+  const price = variant ? variant.price : (product.price || 0);
+  const existing = cart.find(i => i.cartKey === cartKey);
+  if (existing) { existing.qty += qty; }
+  else { cart.push({ id: product.id, cartKey, variantLabel: variant ? variant.label : null, name: displayName, price, qty }); }
+  saveCart();
+  openCart();
+}
+function removeFromCart(cartKey){
+  cart = cart.filter(i => i.cartKey !== cartKey);
+  saveCart();
+}
+function changeCartQty(cartKey, delta){
+  const item = cart.find(i => i.cartKey === cartKey);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  saveCart();
+}
+
+function renderCartUI(){
+  const itemsEl = document.getElementById('cartItems');
+  const emptyEl = document.getElementById('cartEmpty');
+  const footerEl = document.getElementById('cartFooter');
+  const countEl = document.getElementById('cartCount');
+  const totalCount = cart.reduce((s,i)=>s+i.qty,0);
+
+  countEl.textContent = totalCount;
+  countEl.style.display = totalCount > 0 ? 'flex' : 'none';
+
+  if (cart.length === 0) {
+    itemsEl.innerHTML = ''; emptyEl.style.display = 'block'; footerEl.style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none'; footerEl.style.display = 'block';
+  itemsEl.innerHTML = cart.map(i => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);">
+      <div>
+        <div style="font-weight:700;">${i.name}</div>
+        <div style="font-size:0.8rem;color:var(--smoke);">${i.price} جنيه × ${i.qty}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="opt cart-minus" data-key="${i.cartKey}" aria-label="نقص الكمية" style="width:28px;padding:4px 0;">−</button>
+        <span>${i.qty}</span>
+        <button class="opt cart-plus" data-key="${i.cartKey}" aria-label="زود الكمية" style="width:28px;padding:4px 0;">+</button>
+        <button class="cart-remove" data-key="${i.cartKey}" aria-label="احذف من السلة" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-right:6px;">✕</button>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('cartTotal').textContent = cart.reduce((s,i)=>s+i.price*i.qty,0) + ' جنيه';
+
+  itemsEl.querySelectorAll('.cart-minus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,-1)));
+  itemsEl.querySelectorAll('.cart-plus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,1)));
+  itemsEl.querySelectorAll('.cart-remove').forEach(b=>b.addEventListener('click', ()=>removeFromCart(b.dataset.key)));
+}
+
+function openCart(){
+  document.getElementById('cartOverlay').style.display = 'block';
+  document.getElementById('cartDrawer').style.display = 'block';
+}
+function closeCartUI(){
+  document.getElementById('cartOverlay').style.display = 'none';
+  document.getElementById('cartDrawer').style.display = 'none';
+}
+document.getElementById('cartFab').addEventListener('click', openCart);
+document.getElementById('closeCart').addEventListener('click', closeCartUI);
+document.getElementById('cartOverlay').addEventListener('click', closeCartUI);
+document.getElementById('cartEmptyShopBtn').addEventListener('click', closeCartUI);
+
+document.addEventListener('keydown', (e)=>{
+  if (e.key !== 'Escape') return;
+  const checkoutOverlay = document.getElementById('checkoutOverlay');
+  if (checkoutOverlay.style.display === 'flex') { checkoutOverlay.style.display = 'none'; return; }
+  if (document.getElementById('cartDrawer').style.display === 'block') { closeCartUI(); }
+});
+
+// ----- Delivery zones & coupons -----
+let deliveryZones = [];
+let appliedCoupon = null;
+
+async function loadDeliveryZones(){
+  const { data } = await sb.from('delivery_zones').select('*').eq('active', true).order('sort_order', { ascending: true });
+  deliveryZones = data || [];
+  const sel = document.getElementById('checkoutZone');
+  sel.innerHTML = '<option value="">بدون تحديد (هنأكد التوصيل معاك)</option>' +
+    deliveryZones.map(z => `<option value="${z.id}">${z.name} — ${z.fee} جنيه</option>`).join('');
+}
+loadDeliveryZones();
+
+document.getElementById('checkoutZone').addEventListener('change', updateCheckoutSummary);
+
+document.getElementById('applyCouponBtn').addEventListener('click', async ()=>{
+  const code = document.getElementById('checkoutCoupon').value.trim().toUpperCase();
+  const statusEl = document.getElementById('couponStatus');
+  if (!code) { appliedCoupon = null; statusEl.textContent=''; updateCheckoutSummary(); return; }
+
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const { data, error } = await sb.from('coupons').select('*').eq('code', code).eq('active', true).maybeSingle();
+  if (error || !data) {
+    appliedCoupon = null;
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده مش موجود أو مش شغال.';
+    updateCheckoutSummary();
+    return;
+  }
+  if (subtotal < data.min_order) {
+    appliedCoupon = null;
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = `الكود ده يشتغل بس فوق ${data.min_order} جنيه.`;
+    updateCheckoutSummary();
+    return;
+  }
+  if (data.max_uses != null && (data.used_count || 0) >= data.max_uses) {
+    appliedCoupon = null;
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده خلص عدد مرات استخدامه.';
+    updateCheckoutSummary();
+    return;
+  }
+  if (data.per_customer) {
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    if (!phone) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'الكود ده مرة واحدة للعميل — اكتب رقم موبايلك فوق الأول عشان نتأكد.';
+      updateCheckoutSummary();
+      return;
+    }
+    const { data: usedBefore } = await sb.rpc('coupon_already_used_by_phone', { p_code: code, p_phone: phone });
+    if (usedBefore) {
+      appliedCoupon = null;
+      statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده مستخدم قبل كده برقمك.';
+      updateCheckoutSummary();
+      return;
+    }
+  }
+  appliedCoupon = data;
+  statusEl.style.color = 'var(--success)'; statusEl.textContent = `✓ ${data.label || 'الكود اتفعل'}`;
+  updateCheckoutSummary();
+});
+
+function calcOrderTotals(){
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  let discount = 0;
+  if (appliedCoupon && subtotal >= appliedCoupon.min_order) {
+    discount = appliedCoupon.type === 'percentage' ? subtotal * (appliedCoupon.value/100) : appliedCoupon.value;
+    discount = Math.min(discount, subtotal);
+  }
+  const zoneId = document.getElementById('checkoutZone').value;
+  const zone = deliveryZones.find(z => z.id === zoneId);
+  const deliveryFee = zone ? zone.fee : 0;
+  const total = subtotal - discount + deliveryFee;
+  return { subtotal, discount, deliveryFee, total, zone };
+}
+
+function updateCheckoutSummary(){
+  const { subtotal, discount, deliveryFee, total } = calcOrderTotals();
+  document.getElementById('checkoutSummary').innerHTML =
+    `المنتجات: ${subtotal} جنيه` +
+    (discount > 0 ? `<br>الخصم: -${discount.toFixed(0)} جنيه` : '') +
+    (deliveryFee > 0 ? `<br>التوصيل: ${deliveryFee} جنيه` : '') +
+    `<br><b style="color:var(--cream);">الإجمالي: ${total.toFixed(0)} جنيه</b>`;
+}
+
+// ----- Checkout -----
+document.getElementById('checkoutBtn').addEventListener('click', ()=>{
+  document.getElementById('checkoutOverlay').style.display = 'flex';
+  updateCheckoutSummary();
+});
+document.getElementById('cancelCheckout').addEventListener('click', ()=>{
+  document.getElementById('checkoutOverlay').style.display = 'none';
+});
+
+document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('checkoutName').value.trim();
+  const phone = document.getElementById('checkoutPhone').value.trim();
+  const address = document.getElementById('checkoutAddress').value.trim();
+  const statusEl = document.getElementById('checkoutStatus');
+
+  // Honeypot: real customers never fill this hidden field; bots often do
+  if (document.getElementById('hpField').value.trim() !== '') {
+    return; // silently drop suspected bot submissions
+  }
+
+  if (!name || !phone) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'من فضلك اكتب الاسم ورقم الموبايل.';
+    return;
+  }
+  const egyptianPhone = /^01[0-2,5]\d{8}$/;
+  if (!egyptianPhone.test(phone)) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'رقم الموبايل لازم يبدأ بـ 01 ويكون 11 رقم (مثال: 01012345678).';
+    return;
+  }
+
+  // Re-validate the coupon is still eligible right before submitting (cart may have changed since it was applied)
+  if (appliedCoupon) {
+    const currentSubtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    if (currentSubtotal < appliedCoupon.min_order || (appliedCoupon.max_uses != null && (appliedCoupon.used_count||0) >= appliedCoupon.max_uses)) {
+      appliedCoupon = null;
+      document.getElementById('couponStatus').textContent = '';
+      updateCheckoutSummary();
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'كود الخصم بقى مش صالح بعد تغيير السلة، شيلناه من الطلب. راجع الإجمالي وأكّد تاني.';
+      return;
+    }
+  }
+
+  const { subtotal, discount, deliveryFee, total, zone } = calcOrderTotals();
+  const btn = document.getElementById('confirmOrderBtn');
+  btn.disabled = true;
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري تأكيد الطلب...';
+
+  const { error } = await sb.from('store_orders').insert({
+    customer_name: name,
+    customer_phone: phone,
+    customer_address: address || null,
+    items: cart,
+    total,
+    coupon_code: appliedCoupon ? appliedCoupon.code : null,
+    discount,
+    delivery_zone: zone ? zone.name : null,
+    delivery_fee: deliveryFee
+  });
+
+  btn.disabled = false;
+  if (error) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'حصلت مشكلة، حاول تاني.';
+    console.error(error);
+    return;
+  }
+
+  const itemsList = cart.map(i => `- ${i.name} × ${i.qty} (${i.price * i.qty} جنيه)`).join('%0a');
+  const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${itemsList}%0aالمنتجات: ${subtotal} جنيه` +
+    (discount > 0 ? `%0aالخصم: -${discount.toFixed(0)} جنيه (${appliedCoupon.code})` : '') +
+    (deliveryFee > 0 ? `%0aالتوصيل: ${deliveryFee} جنيه (${zone.name})` : '') +
+    `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+
+  cart = [];
+  appliedCoupon = null;
+  document.getElementById('checkoutCoupon').value = '';
+  document.getElementById('couponStatus').textContent = '';
+  saveCart();
+  document.getElementById('checkoutOverlay').style.display = 'none';
+  closeCartUI();
+  statusEl.textContent = '';
+  document.getElementById('checkoutName').value = '';
+  document.getElementById('checkoutPhone').value = '';
+  document.getElementById('checkoutAddress').value = '';
+  alert('تم تأكيد طلبك! هنتواصل معاك قريب.');
+});
+
+renderCartUI();
+loadProducts();
+sb.rpc('increment_page_view').then(()=>{}).catch(()=>{});
+
+let searchDebounceTimer;
+document.getElementById('productSearch').addEventListener('input', ()=>{
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(renderProducts, 250);
+});
+document.getElementById('productSort').addEventListener('change', renderProducts);
+
+const previewCaption = document.getElementById('previewCaption');
+const summaryBox = document.getElementById('summaryBox');
+const nameInput = document.getElementById('nameInput');
+const phoneInput = document.getElementById('phoneInput');
+const saveOrderBtn = document.getElementById('saveOrderBtn');
+const shareBtn = document.getElementById('shareBtn');
+const shareStatus = document.getElementById('shareStatus');
+const sharedBanner = document.getElementById('sharedBanner');
+const orderStatus = document.getElementById('orderStatus');
+const notesText = document.getElementById('notesText');
+
+// ===== Mobile menu toggle =====
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+menuToggle.addEventListener('click', ()=>{
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click', ()=> navLinks.classList.remove('open'));
+});
+
+// ===== Nav shadow on scroll =====
+const navEl = document.querySelector('nav');
+window.addEventListener('scroll', ()=>{
+  navEl.classList.toggle('scrolled', window.scrollY > 12);
+}, { passive: true });
+
+// ===== Scroll-reveal for section containers =====
+if ('IntersectionObserver' in window) {
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+}
+
+const scentNotes = {
+  "عود وخشب": "نوتة علوية: عود خام • نوتة قلب: خشب صندل • نوتة قاعدية: عنبر ومسك",
+  "زهور بيضاء": "نوتة علوية: ياسمين • نوتة قلب: زهر البرتقال • نوتة قاعدية: مسك أبيض",
+  "حمضيات منعشة": "نوتة علوية: ليمون وبرغموت • نوتة قلب: نعناع • نوتة قاعدية: خشب أبيض",
+  "فانيليا وعنبر": "نوتة علوية: قرفة • نوتة قلب: فانيليا • نوتة قاعدية: عنبر دافئ"
+};
+
+let state = { shape: 'classic', shapeLabel:'كلاسيك', colorTop:'#e0b083', colorBottom:'#c08552', colorLabel:'عنبري', name:'', scent:'عود وخشب', capColor:'#c9a227', capColorLabel:'ذهبي', packaging:'علبة هدايا فاخرة' };
+window.state = state; // exposed for the 3D bottle viewer module
+
+function updateSummary(){
+  summaryBox.innerHTML = `<b>الشكل:</b> ${state.shapeLabel} &nbsp; | &nbsp; <b>اللون:</b> ${state.colorLabel} &nbsp; | &nbsp; <b>الغطاء:</b> ${state.capColorLabel} &nbsp; | &nbsp; <b>التركيبة:</b> ${state.scent} &nbsp; | &nbsp; <b>التغليف:</b> ${state.packaging}`;
+}
+
+saveOrderBtn.addEventListener('click', async ()=>{
+  const phone = phoneInput.value.trim();
+  if(!phone){
+    orderStatus.style.color = '#d98787';
+    orderStatus.textContent = 'من فضلك اكتب رقم موبايلك الأول عشان نقدر نأكدلك الطلب.';
+    return;
+  }
+  saveOrderBtn.disabled = true;
+  saveOrderBtn.textContent = 'جاري الحفظ...';
+  orderStatus.style.color = '#c9a227';
+  orderStatus.textContent = '';
+
+  const { error } = await sb.from('orders').insert({
+    bottle_shape: state.shape,
+    bottle_shape_label: state.shapeLabel,
+    glass_color_hex: state.colorBottom,
+    glass_color_label: state.colorLabel,
+    engraved_name: state.name || null,
+    scent: state.scent,
+    cap_color_hex: state.capColor,
+    cap_color_label: state.capColorLabel,
+    packaging: state.packaging,
+    customer_phone: phone
+  });
+
+  saveOrderBtn.disabled = false;
+  saveOrderBtn.textContent = '✓ احفظ الطلب وابعته لينا';
+
+  if(error){
+    orderStatus.style.color = '#d98787';
+    orderStatus.textContent = 'حصلت مشكلة في حفظ الطلب، حاول تاني كمان شوية.';
+    console.error(error);
+    return;
+  }
+
+  orderStatus.style.color = '#8fd98f';
+  orderStatus.textContent = '✓ الطلب اتحفظ! هنتواصل معاك على رقمك في أقرب وقت.';
+
+  const msg = `مرحبا Monsela! عايز اطلب قزازة بالتصميم ده:%0aالشكل: ${state.shapeLabel}%0aاللون: ${state.colorLabel}%0aالغطاء: ${state.capColorLabel}%0aالاسم المنقوش: ${state.name || 'بدون اسم'}%0aالتركيبة: ${state.scent}%0aالتغليف: ${state.packaging}%0aرقمي: ${phone}`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+});
+
+document.querySelectorAll('#shapeOptions .opt').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.shape = btn.dataset.shape;
+    state.shapeLabel = btn.textContent;
+    window.MonselaBottle?.setShape(state.shape);
+    updateSummary();
+  });
+});
+
+document.querySelectorAll('#colorOptions .color-dot').forEach(dot=>{
+  dot.addEventListener('click', ()=>{
+    document.querySelectorAll('#colorOptions .color-dot').forEach(d=>d.classList.remove('active'));
+    dot.classList.add('active');
+    const [bottom, top] = dot.dataset.color.split(',');
+    state.colorTop = top; state.colorBottom = bottom;
+    window.MonselaBottle?.setColor(bottom);
+    state.colorLabel = dot.style.background;
+    updateSummary();
+  });
+});
+
+document.querySelectorAll('#capColorOptions .color-dot').forEach(dot=>{
+  dot.addEventListener('click', ()=>{
+    document.querySelectorAll('#capColorOptions .color-dot').forEach(d=>d.classList.remove('active'));
+    dot.classList.add('active');
+    state.capColor = dot.dataset.color;
+    state.capColorLabel = dot.dataset.label;
+    window.MonselaBottle?.setCapColor(state.capColor);
+    updateSummary();
+  });
+});
+
+document.querySelectorAll('#packagingOptions .opt').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#packagingOptions .opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.packaging = btn.dataset.v;
+    updateSummary();
+  });
+});
+
+nameInput.addEventListener('input', ()=>{
+  state.name = nameInput.value.trim();
+  window.MonselaBottle?.setName(state.name);
+  previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
+  updateSummary();
+});
+
+document.querySelectorAll('.scent-card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    document.querySelectorAll('.scent-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    state.scent = card.dataset.scent;
+    notesText.textContent = scentNotes[state.scent];
+    updateSummary();
+  });
+});
+
+// ===== Quiz logic =====
+let quizAnswers = { q1:null, q2:null, q3:null };
+['q1','q2','q3'].forEach(qid=>{
+  document.querySelectorAll(`#${qid} .opt`).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll(`#${qid} .opt`).forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      quizAnswers[qid] = btn.dataset.v;
+    });
+  });
+});
+
+document.getElementById('quizSubmit').addEventListener('click', ()=>{
+  if(!quizAnswers.q1 || !quizAnswers.q2 || !quizAnswers.q3){
+    alert('جاوب على الأسئلة التلاتة الأول عشان نقدر نرشحلك صح 🙂');
+    return;
+  }
+  let recommended = 'عود وخشب';
+  if(quizAnswers.q1 === 'سهرة' || quizAnswers.q2 === 'دافئة'){
+    recommended = quizAnswers.q3 === 'شتا' ? 'فانيليا وعنبر' : 'عود وخشب';
+  } else if(quizAnswers.q1 === 'صيف' || quizAnswers.q3 === 'صيفي' || quizAnswers.q2 === 'خفيفة'){
+    recommended = 'حمضيات منعشة';
+  } else if(quizAnswers.q2 === 'حلوة'){
+    recommended = 'فانيليا وعنبر';
+  } else {
+    recommended = 'زهور بيضاء';
+  }
+
+  document.querySelectorAll('.scent-card').forEach(c=>{
+    c.classList.toggle('active', c.dataset.scent === recommended);
+  });
+  state.scent = recommended;
+  notesText.textContent = scentNotes[recommended];
+  updateSummary();
+
+  document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+updateSummary();
+
+// ===== Shareable design link =====
+shareBtn.addEventListener('click', async ()=>{
+  shareBtn.disabled = true;
+  const originalText = shareBtn.textContent;
+  shareBtn.textContent = 'جاري إنشاء الرابط...';
+  const { data, error } = await sb.from('designs').insert({
+    bottle_shape: state.shape,
+    bottle_shape_label: state.shapeLabel,
+    glass_color_hex: state.colorBottom,
+    glass_color_label: state.colorLabel,
+    engraved_name: state.name || null,
+    scent: state.scent,
+    cap_color_hex: state.capColor,
+    cap_color_label: state.capColorLabel,
+    packaging: state.packaging
+  }).select().single();
+
+  shareBtn.disabled = false;
+  shareBtn.textContent = originalText;
+
+  if(error || !data){
+    shareStatus.style.color = '#d98787';
+    shareStatus.textContent = 'حصلت مشكلة في إنشاء الرابط، حاول تاني.';
+    console.error(error);
+    return;
+  }
+  const shareUrl = `${window.location.origin}${window.location.pathname}?design=${data.id}`;
+  try{
+    await navigator.clipboard.writeText(shareUrl);
+    shareStatus.style.color = '#8fd98f';
+    shareStatus.textContent = `✓ اتنسخ الرابط! ${shareUrl}`;
+  }catch(e){
+    shareStatus.style.color = '#c9a227';
+    shareStatus.textContent = shareUrl;
+  }
+});
+
+// ===== Load a shared design from URL (?design=ID) =====
+(async function loadSharedDesign(){
+  const params = new URLSearchParams(window.location.search);
+  const designId = params.get('design');
+  if(!designId) return;
+
+  const { data, error } = await sb.from('designs').select('*').eq('id', designId).single();
+  if(error || !data) return;
+
+  state.shape = data.bottle_shape;
+  state.shapeLabel = data.bottle_shape_label;
+  state.colorBottom = data.glass_color_hex;
+  state.colorLabel = data.glass_color_label;
+  state.name = data.engraved_name || '';
+  state.scent = data.scent;
+  state.capColor = data.cap_color_hex || state.capColor;
+  state.capColorLabel = data.cap_color_label || state.capColorLabel;
+  state.packaging = data.packaging || state.packaging;
+
+  window.MonselaBottle?.setShape(state.shape);
+  window.MonselaBottle?.setColor(state.colorBottom);
+  window.MonselaBottle?.setName(state.name);
+  window.MonselaBottle?.setCapColor(state.capColor);
+  nameInput.value = state.name;
+  previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
+  notesText.textContent = scentNotes[state.scent] || '';
+
+  document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.shape === state.shape));
+  document.querySelectorAll('.scent-card').forEach(c=>c.classList.toggle('active', c.dataset.scent === state.scent));
+  document.querySelectorAll('#capColorOptions .color-dot').forEach(d=>d.classList.toggle('active', d.dataset.color === state.capColor));
+  document.querySelectorAll('#packagingOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.v === state.packaging));
+
+  sharedBanner.style.display = 'block';
+  sharedBanner.textContent = `👀 ده تصميم اتبعتلك من صاحبك — عدّل فيه زي ما تحب أو اطلبه زي ما هو`;
+  updateSummary();
+  document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
+})();
+</script>
+
+<script type="module">
+// ===== Monsela 3D Bottle Viewer (Three.js) =====
+// Lazy-loaded only when the customizer section is actually about to be seen —
+// either the user scrolls to it, or a shared design link (?design=) needs it immediately.
+function startBottleViewer() {
+  import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').then((THREE) => {
+    const wrap = document.getElementById('rotateWrap');
+    const loadingLabel = document.getElementById('bottleLoading');
+    if (!wrap) return;
+
+    const PROFILES = {
+      classic: [[0,0],[0.38,0],[0.40,0.08],[0.37,0.50],[0.30,0.58],[0.35,0.66],[0.40,0.80],[0.40,0.95],[0.20,1.08],[0.16,1.25],[0.16,1.40],[0,1.40]],
+      tall:    [[0,0],[0.27,0],[0.29,0.06],[0.29,1.15],[0.25,1.26],[0.13,1.38],[0.13,1.52],[0,1.52]],
+      round:   [[0,0],[0.44,0],[0.50,0.14],[0.52,0.42],[0.47,0.72],[0.34,0.92],[0.29,1.02],[0.16,1.12],[0.16,1.28],[0,1.28]]
+    };
+
+    function lathePoints(key){
+      return PROFILES[key].map(([x,y]) => new THREE.Vector2(x,y));
+    }
+    function topHeight(key){
+      const pts = PROFILES[key];
+      return pts[pts.length - 1][1];
+    }
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, wrap.clientWidth / wrap.clientHeight, 0.1, 100);
+    camera.position.set(0, 0, 3.6);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+    wrap.appendChild(renderer.domElement);
+    renderer.domElement.style.touchAction = 'none';
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x1b1420, 0.7));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+    keyLight.position.set(2, 3, 4);
+    scene.add(keyLight);
+    const goldRim = new THREE.DirectionalLight(0xc9a227, 0.5);
+    goldRim.position.set(-3, 1, -2);
+    scene.add(goldRim);
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const startColor = (window.state && window.state.colorBottom) || '#c08552';
+    const bottleMaterial = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(startColor),
+      transparent: true,
+      opacity: 0.86,
+      roughness: 0.12,
+      metalness: 0.0,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.2,
+      side: THREE.DoubleSide
+    });
+    const bottleMesh = new THREE.Mesh(new THREE.LatheGeometry(lathePoints('classic'), 48), bottleMaterial);
+    group.add(bottleMesh);
+
+    const capMaterial = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.6, roughness: 0.3 });
+    const capMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.22, 32), capMaterial);
+    group.add(capMesh);
+
+    const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x8b3a4a, metalness: 0.2, roughness: 0.5 });
+    const ringMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.06, 32), ringMaterial);
+    group.add(ringMesh);
+
+    // Engraved name, rendered as a canvas texture on a plane facing the camera
+    const nameCanvas = document.createElement('canvas');
+    nameCanvas.width = 256; nameCanvas.height = 128;
+    const nameCtx = nameCanvas.getContext('2d');
+    const nameTexture = new THREE.CanvasTexture(nameCanvas);
+    const namePlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.7, 0.35),
+      new THREE.MeshBasicMaterial({ map: nameTexture, transparent: true })
+    );
+    group.add(namePlane);
+
+    function drawName(text){
+      nameCtx.clearRect(0, 0, nameCanvas.width, nameCanvas.height);
+      if (text) {
+        nameCtx.fillStyle = '#1b1420';
+        nameCtx.textAlign = 'center';
+        nameCtx.textBaseline = 'middle';
+        nameCtx.font = '48px "Aref Ruqaa", serif';
+        nameCtx.fillText(text, nameCanvas.width / 2, nameCanvas.height / 2);
+      }
+      nameTexture.needsUpdate = true;
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => drawName((window.state && window.state.name) || ''));
+    }
+
+    function layoutForShape(key){
+      const h = topHeight(key);
+      capMesh.position.y = h + 0.11;
+      ringMesh.position.y = h - 0.02;
+      namePlane.position.set(0, h * 0.5, 0.42);
+      group.position.y = -h / 2;
+    }
+
+    function setShape(key){
+      if (!PROFILES[key]) return;
+      bottleMesh.geometry.dispose();
+      bottleMesh.geometry = new THREE.LatheGeometry(lathePoints(key), 48);
+      layoutForShape(key);
+    }
+    function setColor(hex){
+      bottleMaterial.color.set(hex);
+    }
+    function setCapColor(hex){
+      capMaterial.color.set(hex);
+    }
+    function setName(text){
+      drawName(text);
+    }
+
+    layoutForShape((window.state && window.state.shape) || 'classic');
+    drawName((window.state && window.state.name) || '');
+    if (window.state && window.state.capColor) capMaterial.color.set(window.state.capColor);
+
+    // Drag-to-rotate + gentle auto-rotate, using unified Pointer Events (mouse + touch)
+    let isDragging = false, lastX = 0;
+    wrap.addEventListener('pointerdown', (e) => {
+      isDragging = true; lastX = e.clientX; wrap.style.cursor = 'grabbing';
+      wrap.setPointerCapture(e.pointerId);
+    });
+    window.addEventListener('pointerup', () => { isDragging = false; wrap.style.cursor = 'grab'; });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - lastX; lastX = e.clientX;
+      group.rotation.y += dx * 0.012;
+    });
+
+    const clock = new THREE.Clock();
+    function animate(){
+      requestAnimationFrame(animate);
+      if (!isDragging) group.rotation.y += clock.getDelta() * 0.35;
+      renderer.render(scene, camera);
+    }
+
+    function onResize(){
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+
+    if (loadingLabel) loadingLabel.style.display = 'none';
+    animate();
+
+    window.MonselaBottle = { setShape, setColor, setCapColor, setName };
+  }).catch((err) => {
+    console.error('3D bottle viewer failed to load:', err);
+    if (loadingLabel) loadingLabel.textContent = 'المعاينة ثلاثية الأبعاد مش مدعومة على المتصفح أو الجهاز ده — جرب متصفح تاني أو جهاز تاني، وممكن كمان تختار الشكل واللون والاسم عادي من الفورم جنبها';
+  });
+}
+
+const hasSharedDesign = new URLSearchParams(window.location.search).has('design');
+if (hasSharedDesign) {
+  // A shared design link needs the 3D preview right away, no need to wait for scroll.
+  startBottleViewer();
+} else if ('IntersectionObserver' in window) {
+  const customizerEl = document.getElementById('customizer');
+  const bottleObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if (entry.isIntersecting) {
+        startBottleViewer();
+        bottleObserver.disconnect();
+      }
+    });
+  }, { rootMargin: '200px' });
+  if (customizerEl) bottleObserver.observe(customizerEl);
+} else {
+  window.addEventListener('load', startBottleViewer);
+}
+</script>
+
+</body>
+</html>
