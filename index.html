@@ -716,8 +716,39 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
 const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
 const WHATSAPP_NUMBER = "201068828900"; // رقم الواتساب الحقيقي
+function openWhatsAppMessage(message){
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
+}
 document.getElementById('footerWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== Global error safety net =====
+// If something breaks unexpectedly, tell the visitor gently instead of failing silently.
+function showErrorToast(){
+  if (document.getElementById('globalErrorToast')) return;
+  const toast = document.createElement('div');
+  toast.id = 'globalErrorToast';
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink-2);border:1px solid var(--danger);color:var(--cream);padding:12px 20px;border-radius:12px;font-size:0.85rem;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+  toast.textContent = '⚠️ حصلت مشكلة بسيطة في الصفحة. لو حاجة مش شغالة، جرب تحدّث الصفحة.';
+  document.body.appendChild(toast);
+  setTimeout(()=> toast.remove(), 6000);
+}
+window.addEventListener('error', (e)=>{ console.error('Unhandled error:', e.error || e.message); showErrorToast(); });
+window.addEventListener('unhandledrejection', (e)=>{ console.error('Unhandled promise rejection:', e.reason); showErrorToast(); });
+
+// ===== Lightweight anti-spam helpers =====
+const pageLoadTime = Date.now();
+function tooFastToBeHuman(minMs = 2500){
+  return (Date.now() - pageLoadTime) < minMs;
+}
+function canSubmitAgain(key, cooldownMs = 15000){
+  try {
+    const last = Number(localStorage.getItem(`monsela_throttle_${key}`) || 0);
+    if (Date.now() - last < cooldownMs) return false;
+    localStorage.setItem(`monsela_throttle_${key}`, String(Date.now()));
+    return true;
+  } catch(e) { return true; }
+}
 
 // ===== Load real products (added via the admin panel) into the gallery =====
 // ===== Shop: products, categories, cart, checkout =====
@@ -746,6 +777,11 @@ async function loadProducts(){
   renderCategoryFilters();
   renderBrandFilter();
   renderProducts();
+
+  const sharedProductId = new URLSearchParams(location.search).get('product');
+  if (sharedProductId && allProducts.some(p => p.id === sharedProductId)) {
+    openProductDetail(sharedProductId);
+  }
 }
 
 function renderBrandFilter(){
@@ -952,6 +988,9 @@ function renderProducts(){
 async function openProductDetail(productId){
   const p = allProducts.find(x => x.id === productId);
   if (!p) return;
+  if (new URLSearchParams(location.search).get('product') !== productId) {
+    history.pushState({ product: productId }, '', `?product=${productId}`);
+  }
   const overlay = document.getElementById('productDetailOverlay');
   const content = document.getElementById('productDetailContent');
   const allImages = [p.image_url, ...(Array.isArray(p.gallery_images) ? p.gallery_images : [])].filter(Boolean);
@@ -1001,6 +1040,7 @@ async function openProductDetail(productId){
     const comment = document.getElementById('pdReviewComment').value.trim();
     const statusEl = document.getElementById('pdReviewStatus');
     if (!name) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب اسمك الأول.'; return; }
+    if (!canSubmitAgain('review', 20000)) { statusEl.style.color='var(--danger)'; statusEl.textContent='استنى شوية قبل ما تبعت مراجعة تانية.'; return; }
     const { error } = await sb.from('product_reviews').insert({ product_id: productId, customer_name: name, rating, comment: comment || null });
     if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة، حاول تاني.'; return; }
     statusEl.style.color='var(--success)'; statusEl.textContent='شكرًا! مراجعتك هتظهر بعد المراجعة.';
@@ -1027,6 +1067,13 @@ async function openProductDetail(productId){
 }
 document.getElementById('closeProductDetail').addEventListener('click', ()=>{
   document.getElementById('productDetailOverlay').style.display = 'none';
+  if (location.search.includes('product=')) history.pushState({}, '', location.pathname);
+});
+window.addEventListener('popstate', ()=>{
+  const params = new URLSearchParams(location.search);
+  if (!params.has('product')) {
+    document.getElementById('productDetailOverlay').style.display = 'none';
+  }
 });
 
 // ===== Homepage banners =====
@@ -1320,6 +1367,14 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   if (document.getElementById('hpField').value.trim() !== '') {
     return; // silently drop suspected bot submissions
   }
+  if (tooFastToBeHuman()) {
+    return; // suspiciously fast submission right after page load — likely a bot
+  }
+  if (!canSubmitAgain('checkout', 10000)) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'استنى شوية قبل ما تبعت طلب تاني.';
+    return;
+  }
 
   if (!name || !phone) {
     statusEl.style.color = 'var(--danger)';
@@ -1382,7 +1437,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     (discount > 0 ? `%0aالخصم: -${discount.toFixed(0)} جنيه (${appliedCoupon.code})` : '') +
     (deliveryFee > 0 ? `%0aالتوصيل: ${deliveryFee} جنيه (${zone.name})` : '') +
     `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+  openWhatsAppMessage(msg);
 
   cart = [];
   appliedCoupon = null;
@@ -1603,7 +1658,7 @@ saveOrderBtn.addEventListener('click', async ()=>{
   orderStatus.textContent = '✓ الطلب اتحفظ! هنتواصل معاك على رقمك في أقرب وقت.';
 
   const msg = `مرحبا Monsela! عايز اطلب قزازة بالتصميم ده:%0aالشكل: ${state.shapeLabel}%0aاللون: ${state.colorLabel}%0aالغطاء: ${state.capColorLabel}%0aالاسم المنقوش: ${state.name || 'بدون اسم'}%0aالتركيبة: ${state.scent}%0aالتغليف: ${state.packaging}%0aرقمي: ${phone}`;
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+  openWhatsAppMessage(msg);
 });
 
 document.querySelectorAll('#shapeOptions .opt').forEach(btn=>{
@@ -1708,6 +1763,7 @@ updateSummary();
 
 // ===== Shareable design link =====
 shareBtn.addEventListener('click', async ()=>{
+  if (!canSubmitAgain('share', 5000)) return;
   shareBtn.disabled = true;
   const originalText = shareBtn.textContent;
   shareBtn.textContent = 'جاري إنشاء الرابط...';
