@@ -86,6 +86,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
   <div id="adminScreen">
     <div class="top-bar">
       <span id="whoami" style="color:var(--smoke);font-size:0.9rem;"></span>
+      <span id="viewCounter" style="color:var(--smoke);font-size:0.85rem;"></span>
       <button class="btn btn-ghost" id="logoutBtn">تسجيل الخروج</button>
     </div>
 
@@ -95,13 +96,17 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <label>اسم البرفان</label>
       <input type="text" id="pName" placeholder="مثال: عود ملكي">
       <div class="row">
+        <div><label>القسم الرئيسي (مثال: عطور، مجوهرات، ساعات، اقلام)</label><input type="text" id="pDepartment" placeholder="عطور" value="عطور"></div>
+        <div><label>البراند (اختياري)</label><input type="text" id="pBrand" placeholder="مثال: Ibrahim Al Qurashi"></div>
+      </div>
+      <div class="row">
         <div>
           <label>السعر (جنيه)</label>
           <input type="number" id="pPrice" placeholder="450">
         </div>
         <div>
-          <label>تصنيف قصير (كارت المنتج)</label>
-          <input type="text" id="pTag" placeholder="مثال: شرقي">
+          <label>السعر قبل الخصم (اختياري — سيبها فاضية لو مفيش خصم)</label>
+          <input type="number" id="pOriginalPrice" placeholder="600">
         </div>
       </div>
       <div class="row">
@@ -114,12 +119,19 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
           <input type="text" id="pCategory" placeholder="مثال: عطور رجالي">
         </div>
       </div>
+      <div class="row">
+        <div>
+          <label>تصنيف قصير (بادج على الكارت)</label>
+          <input type="text" id="pTag" placeholder="مثال: شرقي">
+        </div>
+        <div></div>
+      </div>
       <label>النوتات / الوصف القصير (ظاهر تحت الاسم في الموقع)</label>
       <textarea id="pNotes" placeholder="مثال: عود، عنبر، خشب صندل — دافئ وثقيل"></textarea>
       <label>وصف تفصيلي (اختياري، مش ظاهر في الكارت)</label>
       <textarea id="pDescription"></textarea>
-      <label>صورة المنتج</label>
-      <input type="file" id="pImage" accept="image/*">
+      <label>صورة المنتج (أول صورة هتبقى الغلاف، والباقي معرض صور إضافي)</label>
+      <input type="file" id="pImage" accept="image/*" multiple>
       <div id="currentImagePreview" style="margin-bottom:14px;"></div>
       <label style="display:flex;align-items:center;gap:8px;">
         <input type="checkbox" id="pFeatured" style="width:auto;margin:0;"> منتج مميز (يظهر الأول)
@@ -136,11 +148,22 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
 
     <div class="card">
       <h2>منتجاتك الحالية</h2>
+      <button class="btn btn-ghost" id="exportProductsBtn" style="margin-bottom:14px;">⬇ تصدير المنتجات Excel</button>
+      <div id="lowStockAlert" style="margin-bottom:14px;"></div>
       <div id="productsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
     <div class="card">
+      <h2>إعدادات المتجر</h2>
+      <label>حد الشحن المجاني (جنيه) — 0 يعني معطّل</label>
+      <input type="number" id="freeShippingThreshold" placeholder="1500">
+      <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
+      <div class="status" id="settingsStatus"></div>
+    </div>
+
+    <div class="card">
       <h2>طلبات المتجر (السلة)</h2>
+      <button class="btn btn-ghost" id="exportOrdersBtn" style="margin-bottom:14px;">⬇ تصدير الطلبات Excel</button>
       <div id="ordersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
@@ -185,6 +208,50 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <button class="btn" id="saveZoneBtn">إضافة المنطقة</button>
       <div class="status" id="zoneFormStatus"></div>
       <div id="zonesList" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>أرقام قسم "من احنا"</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">ده بديل الأرقام الوهمية — اكتب أرقامك الحقيقية بس. سيبها فاضية لو مفيش أرقام حقيقية لسه.</p>
+      <div class="row">
+        <div><label>الرقم الأول</label><input type="text" id="stat1Value" placeholder="مثال: +50"></div>
+        <div><label>وصف الرقم الأول</label><input type="text" id="stat1Label" placeholder="عميل سعيد"></div>
+      </div>
+      <div class="row">
+        <div><label>الرقم الثاني</label><input type="text" id="stat2Value" placeholder="مثال: 5"></div>
+        <div><label>وصف الرقم الثاني</label><input type="text" id="stat2Label" placeholder="تركيبة متاحة"></div>
+      </div>
+      <button class="btn" id="saveStatsBtn">حفظ الأرقام</button>
+      <div class="status" id="statsFormStatus"></div>
+    </div>
+
+    <div class="card">
+      <h2>بانرات الصفحة الرئيسية</h2>
+      <label>رابط صورة البانر</label>
+      <input type="text" id="bImageUrl" placeholder="https://...">
+      <div class="row">
+        <div><label>عنوان (اختياري)</label><input type="text" id="bTitle" placeholder="خصومات الصيف"></div>
+        <div><label>رابط عند الضغط (اختياري)</label><input type="text" id="bLink" placeholder="#gallery"></div>
+      </div>
+      <button class="btn" id="saveBannerBtn">إضافة بانر</button>
+      <div class="status" id="bannerFormStatus"></div>
+      <div id="bannersList" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>شعارات الماركات</h2>
+      <div class="row">
+        <div><label>اسم الماركة (زي ما مكتوب بالظبط في المنتجات)</label><input type="text" id="brName" placeholder="Ibrahim Al Qurashi"></div>
+        <div><label>رابط الشعار</label><input type="text" id="brLogoUrl" placeholder="https://..."></div>
+      </div>
+      <button class="btn" id="saveBrandLogoBtn">إضافة شعار</button>
+      <div class="status" id="brandLogoFormStatus"></div>
+      <div id="brandLogosList" style="margin-top:16px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>مراجعات العملاء (تحتاج موافقتك)</h2>
+      <div id="reviewsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
   </div>
 </div>
@@ -250,6 +317,159 @@ async function showAdmin(){
   loadCoupons();
   loadZones();
   subscribeToNewOrders();
+  loadViewCounter();
+  loadShopSettings();
+  loadAboutStats();
+  loadBanners();
+  loadBrandLogos();
+  loadReviews();
+}
+
+async function loadViewCounter(){
+  const { data } = await sb.from('page_views').select('total_views').eq('id', 1).maybeSingle();
+  if (data) document.getElementById('viewCounter').textContent = `👁️ ${data.total_views} زيارة للموقع`;
+}
+
+async function loadShopSettings(){
+  const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
+  if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
+}
+document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('settingsStatus');
+  const value = Number(document.getElementById('freeShippingThreshold').value) || 0;
+  const { error } = await sb.from('shop_settings').update({ free_shipping_threshold: value }).eq('id', 1);
+  statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
+  statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
+});
+
+// ===== About stats (real trust numbers, editable) =====
+async function loadAboutStats(){
+  const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
+  if (!data) return;
+  document.getElementById('stat1Value').value = data.stat1_value || '';
+  document.getElementById('stat1Label').value = data.stat1_label || '';
+  document.getElementById('stat2Value').value = data.stat2_value || '';
+  document.getElementById('stat2Label').value = data.stat2_label || '';
+}
+document.getElementById('saveStatsBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('statsFormStatus');
+  const { error } = await sb.from('shop_settings').update({
+    stat1_value: document.getElementById('stat1Value').value.trim(),
+    stat1_label: document.getElementById('stat1Label').value.trim(),
+    stat2_value: document.getElementById('stat2Value').value.trim(),
+    stat2_label: document.getElementById('stat2Label').value.trim()
+  }).eq('id', 1);
+  statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
+  statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
+});
+
+// ===== Homepage banners =====
+document.getElementById('saveBannerBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('bannerFormStatus');
+  const imageUrl = document.getElementById('bImageUrl').value.trim();
+  if (!imageUrl) { statusEl.style.color='var(--danger)'; statusEl.textContent='لازم رابط صورة.'; return; }
+  const { error } = await sb.from('banners').insert({
+    image_url: imageUrl,
+    title: document.getElementById('bTitle').value.trim() || null,
+    link_url: document.getElementById('bLink').value.trim() || null
+  });
+  if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: ' + error.message; return; }
+  statusEl.style.color='var(--success)'; statusEl.textContent='اتضاف ✓';
+  document.getElementById('bImageUrl').value=''; document.getElementById('bTitle').value=''; document.getElementById('bLink').value='';
+  loadBanners();
+});
+async function loadBanners(){
+  const listEl = document.getElementById('bannersList');
+  const { data, error } = await sb.from('banners').select('*').order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش بانرات.</p>'; return; }
+  listEl.innerHTML = data.map(b => `
+    <div class="product-item">
+      <img src="${b.image_url}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;">
+      <div class="info"><h4>${b.title || '(بدون عنوان)'} ${b.active ? '' : '(معطّل)'}</h4></div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-toggle-banner="${b.id}" data-active="${b.active}">${b.active ? 'تعطيل' : 'تفعيل'}</button>
+        <button class="btn btn-danger" data-delete-banner="${b.id}">حذف</button>
+      </div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-toggle-banner]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('banners').update({ active: btn.dataset.active !== 'true' }).eq('id', btn.dataset.toggleBanner);
+      loadBanners();
+    });
+  });
+  listEl.querySelectorAll('[data-delete-banner]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تمسح البانر ده؟')) return;
+      await sb.from('banners').delete().eq('id', btn.dataset.deleteBanner);
+      loadBanners();
+    });
+  });
+}
+
+// ===== Brand logos =====
+document.getElementById('saveBrandLogoBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('brandLogoFormStatus');
+  const name = document.getElementById('brName').value.trim();
+  const logoUrl = document.getElementById('brLogoUrl').value.trim();
+  if (!name || !logoUrl) { statusEl.style.color='var(--danger)'; statusEl.textContent='لازم الاسم والرابط.'; return; }
+  const { error } = await sb.from('brand_logos').upsert({ brand_name: name, logo_url: logoUrl });
+  if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: ' + error.message; return; }
+  statusEl.style.color='var(--success)'; statusEl.textContent='اتضاف ✓';
+  document.getElementById('brName').value=''; document.getElementById('brLogoUrl').value='';
+  loadBrandLogos();
+});
+async function loadBrandLogos(){
+  const listEl = document.getElementById('brandLogosList');
+  const { data, error } = await sb.from('brand_logos').select('*').order('sort_order', { ascending: true });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش شعارات مضافة.</p>'; return; }
+  listEl.innerHTML = data.map(b => `
+    <div class="product-item">
+      <img src="${b.logo_url}" style="width:64px;height:64px;object-fit:contain;border-radius:10px;background:#fff;">
+      <div class="info"><h4>${b.brand_name}</h4></div>
+      <div class="actions"><button class="btn btn-danger" data-delete-brandlogo="${b.brand_name}">حذف</button></div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-delete-brandlogo]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تمسح الشعار ده؟')) return;
+      await sb.from('brand_logos').delete().eq('brand_name', btn.dataset.deleteBrandlogo);
+      loadBrandLogos();
+    });
+  });
+}
+
+// ===== Review moderation =====
+async function loadReviews(){
+  const listEl = document.getElementById('reviewsList');
+  const { data, error } = await sb.from('product_reviews').select('*, products(name)').order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش مراجعات.</p>'; return; }
+  listEl.innerHTML = data.map(r => `
+    <div class="product-item" style="align-items:flex-start;">
+      <div class="info">
+        <h4>${r.customer_name} — ${'⭐'.repeat(r.rating)} ${r.approved ? '' : '(مستنية موافقة)'}</h4>
+        <p>${r.comment || ''}</p>
+        <p style="font-size:0.75rem;">على منتج: ${r.products ? r.products.name : '(محذوف)'}</p>
+      </div>
+      <div class="actions">
+        ${!r.approved ? `<button class="btn" data-approve-review="${r.id}">موافقة</button>` : ''}
+        <button class="btn btn-danger" data-delete-review="${r.id}">حذف</button>
+      </div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-approve-review]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('product_reviews').update({ approved: true }).eq('id', btn.dataset.approveReview);
+      loadReviews();
+    });
+  });
+  listEl.querySelectorAll('[data-delete-review]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تمسح المراجعة دي؟')) return;
+      await sb.from('product_reviews').delete().eq('id', btn.dataset.deleteReview);
+      loadReviews();
+    });
+  });
 }
 
 // ===== Live notification when a new order comes in =====
@@ -307,6 +527,7 @@ sb.auth.getSession().then(({ data }) => {
 
 // ===== Product form =====
 let editingImageUrl = null;
+let editingGalleryImages = [];
 
 // ===== Product size variants (dynamic rows) =====
 function addVariantRow(label = '', price = '', stock = ''){
@@ -344,7 +565,10 @@ function resetForm(){
   document.getElementById('productId').value = '';
   document.getElementById('pName').value = '';
   document.getElementById('pPrice').value = '';
+  document.getElementById('pOriginalPrice').value = '';
   document.getElementById('pTag').value = '';
+  document.getElementById('pDepartment').value = 'عطور';
+  document.getElementById('pBrand').value = '';
   document.getElementById('pStock').value = '0';
   document.getElementById('pCategory').value = '';
   document.getElementById('pNotes').value = '';
@@ -355,6 +579,7 @@ function resetForm(){
   document.getElementById('cancelEditBtn').style.display = 'none';
   clearVariantRows();
   editingImageUrl = null;
+  editingGalleryImages = [];
 }
 
 // Resize + compress an image in the browser before uploading, so the shop stays fast
@@ -387,40 +612,52 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الحفظ...';
 
   let imageUrl = editingImageUrl;
+  let galleryUrls = editingGalleryImages || [];
   const fileInput = document.getElementById('pImage');
-  if (fileInput.files && fileInput.files[0]) {
-    const file = fileInput.files[0];
-    if (!file.type.startsWith('image/')) {
-      statusEl.style.color='var(--danger)'; statusEl.textContent='الملف ده مش صورة، اختار صورة (jpg, png, webp...).';
-      saveBtn.disabled = false;
-      return;
+  if (fileInput.files && fileInput.files.length > 0) {
+    const files = Array.from(fileInput.files);
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        statusEl.style.color='var(--danger)'; statusEl.textContent='في ملف مش صورة، اختار صور بس (jpg, png, webp...).';
+        saveBtn.disabled = false;
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        statusEl.style.color='var(--danger)'; statusEl.textContent='في صورة كبيرة جدًا (أكبر من 5 ميجا) — صغّرها وحاول تاني.';
+        saveBtn.disabled = false;
+        return;
+      }
     }
-    if (file.size > 5 * 1024 * 1024) {
-      statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة كبيرة جدًا (أكبر من 5 ميجا) — صغّرها وحاول تاني.';
-      saveBtn.disabled = false;
-      return;
+    const uploadedUrls = [];
+    for (const file of files) {
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+      const compressed = await compressImage(file);
+      const { error: uploadError } = await sb.storage.from('product-images').upload(path, compressed, { contentType: 'image/jpeg' });
+      if (uploadError) {
+        statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة في رفع صورة: ' + uploadError.message;
+        saveBtn.disabled = false;
+        return;
+      }
+      const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+      uploadedUrls.push(urlData.publicUrl);
     }
-    const path = `${Date.now()}.jpg`;
-    const compressed = await compressImage(file);
-    const { error: uploadError } = await sb.storage.from('product-images').upload(path, compressed, { contentType: 'image/jpeg' });
-    if (uploadError) {
-      statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة في رفع الصورة: ' + uploadError.message;
-      saveBtn.disabled = false;
-      return;
-    }
-    const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
-    imageUrl = urlData.publicUrl;
+    imageUrl = uploadedUrls[0];
+    galleryUrls = uploadedUrls.slice(1);
   }
 
   const payload = {
     name,
     price: document.getElementById('pPrice').value ? Number(document.getElementById('pPrice').value) : null,
+    original_price: document.getElementById('pOriginalPrice').value ? Number(document.getElementById('pOriginalPrice').value) : null,
     tag: document.getElementById('pTag').value.trim() || null,
+    department: document.getElementById('pDepartment').value.trim() || 'عطور',
+    brand: document.getElementById('pBrand').value.trim() || null,
     stock: document.getElementById('pStock').value ? Number(document.getElementById('pStock').value) : 0,
     category: document.getElementById('pCategory').value.trim() || null,
     notes: document.getElementById('pNotes').value.trim() || null,
     description: document.getElementById('pDescription').value.trim() || null,
     featured: document.getElementById('pFeatured').checked,
+    gallery_images: galleryUrls.length ? galleryUrls : null,
     variants: readVariantsFromForm(),
     image_url: imageUrl
   };
@@ -447,6 +684,21 @@ async function loadProductsList(){
   const listEl = document.getElementById('productsList');
   const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
   if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في تحميل المنتجات.</p>'; return; }
+  lastLoadedProducts = data || [];
+
+  const lowStockEl = document.getElementById('lowStockAlert');
+  const lowItems = [];
+  (data || []).forEach(p => {
+    if (Array.isArray(p.variants)) {
+      p.variants.forEach(v => { if ((v.stock ?? 0) <= 5) lowItems.push(`${p.name} (${v.label}): ${v.stock}`); });
+    } else if ((p.stock ?? 0) <= 5) {
+      lowItems.push(`${p.name}: ${p.stock}`);
+    }
+  });
+  lowStockEl.innerHTML = lowItems.length
+    ? `<div style="background:rgba(217,135,135,0.12);border:1px solid var(--danger);border-radius:10px;padding:12px 16px;font-size:0.85rem;">⚠️ مخزون قليل: ${lowItems.join('، ')}</div>`
+    : '';
+
   if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش منتجات مضافة.</p>'; return; }
 
   listEl.innerHTML = data.map(p => `
@@ -478,7 +730,10 @@ function editProduct(p){
   document.getElementById('productId').value = p.id;
   document.getElementById('pName').value = p.name || '';
   document.getElementById('pPrice').value = p.price || '';
+  document.getElementById('pOriginalPrice').value = p.original_price || '';
   document.getElementById('pTag').value = p.tag || '';
+  document.getElementById('pDepartment').value = p.department || 'عطور';
+  document.getElementById('pBrand').value = p.brand || '';
   document.getElementById('pStock').value = p.stock ?? 0;
   document.getElementById('pCategory').value = p.category || '';
   document.getElementById('pNotes').value = p.notes || '';
@@ -489,8 +744,10 @@ function editProduct(p){
     p.variants.forEach(v => addVariantRow(v.label, v.price, v.stock));
   }
   editingImageUrl = p.image_url || null;
+  editingGalleryImages = Array.isArray(p.gallery_images) ? p.gallery_images : [];
+  const galleryNote = editingGalleryImages.length ? `<br>+ ${editingGalleryImages.length} صورة إضافية في المعرض` : '';
   document.getElementById('currentImagePreview').innerHTML = p.image_url
-    ? `<img src="${p.image_url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;"><div style="font-size:0.75rem;color:var(--smoke);margin-top:4px;">الصورة الحالية — اختار صورة جديدة بس لو عايز تغيّرها</div>`
+    ? `<img src="${p.image_url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;"><div style="font-size:0.75rem;color:var(--smoke);margin-top:4px;">الصورة الحالية — اختار صور جديدة بس لو عايز تغيّرها${galleryNote}</div>`
     : '';
   document.getElementById('cancelEditBtn').style.display = 'inline-block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -505,11 +762,41 @@ async function deleteProduct(id){
 
 // ===== Incoming store orders =====
 const ORDER_STATUSES = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم', 'مرتجع'];
+let lastLoadedProducts = [];
+let lastLoadedOrders = [];
+
+function downloadCSV(rows, filename){
+  const csvContent = '\uFEFF' + rows.map(row =>
+    row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')
+  ).join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  link.click();
+}
+
+document.getElementById('exportProductsBtn').addEventListener('click', ()=>{
+  const rows = [['الاسم','السعر','المخزون','التصنيف','مميز','تاريخ الإضافة']];
+  lastLoadedProducts.forEach(p => rows.push([p.name, p.price, p.stock, p.category, p.featured ? 'نعم' : 'لا', p.created_at]));
+  downloadCSV(rows, 'monsela-products.csv');
+});
+
+document.getElementById('exportOrdersBtn').addEventListener('click', ()=>{
+  const rows = [['الاسم','الموبايل','العنوان','المنتجات','الإجمالي','الحالة','التاريخ']];
+  lastLoadedOrders.forEach(o => rows.push([
+    o.customer_name, o.customer_phone, o.customer_address,
+    (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(' | '),
+    o.total, o.status, o.created_at
+  ]));
+  downloadCSV(rows, 'monsela-orders.csv');
+});
 
 async function loadOrdersList(){
   const listEl = document.getElementById('ordersList');
   const { data, error } = await sb.from('store_orders').select('*').order('created_at', { ascending: false });
   if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في تحميل الطلبات.</p>'; return; }
+  lastLoadedOrders = data || [];
   if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات واردة.</p>'; return; }
 
   listEl.innerHTML = data.map(o => {
@@ -521,6 +808,7 @@ async function loadOrdersList(){
         <h4>${o.customer_name} — ${o.total} جنيه</h4>
         <p>${itemsText}</p>
         <p>📞 ${o.customer_phone} ${o.customer_address ? '· ' + o.customer_address : ''}</p>
+        ${o.notes ? `<p style="color:var(--gold);">📝 ${o.notes}</p>` : ''}
         <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
       </div>
       <div class="actions">
