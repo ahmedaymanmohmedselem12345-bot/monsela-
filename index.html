@@ -299,6 +299,9 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   🛒<span id="cartCount" style="position:absolute;top:-4px;left:-4px;background:var(--rose);color:var(--cream);border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:none;align-items:center;justify-content:center;">0</span>
 </button>
 
+<!-- Back to top -->
+<button id="backToTop" aria-label="ارجع لفوق" style="display:none;position:fixed;bottom:24px;right:24px;z-index:60;width:46px;height:46px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;font-size:1.1rem;">↑</button>
+
 <!-- Cart drawer -->
 <div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:70;"></div>
 <div id="cartDrawer" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(0,0,0,0.5);padding:26px;overflow-y:auto;">
@@ -361,7 +364,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <a href="#customizer" class="btn-ghost">صمم قزازتك</a>
     </div>
   </div>
-  <div class="hero-visual">
+  <div class="hero-visual" aria-hidden="true">
     <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg">
       <rect x="90" y="10" width="40" height="26" rx="4" fill="#c9a227"/>
       <rect x="95" y="0" width="30" height="14" rx="3" fill="#8b3a4a"/>
@@ -398,6 +401,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <div class="gallery-grid reveal" id="productsGrid">
       <p style="grid-column:1/-1;text-align:center;color:var(--smoke);">جاري تحميل المنتجات…</p>
     </div>
+    <div id="loadMoreWrap" style="text-align:center;margin-top:24px;"></div>
   </div>
 </section>
 
@@ -635,6 +639,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ===== Shop: products, categories, cart, checkout =====
 let allProducts = [];
 let activeCategory = 'الكل';
+let visibleCount = 12;
 
 async function loadProducts(){
   const grid = document.getElementById('productsGrid');
@@ -666,6 +671,7 @@ function renderCategoryFilters(){
   wrap.querySelectorAll('[data-cat]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       activeCategory = btn.dataset.cat;
+      visibleCount = 12;
       wrap.querySelectorAll('[data-cat]').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       renderProducts();
@@ -697,8 +703,12 @@ function renderProducts(){
 
   if (list.length === 0) {
     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات في القسم ده.</p>';
+    document.getElementById('loadMoreWrap').innerHTML = '';
     return;
   }
+
+  const fullList = list;
+  list = list.slice(0, visibleCount);
 
   function stockBadgeHTML(stock, id){
     const outOfStock = (stock ?? 0) <= 0;
@@ -720,7 +730,7 @@ function renderProducts(){
       ${p.image_url
         ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
         : `<div class="glass"></div>`}
-      <h3>${p.name}</h3>
+      <h3>${p.name} ${p.featured ? '<span style="color:var(--gold);font-size:0.8rem;">⭐ مميز</span>' : ''}</h3>
       <p>${p.notes || p.description || ''}</p>
       ${hasVariants ? `
         <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin:8px 0;">
@@ -786,6 +796,17 @@ function renderProducts(){
       addToCart(product, qty, variant);
     });
   });
+
+  const loadMoreWrap = document.getElementById('loadMoreWrap');
+  if (fullList.length > visibleCount) {
+    loadMoreWrap.innerHTML = `<button id="loadMoreBtn" class="btn-ghost">تحميل المزيد (${fullList.length - visibleCount} كمان)</button>`;
+    document.getElementById('loadMoreBtn').addEventListener('click', ()=>{
+      visibleCount += 12;
+      renderProducts();
+    });
+  } else {
+    loadMoreWrap.innerHTML = '';
+  }
 }
 
 // ----- Cart (persisted in localStorage so it survives page reloads) -----
@@ -1053,13 +1074,14 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
 
 renderCartUI();
 loadProducts();
+sb.rpc('increment_page_view').then(()=>{}).catch(()=>{});
 
 let searchDebounceTimer;
 document.getElementById('productSearch').addEventListener('input', ()=>{
   clearTimeout(searchDebounceTimer);
-  searchDebounceTimer = setTimeout(renderProducts, 250);
+  searchDebounceTimer = setTimeout(()=>{ visibleCount = 12; renderProducts(); }, 250);
 });
-document.getElementById('productSort').addEventListener('change', renderProducts);
+document.getElementById('productSort').addEventListener('change', ()=>{ visibleCount = 12; renderProducts(); });
 
 const previewCaption = document.getElementById('previewCaption');
 const summaryBox = document.getElementById('summaryBox');
@@ -1084,9 +1106,12 @@ navLinks.querySelectorAll('a').forEach(a=>{
 
 // ===== Nav shadow on scroll =====
 const navEl = document.querySelector('nav');
+const backToTopBtn = document.getElementById('backToTop');
 window.addEventListener('scroll', ()=>{
   navEl.classList.toggle('scrolled', window.scrollY > 12);
+  backToTopBtn.style.display = window.scrollY > 600 ? 'block' : 'none';
 }, { passive: true });
+backToTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 // ===== Scroll-reveal for section containers =====
 if ('IntersectionObserver' in window) {
