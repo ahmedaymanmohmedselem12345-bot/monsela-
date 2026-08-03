@@ -1,0 +1,11 @@
+{
+  "name": "Monsela | برفانات أصلية",
+  "short_name": "Monsela",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1b1420",
+  "theme_color": "#1b1420",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": []
+}

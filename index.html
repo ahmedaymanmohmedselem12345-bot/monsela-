@@ -12,6 +12,13 @@
 <meta name="twitter:title" content="Monsela | برفانات أصلية">
 <meta name="twitter:description" content="تسوق برفانات أصلية، وصمم قزازتك الخاصة كميزة إضافية.">
 <meta name="theme-color" content="#1b1420">
+<!-- Content-Security-Policy: restricts which domains can load scripts/styles/images/API calls.
+     Note: 'unsafe-inline' for scripts is required because this site is intentionally a single
+     HTML file (all JS is inline) rather than external .js files — a deliberate trade-off for
+     easier maintenance by a non-developer owner. This still blocks loading malicious external
+     scripts, framing attacks, and unexpected data exfiltration destinations. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://oujdveezelfokelyptza.supabase.co https://api.qrserver.com; frame-ancestors 'self'; base-uri 'self';">
+<link rel="manifest" href="manifest.json">
 <link rel="canonical" href="https://monsela-selim-s-projects2.vercel.app/">
 <script type="application/ld+json">
 {
@@ -534,6 +541,16 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </section>
 
+<section class="section" id="newArrivals" style="display:none;padding-top:0;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">وصل حديثًا</div>
+      <h2>أحدث إضافاتنا</h2>
+    </div>
+    <div class="gallery-grid reveal" id="newArrivalsGrid"></div>
+  </div>
+</section>
+
 <section class="section" id="recentlyViewed" style="display:none;padding-top:0;">
   <div class="container">
     <div class="section-head reveal">
@@ -1043,7 +1060,12 @@ function renderProducts(){
           <button class="opt qty-plus" data-id="${p.id}" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
         </div>
         <button class="btn-primary add-to-cart" data-id="${p.id}" style="width:100%;margin-bottom:8px;">أضف للسلة</button>
-      ` : `<button class="btn-ghost" disabled style="width:100%;opacity:0.5;margin-bottom:8px;">غير متاح حاليًا</button>`}
+      ` : `
+        <div style="margin-bottom:8px;">
+          <input type="email" class="notify-email" data-id="${p.id}" placeholder="إيميلك للإشعار" style="width:100%;margin-bottom:6px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:8px 10px;border-radius:8px;font-size:0.8rem;">
+          <button class="btn-ghost notify-btn" data-id="${p.id}" style="width:100%;font-size:0.85rem;">أبلغني لما يتوفر</button>
+        </div>
+      `}
       <div style="display:flex;gap:8px;">
         <button class="btn-ghost view-details" data-id="${p.id}" style="flex:1;">عرض التفاصيل</button>
         <button class="wishlist-toggle" data-id="${p.id}" aria-label="أضف للمفضلة" style="width:44px;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;font-size:1.1rem;">${wishlist.includes(p.id) ? '❤️' : '🤍'}</button>
@@ -1051,6 +1073,19 @@ function renderProducts(){
       </div>
     </div>`;
   }).join('');
+
+  grid.querySelectorAll('.notify-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const emailInput = grid.querySelector(`.notify-email[data-id="${btn.dataset.id}"]`);
+      const email = emailInput.value.trim();
+      if (!email || !email.includes('@')) { alert('اكتب إيميل صحيح.'); return; }
+      const { error } = await sb.from('stock_notifications').insert({ product_id: btn.dataset.id, email });
+      if (error) { alert('حصلت مشكلة، حاول تاني.'); return; }
+      btn.textContent = '✓ هنبلغك أول ما يتوفر';
+      btn.disabled = true;
+      emailInput.style.display = 'none';
+    });
+  });
 
   grid.querySelectorAll('.wishlist-toggle').forEach(btn=>{
     btn.addEventListener('click', ()=> toggleWishlist(btn.dataset.id));
@@ -1173,6 +1208,10 @@ async function openProductDetail(productId){
     </div>
     <div id="pdReviewsSummary" style="margin-bottom:16px;"></div>
     <div id="pdReviewsList" style="margin-bottom:20px;"></div>
+    <div id="pdRelatedWrap" style="display:none;margin-bottom:20px;">
+      <h4 style="margin-bottom:10px;color:var(--gold);">منتجات مشابهة</h4>
+      <div id="pdRelatedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+    </div>
     <details style="margin-bottom:10px;">
       <summary style="cursor:pointer;color:var(--gold);">اكتب مراجعة</summary>
       <div style="margin-top:12px;">
@@ -1232,6 +1271,26 @@ async function openProductDetail(productId){
         <p style="color:var(--smoke);margin-top:4px;">${escapeHTML(r.comment || '')}</p>
       </div>
     `).join('');
+  }
+
+  // Related products (same department, excluding this one)
+  if (p.department) {
+    const { data: related } = await sb.from('products').select('*').eq('department', p.department).neq('id', productId).limit(4);
+    const relatedWrap = document.getElementById('pdRelatedWrap');
+    if (related && related.length > 0) {
+      relatedWrap.style.display = 'block';
+      document.getElementById('pdRelatedGrid').innerHTML = related.map(rp => `
+        <div style="text-align:center;cursor:pointer;" class="pd-related-item" data-id="${rp.id}">
+          ${rp.image_url ? `<img src="${rp.image_url}" alt="${rp.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;margin-bottom:6px;">` : ''}
+          <p style="font-size:0.78rem;">${rp.name}</p>
+        </div>
+      `).join('');
+      document.querySelectorAll('.pd-related-item').forEach(el=>{
+        el.addEventListener('click', ()=> openProductDetail(el.dataset.id));
+      });
+    } else {
+      relatedWrap.style.display = 'none';
+    }
   }
 
   overlay.style.display = 'flex';
@@ -1332,8 +1391,28 @@ async function loadAboutStatsDisplay(){
   }
 }
 
+// ===== New arrivals =====
+async function loadNewArrivals(){
+  const { data } = await sb.from('products').select('*').order('created_at', { ascending: false }).limit(8);
+  const section = document.getElementById('newArrivals');
+  if (!data || data.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  document.getElementById('newArrivalsGrid').innerHTML = data.map(p => `
+    <div class="perfume-card">
+      ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
+      <h3>${p.name}</h3>
+      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
+      <button class="btn-ghost view-details-new" data-id="${p.id}" style="width:100%;">عرض التفاصيل</button>
+    </div>
+  `).join('');
+  document.querySelectorAll('.view-details-new').forEach(btn=>{
+    btn.addEventListener('click', ()=> openProductDetail(btn.dataset.id));
+  });
+}
+
 loadBanners();
 loadBestSellers();
+loadNewArrivals();
 loadBrandLogosStrip();
 loadAboutStatsDisplay();
 
