@@ -279,6 +279,14 @@ const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
 const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Escape any user-controlled text before putting it into innerHTML, so a customer
+// can never inject working HTML/JS via their name, comment, notes, etc.
+function escapeHTML(str){
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
 const authScreen = document.getElementById('authScreen');
 const adminScreen = document.getElementById('adminScreen');
 const tabLogin = document.getElementById('tabLogin');
@@ -520,9 +528,9 @@ async function loadReviews(){
   listEl.innerHTML = data.map(r => `
     <div class="product-item" style="align-items:flex-start;">
       <div class="info">
-        <h4>${r.customer_name} — ${'⭐'.repeat(r.rating)} ${r.approved ? '' : '(مستنية موافقة)'}</h4>
-        <p>${r.comment || ''}</p>
-        <p style="font-size:0.75rem;">على منتج: ${r.products ? r.products.name : '(محذوف)'}</p>
+        <h4>${escapeHTML(r.customer_name)} — ${'⭐'.repeat(r.rating)} ${r.approved ? '' : '(مستنية موافقة)'}</h4>
+        <p>${escapeHTML(r.comment || '')}</p>
+        <p style="font-size:0.75rem;">على منتج: ${escapeHTML(r.products ? r.products.name : '(محذوف)')}</p>
       </div>
       <div class="actions">
         ${!r.approved ? `<button class="btn" data-approve-review="${r.id}">موافقة</button>` : ''}
@@ -873,16 +881,16 @@ async function loadOrdersList(){
   if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات واردة.</p>'; return; }
 
   listEl.innerHTML = data.map(o => {
-    const itemsText = (o.items || []).map(i => `${i.name} × ${i.qty}`).join('، ');
+    const itemsText = (o.items || []).map(i => `${escapeHTML(i.name)} × ${i.qty}`).join('، ');
     const statusOptions = ORDER_STATUSES.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('');
     return `
     <div class="product-item" style="align-items:flex-start;">
       <div class="info">
-        <h4>${o.customer_name} — ${o.total} جنيه</h4>
+        <h4>${escapeHTML(o.customer_name)} — ${o.total} جنيه</h4>
         <p>${itemsText}</p>
-        <p>📞 ${o.customer_phone} ${o.customer_address ? '· ' + o.customer_address : ''}</p>
-        ${o.notes ? `<p style="color:var(--gold);">📝 ${o.notes}</p>` : ''}
-        ${o.is_gift ? `<p style="color:var(--rose);">🎁 هدية ${o.gift_message ? '— ' + o.gift_message : ''}</p>` : ''}
+        <p>📞 ${escapeHTML(o.customer_phone)} ${o.customer_address ? '· ' + escapeHTML(o.customer_address) : ''}</p>
+        ${o.notes ? `<p style="color:var(--gold);">📝 ${escapeHTML(o.notes)}</p>` : ''}
+        ${o.is_gift ? `<p style="color:var(--rose);">🎁 هدية ${o.gift_message ? '— ' + escapeHTML(o.gift_message) : ''}</p>` : ''}
         <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
       </div>
       <div class="actions">
@@ -912,10 +920,10 @@ async function loadCustomizerOrdersList(){
     return `
     <div class="product-item" style="align-items:flex-start;">
       <div class="info">
-        <h4>${o.engraved_name || 'بدون اسم'} — ${o.bottle_shape_label}</h4>
+        <h4>${escapeHTML(o.engraved_name) || 'بدون اسم'} — ${o.bottle_shape_label}</h4>
         <p>لون القزازة: ${o.glass_color_label} ${o.cap_color_label ? '· غطاء ' + o.cap_color_label : ''}</p>
         <p>التركيبة: ${o.scent} ${o.packaging ? '· ' + o.packaging : ''}</p>
-        <p>📞 ${o.customer_phone}</p>
+        <p>📞 ${escapeHTML(o.customer_phone)}</p>
         <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
       </div>
       <div class="actions">
