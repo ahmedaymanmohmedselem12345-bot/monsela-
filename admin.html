@@ -242,7 +242,9 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
   const fileInput = document.getElementById('pImage');
   if (fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
-    const path = `${Date.now()}-${file.name}`;
+    const extMatch = file.name.match(/\.[^.]+$/);
+    const ext = extMatch ? extMatch[0] : '';
+    const path = `${Date.now()}${ext}`;
     const { error: uploadError } = await sb.storage.from('product-images').upload(path, file);
     if (uploadError) {
       statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة في رفع الصورة: ' + uploadError.message;
