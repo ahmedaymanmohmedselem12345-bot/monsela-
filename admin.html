@@ -212,6 +212,11 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
     </div>
 
     <div class="card">
+      <h2>طلبات "أبلغني لو السعر قلّ"</h2>
+      <div id="priceAlertList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+
+    <div class="card">
       <h2>طلبات "أبلغني لما يتوفر"</h2>
       <div id="stockNotifyList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
@@ -395,6 +400,7 @@ async function showAdmin(){
   loadFlashSale();
   loadNewsletterSubscribers();
   loadStockNotifications();
+  loadPriceAlerts();
   loadDashboard();
 }
 
@@ -481,11 +487,33 @@ async function loadDashboard(){
     searches.forEach(s => { counts[s.term] = (counts[s.term] || 0) + 1; });
     const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0, 5);
     document.getElementById('topSearchesList').innerHTML = top.map(([term, count]) =>
-      `<div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:6px 0;border-bottom:1px solid var(--line);"><span>${term}</span><span style="color:var(--gold);">${count}</span></div>`
+      `<div style="display:flex;justify-content:space-between;font-size:0.85rem;padding:6px 0;border-bottom:1px solid var(--line);"><span>${escapeHTML(term)}</span><span style="color:var(--gold);">${count}</span></div>`
     ).join('');
   } else {
     document.getElementById('topSearchesList').innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش بيانات كافية.</p>';
   }
+}
+
+// ===== Price-drop alert requests =====
+async function loadPriceAlerts(){
+  const listEl = document.getElementById('priceAlertList');
+  const { data, error } = await sb.from('price_alerts').select('*, products(name)').eq('notified', false).order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات.</p>'; return; }
+  listEl.innerHTML = data.map(n => `
+    <div class="product-item">
+      <div class="info">
+        <h4>${n.products ? escapeHTML(n.products.name) : '(منتج محذوف)'}</h4>
+        <p>${escapeHTML(n.email)}</p>
+      </div>
+      <div class="actions"><button class="btn btn-ghost" data-mark-price-notified="${n.id}">اتبلّغ ✓</button></div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-mark-price-notified]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('price_alerts').update({ notified: true }).eq('id', btn.dataset.markPriceNotified);
+      loadPriceAlerts();
+    });
+  });
 }
 
 // ===== Back-in-stock notification requests =====
@@ -496,8 +524,8 @@ async function loadStockNotifications(){
   listEl.innerHTML = data.map(n => `
     <div class="product-item">
       <div class="info">
-        <h4>${n.products ? n.products.name : '(منتج محذوف)'}</h4>
-        <p>${n.email}</p>
+        <h4>${n.products ? escapeHTML(n.products.name) : '(منتج محذوف)'}</h4>
+        <p>${escapeHTML(n.email)}</p>
       </div>
       <div class="actions"><button class="btn btn-ghost" data-mark-notified="${n.id}">اتبلّغ ✓</button></div>
     </div>
@@ -519,7 +547,7 @@ async function loadNewsletterSubscribers(){
   lastLoadedSubscribers = data || [];
   if (lastLoadedSubscribers.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش مشتركين.</p>'; return; }
   listEl.innerHTML = `<p style="color:var(--smoke);margin-bottom:10px;">${lastLoadedSubscribers.length} مشترك</p>` +
-    lastLoadedSubscribers.slice(0, 20).map(s => `<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:0.85rem;">${s.email}</div>`).join('') +
+    lastLoadedSubscribers.slice(0, 20).map(s => `<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:0.85rem;">${escapeHTML(s.email)}</div>`).join('') +
     (lastLoadedSubscribers.length > 20 ? `<p style="color:var(--smoke);font-size:0.8rem;margin-top:8px;">+ ${lastLoadedSubscribers.length - 20} تاني — صدّر Excel عشان تشوف الكل</p>` : '');
 }
 document.getElementById('exportNewsletterBtn').addEventListener('click', ()=>{
