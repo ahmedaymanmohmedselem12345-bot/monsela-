@@ -125,6 +125,10 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
         <input type="checkbox" id="pFeatured" style="width:auto;margin:0;"> منتج مميز (يظهر الأول)
       </label>
       <br>
+      <label style="margin-top:10px;">أحجام مختلفة (اختياري — لو فاضي، السعر والمخزون فوق هما اللي هيتعرضوا)</label>
+      <div id="variantsRows"></div>
+      <button type="button" class="btn btn-ghost" id="addVariantRow" style="margin-bottom:16px;">+ أضف حجم</button>
+      <br>
       <button class="btn" id="saveProductBtn">حفظ المنتج</button>
       <button class="btn btn-ghost" id="cancelEditBtn" style="display:none;">إلغاء التعديل</button>
       <div class="status" id="productStatus"></div>
@@ -136,8 +140,13 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
     </div>
 
     <div class="card">
-      <h2>الطلبات الواردة</h2>
+      <h2>طلبات المتجر (السلة)</h2>
       <div id="ordersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>طلبات تصميم القزازة</h2>
+      <div id="customizerOrdersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
     <div class="card">
@@ -155,6 +164,11 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
         <div><label>القيمة</label><input type="number" id="cValue" placeholder="10"></div>
         <div><label>أقل قيمة طلب (اختياري)</label><input type="number" id="cMinOrder" placeholder="0"></div>
       </div>
+      <label>حد أقصى لعدد مرات الاستخدام (اختياري، سيبها فاضية = غير محدود)</label>
+      <input type="number" id="cMaxUses" placeholder="مثال: 50">
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <input type="checkbox" id="cPerCustomer" style="width:auto;margin:0;"> مرة واحدة بس لكل عميل (حسب رقم الموبايل)
+      </label>
       <label>وصف قصير (اختياري)</label>
       <input type="text" id="cLabel" placeholder="خصم ١٠٪ على أول طلب">
       <button class="btn" id="saveCouponBtn">إضافة الكود</button>
@@ -232,8 +246,57 @@ async function showAdmin(){
   adminScreen.classList.add('show');
   loadProductsList();
   loadOrdersList();
+  loadCustomizerOrdersList();
   loadCoupons();
   loadZones();
+  subscribeToNewOrders();
+}
+
+// ===== Live notification when a new order comes in =====
+function playNotifySound(){
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.value = 0.15;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  } catch(e) {}
+}
+
+let realtimeSubscribed = false;
+function subscribeToNewOrders(){
+  if (realtimeSubscribed) return;
+  realtimeSubscribed = true;
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+  sb.channel('store_orders_notify')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'store_orders' }, (payload) => {
+      playNotifySound();
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('طلب جديد في Monsela! 🛍️', {
+          body: `${payload.new.customer_name} — ${payload.new.total} جنيه`
+        });
+      }
+      loadOrdersList();
+    })
+    .subscribe();
+
+  sb.channel('customizer_orders_notify')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+      playNotifySound();
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('طلب تصميم قزازة جديد! 🧴', {
+          body: `${payload.new.engraved_name || 'بدون اسم'} — ${payload.new.bottle_shape_label}`
+        });
+      }
+      loadCustomizerOrdersList();
+    })
+    .subscribe();
 }
 
 // Check existing session on load
@@ -244,6 +307,35 @@ sb.auth.getSession().then(({ data }) => {
 
 // ===== Product form =====
 let editingImageUrl = null;
+
+// ===== Product size variants (dynamic rows) =====
+function addVariantRow(label = '', price = '', stock = ''){
+  const row = document.createElement('div');
+  row.className = 'row variant-row';
+  row.style.alignItems = 'center';
+  row.innerHTML = `
+    <input type="text" class="v-label" placeholder="مثال: 30مل" value="${label}">
+    <input type="number" class="v-price" placeholder="السعر" value="${price}">
+    <input type="number" class="v-stock" placeholder="المخزون" value="${stock}">
+    <button type="button" class="btn btn-danger remove-variant" style="flex:0;padding:10px 14px;">✕</button>
+  `;
+  document.getElementById('variantsRows').appendChild(row);
+  row.querySelector('.remove-variant').addEventListener('click', ()=> row.remove());
+}
+document.getElementById('addVariantRow').addEventListener('click', ()=> addVariantRow());
+
+function readVariantsFromForm(){
+  const rows = document.querySelectorAll('#variantsRows .variant-row');
+  const variants = [];
+  rows.forEach(row => {
+    const label = row.querySelector('.v-label').value.trim();
+    const price = Number(row.querySelector('.v-price').value);
+    const stock = Number(row.querySelector('.v-stock').value) || 0;
+    if (label && price) variants.push({ label, price, stock });
+  });
+  return variants.length ? variants : null;
+}
+function clearVariantRows(){ document.getElementById('variantsRows').innerHTML = ''; }
 
 document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
 
@@ -261,7 +353,28 @@ function resetForm(){
   document.getElementById('pFeatured').checked = false;
   document.getElementById('currentImagePreview').innerHTML = '';
   document.getElementById('cancelEditBtn').style.display = 'none';
+  clearVariantRows();
   editingImageUrl = null;
+}
+
+// Resize + compress an image in the browser before uploading, so the shop stays fast
+function compressImage(file, maxDimension = 1000, quality = 0.82){
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e) => { img.src = e.target.result; };
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > height && width > maxDimension) { height *= maxDimension / width; width = maxDimension; }
+      else if (height > maxDimension) { width *= maxDimension / height; height = maxDimension; }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
 }
 
 document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
@@ -277,10 +390,19 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
   const fileInput = document.getElementById('pImage');
   if (fileInput.files && fileInput.files[0]) {
     const file = fileInput.files[0];
-    const extMatch = file.name.match(/\.[^.]+$/);
-    const ext = extMatch ? extMatch[0] : '';
-    const path = `${Date.now()}${ext}`;
-    const { error: uploadError } = await sb.storage.from('product-images').upload(path, file);
+    if (!file.type.startsWith('image/')) {
+      statusEl.style.color='var(--danger)'; statusEl.textContent='الملف ده مش صورة، اختار صورة (jpg, png, webp...).';
+      saveBtn.disabled = false;
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة كبيرة جدًا (أكبر من 5 ميجا) — صغّرها وحاول تاني.';
+      saveBtn.disabled = false;
+      return;
+    }
+    const path = `${Date.now()}.jpg`;
+    const compressed = await compressImage(file);
+    const { error: uploadError } = await sb.storage.from('product-images').upload(path, compressed, { contentType: 'image/jpeg' });
     if (uploadError) {
       statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة في رفع الصورة: ' + uploadError.message;
       saveBtn.disabled = false;
@@ -299,6 +421,7 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     notes: document.getElementById('pNotes').value.trim() || null,
     description: document.getElementById('pDescription').value.trim() || null,
     featured: document.getElementById('pFeatured').checked,
+    variants: readVariantsFromForm(),
     image_url: imageUrl
   };
 
@@ -361,6 +484,10 @@ function editProduct(p){
   document.getElementById('pNotes').value = p.notes || '';
   document.getElementById('pDescription').value = p.description || '';
   document.getElementById('pFeatured').checked = !!p.featured;
+  clearVariantRows();
+  if (Array.isArray(p.variants)) {
+    p.variants.forEach(v => addVariantRow(v.label, v.price, v.stock));
+  }
   editingImageUrl = p.image_url || null;
   document.getElementById('currentImagePreview').innerHTML = p.image_url
     ? `<img src="${p.image_url}" style="width:80px;height:80px;object-fit:cover;border-radius:10px;"><div style="font-size:0.75rem;color:var(--smoke);margin-top:4px;">الصورة الحالية — اختار صورة جديدة بس لو عايز تغيّرها</div>`
@@ -377,7 +504,7 @@ async function deleteProduct(id){
 }
 
 // ===== Incoming store orders =====
-const ORDER_STATUSES = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم'];
+const ORDER_STATUSES = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم', 'مرتجع'];
 
 async function loadOrdersList(){
   const listEl = document.getElementById('ordersList');
@@ -412,6 +539,39 @@ async function loadOrdersList(){
   });
 }
 
+async function loadCustomizerOrdersList(){
+  const listEl = document.getElementById('customizerOrdersList');
+  const { data, error } = await sb.from('orders').select('*').order('created_at', { ascending: false });
+  if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في تحميل طلبات التصميم.</p>'; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات تصميم واردة.</p>'; return; }
+
+  listEl.innerHTML = data.map(o => {
+    const statusOptions = ORDER_STATUSES.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('');
+    return `
+    <div class="product-item" style="align-items:flex-start;">
+      <div class="info">
+        <h4>${o.engraved_name || 'بدون اسم'} — ${o.bottle_shape_label}</h4>
+        <p>لون القزازة: ${o.glass_color_label} ${o.cap_color_label ? '· غطاء ' + o.cap_color_label : ''}</p>
+        <p>التركيبة: ${o.scent} ${o.packaging ? '· ' + o.packaging : ''}</p>
+        <p>📞 ${o.customer_phone}</p>
+        <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
+      </div>
+      <div class="actions">
+        <select data-corder="${o.id}" class="customizer-order-status" style="background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;">
+          ${statusOptions}
+        </select>
+      </div>
+    </div>`;
+  }).join('');
+
+  listEl.querySelectorAll('.customizer-order-status').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      const { error } = await sb.from('orders').update({ status: sel.value }).eq('id', sel.dataset.corder);
+      if (error) alert('حصلت مشكلة في تحديث الحالة: ' + error.message);
+    });
+  });
+}
+
 // ===== Coupons =====
 document.getElementById('saveCouponBtn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('couponFormStatus');
@@ -424,12 +584,15 @@ document.getElementById('saveCouponBtn').addEventListener('click', async ()=>{
     type: document.getElementById('cType').value,
     value,
     min_order: Number(document.getElementById('cMinOrder').value) || 0,
+    max_uses: document.getElementById('cMaxUses').value ? Number(document.getElementById('cMaxUses').value) : null,
+    per_customer: document.getElementById('cPerCustomer').checked,
     label: document.getElementById('cLabel').value.trim() || null
   });
   if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: ' + error.message; return; }
   statusEl.style.color='var(--success)'; statusEl.textContent='اتضاف ✓';
   document.getElementById('cCode').value=''; document.getElementById('cValue').value='';
   document.getElementById('cMinOrder').value=''; document.getElementById('cLabel').value='';
+  document.getElementById('cMaxUses').value=''; document.getElementById('cPerCustomer').checked = false;
   loadCoupons();
 });
 
@@ -441,7 +604,7 @@ async function loadCoupons(){
     <div class="product-item">
       <div class="info">
         <h4>${c.code} ${c.active ? '' : '(معطّل)'}</h4>
-        <p>${c.type === 'percentage' ? c.value + '%' : c.value + ' جنيه'} ${c.min_order ? '· أقل طلب ' + c.min_order + ' جنيه' : ''}</p>
+        <p>${c.type === 'percentage' ? c.value + '%' : c.value + ' جنيه'} ${c.min_order ? '· أقل طلب ' + c.min_order + ' جنيه' : ''} · استخدم ${c.used_count || 0}${c.max_uses ? ' / ' + c.max_uses : ''}</p>
       </div>
       <div class="actions">
         <button class="btn btn-ghost" data-toggle-coupon="${c.id}" data-active="${c.active}">${c.active ? 'تعطيل' : 'تفعيل'}</button>

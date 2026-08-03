@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Monsela | برفانات مصممة خصيصًا ليك</title>
+<meta name="description" content="Monsela - متجر برفانات أصلية أونلاين في مصر. تسوق مجموعتنا، وكميزة إضافية، صمم قزازتك الخاصة واحط اسمك عليها.">
+<meta property="og:title" content="Monsela | برفانات أصلية">
+<meta property="og:description" content="تسوق برفانات أصلية، وصمم قزازتك الخاصة كميزة إضافية.">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "Monsela",
+  "description": "متجر برفانات أصلية أونلاين في مصر مع خدمة تصميم القزازة الشخصية",
+  "priceRange": "$$"
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -16,7 +29,7 @@
   --gold:#c9a227;
   --cream:#f3ede4;
   --rose:#8b3a4a;
-  --smoke:#6b6470;
+  --smoke:#8a8390;
   --line:rgba(243,237,228,0.14);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -264,6 +277,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </style>
 </head>
 <body>
+<a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--ink);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
+<style>a[href="#main-content"]:focus{right:0;}</style>
 
 <nav>
   <div class="container">
@@ -292,7 +307,11 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <button id="closeCart" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
   </div>
   <div id="cartItems"></div>
-  <div id="cartEmpty" style="color:var(--smoke);text-align:center;padding:30px 0;">السلة فاضية لسه</div>
+  <div id="cartEmpty" style="color:var(--smoke);text-align:center;padding:30px 0;">
+    السلة فاضية لسه
+    <br><br>
+    <a href="#gallery" class="btn-primary" id="cartEmptyShopBtn" style="display:inline-block;">تصفح المنتجات</a>
+  </div>
   <div id="cartFooter" style="display:none;border-top:1px solid var(--line);margin-top:16px;padding-top:16px;">
     <div style="display:flex;justify-content:space-between;font-weight:700;margin-bottom:16px;">
       <span>الإجمالي</span><span id="cartTotal">0 جنيه</span>
@@ -303,19 +322,21 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Checkout modal -->
 <div id="checkoutOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:18px;">بيانات التوصيل</h3>
-    <label style="display:block;font-weight:700;margin-bottom:8px;">الاسم</label>
-    <input type="text" id="checkoutName" placeholder="اسمك بالكامل" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-    <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل</label>
-    <input type="text" id="checkoutPhone" placeholder="01xxxxxxxxx" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-    <label style="display:block;font-weight:700;margin-bottom:8px;">العنوان</label>
+    <!-- honeypot field: invisible to humans, bots tend to fill every field -->
+    <input type="text" id="hpField" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+    <label for="checkoutName" style="display:block;font-weight:700;margin-bottom:8px;">الاسم <span style="color:var(--rose);">*</span></label>
+    <input type="text" id="checkoutName" placeholder="اسمك بالكامل" required style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+    <label for="checkoutPhone" style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل <span style="color:var(--rose);">*</span></label>
+    <input type="text" id="checkoutPhone" placeholder="01xxxxxxxxx" required style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+    <label for="checkoutAddress" style="display:block;font-weight:700;margin-bottom:8px;">العنوان</label>
     <textarea id="checkoutAddress" placeholder="المحافظة، المنطقة، تفاصيل العنوان" style="width:100%;min-height:70px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
-    <label style="display:block;font-weight:700;margin-bottom:8px;">منطقة التوصيل</label>
+    <label for="checkoutZone" style="display:block;font-weight:700;margin-bottom:8px;">منطقة التوصيل</label>
     <select id="checkoutZone" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
       <option value="">بدون تحديد (هنأكد التوصيل معاك)</option>
     </select>
-    <label style="display:block;font-weight:700;margin-bottom:8px;">كود خصم (لو عندك)</label>
+    <label for="checkoutCoupon" style="display:block;font-weight:700;margin-bottom:8px;">كود خصم (لو عندك)</label>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <input type="text" id="checkoutCoupon" placeholder="مثال: WELCOME10" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
       <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;">تطبيق</button>
@@ -330,7 +351,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<header class="hero container">
+<header class="hero container" id="main-content">
   <div>
     <div class="eyebrow">Monsela — برفاناتك المفضلة</div>
     <h1>عطور أصلية،<br>وبصمتك لو حبيت</h1>
@@ -364,8 +385,14 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <h2>تسوق مجموعتنا</h2>
       <p>اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.</p>
     </div>
-    <div style="max-width:420px;margin:0 auto 20px;">
-      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
+    <div style="max-width:420px;margin:0 auto 20px;display:flex;gap:10px;">
+      <input type="text" id="productSearch" placeholder="ابحث عن منتج..." style="flex:1;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
+      <select id="productSort" style="background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.9rem;">
+        <option value="default">الترتيب الافتراضي</option>
+        <option value="newest">الأحدث</option>
+        <option value="price_asc">السعر: من الأقل</option>
+        <option value="price_desc">السعر: من الأعلى</option>
+      </select>
     </div>
     <div class="option-row reveal" id="categoryFilters" style="justify-content:center;margin-bottom:28px;"></div>
     <div class="gallery-grid reveal" id="productsGrid">
@@ -593,14 +620,15 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   <div class="container">
     <div class="logo">Mon<span>sela</span></div>
     <p>صُنع بحب في مصر — كل قزازة ليها حكاية</p>
-    <p style="margin-top:14px;">تواصل معانا: <a href="https://wa.me/201000000000" style="color:var(--gold);" target="_blank">واتساب</a> &nbsp;|&nbsp; <a href="#" style="color:var(--gold);">Instagram</a></p>
+    <p style="margin-top:14px;">تواصل معانا: <a href="#" id="footerWhatsapp" style="color:var(--gold);" target="_blank">واتساب</a> &nbsp;|&nbsp; <a href="#" style="color:var(--gold);">Instagram</a></p>
   </div>
 </footer>
 
 <script>
 const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
 const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
-const WHATSAPP_NUMBER = "201000000000"; // TODO: غيّر ده لرقم واتساب البراند الحقيقي
+const WHATSAPP_NUMBER = "201000000000"; // TODO: غيّر ده لرقم واتساب البراند الحقيقي — ده المكان الوحيد اللي محتاج تغيّره
+document.getElementById('footerWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ===== Load real products (added via the admin panel) into the gallery =====
@@ -631,9 +659,10 @@ function renderCategoryFilters(){
   const wrap = document.getElementById('categoryFilters');
   const cats = ['الكل', ...new Set(allProducts.map(p => p.category).filter(Boolean))];
   if (cats.length <= 1) { wrap.innerHTML = ''; return; }
-  wrap.innerHTML = cats.map(c =>
-    `<button class="opt ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c}</button>`
-  ).join('');
+  wrap.innerHTML = cats.map(c => {
+    const count = c === 'الكل' ? allProducts.length : allProducts.filter(p => p.category === c).length;
+    return `<button class="opt ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c} (${count})</button>`;
+  }).join('');
   wrap.querySelectorAll('[data-cat]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       activeCategory = btn.dataset.cat;
@@ -656,35 +685,85 @@ function renderProducts(){
     );
   }
 
+  const sortBy = document.getElementById('productSort').value;
+  list = [...list];
+  if (sortBy === 'newest') {
+    list.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  } else if (sortBy === 'price_asc') {
+    list.sort((a,b) => (a.price||0) - (b.price||0));
+  } else if (sortBy === 'price_desc') {
+    list.sort((a,b) => (b.price||0) - (a.price||0));
+  }
+
   if (list.length === 0) {
     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات في القسم ده.</p>';
     return;
   }
 
+  function stockBadgeHTML(stock, id){
+    const outOfStock = (stock ?? 0) <= 0;
+    const lowStock = !outOfStock && stock <= 5;
+    return `<p id="stockBadge-${id}" style="font-size:0.78rem;margin-bottom:12px;color:${outOfStock ? 'var(--danger)' : lowStock ? '#e0a83c' : '#8fd98f'};">
+      ${outOfStock ? 'خلصت الكمية' : lowStock ? `متبقي ${stock} بس` : 'متوفر'}
+    </p>`;
+  }
+
   grid.innerHTML = list.map(p => {
-    const outOfStock = (p.stock ?? 0) <= 0;
-    const lowStock = !outOfStock && p.stock <= 5;
+    const hasVariants = Array.isArray(p.variants) && p.variants.length > 0;
+    const firstVariant = hasVariants ? p.variants[0] : null;
+    const price = hasVariants ? firstVariant.price : p.price;
+    const stock = hasVariants ? firstVariant.stock : (p.stock ?? 0);
+    const outOfStock = (stock ?? 0) <= 0;
+
     return `
     <div class="perfume-card">
       ${p.image_url
-        ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
+        ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
         : `<div class="glass"></div>`}
       <h3>${p.name}</h3>
       <p>${p.notes || p.description || ''}</p>
-      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
-      <p style="font-size:0.78rem;margin-bottom:12px;color:${outOfStock ? 'var(--danger)' : lowStock ? '#e0a83c' : '#8fd98f'};">
-        ${outOfStock ? 'خلصت الكمية' : lowStock ? `متبقي ${p.stock} بس` : 'متوفر'}
-      </p>
+      ${hasVariants ? `
+        <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin:8px 0;">
+          ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+        </select>
+      ` : (p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : '')}
+      ${stockBadgeHTML(stock, p.id)}
       ${!outOfStock ? `
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
-          <button class="opt qty-minus" data-id="${p.id}" style="width:34px;padding:6px 0;">−</button>
+          <button class="opt qty-minus" data-id="${p.id}" aria-label="نقص الكمية" style="width:34px;padding:6px 0;">−</button>
           <span id="qty-${p.id}" style="min-width:24px;text-align:center;">1</span>
-          <button class="opt qty-plus" data-id="${p.id}" style="width:34px;padding:6px 0;">+</button>
+          <button class="opt qty-plus" data-id="${p.id}" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
         </div>
         <button class="btn-primary add-to-cart" data-id="${p.id}" style="width:100%;">أضف للسلة</button>
       ` : `<button class="btn-ghost" disabled style="width:100%;opacity:0.5;">غير متاح حاليًا</button>`}
     </div>`;
   }).join('');
+
+  function currentVariantOf(productId){
+    const sel = grid.querySelector(`.variant-select[data-id="${productId}"]`);
+    const product = allProducts.find(p => p.id === productId);
+    if (sel && Array.isArray(product.variants)) return product.variants[Number(sel.value)];
+    return null;
+  }
+  function currentStockLimit(productId){
+    const product = allProducts.find(p => p.id === productId);
+    const variant = currentVariantOf(productId);
+    return variant ? variant.stock : (product.stock ?? 0);
+  }
+
+  grid.querySelectorAll('.variant-select').forEach(sel=>{
+    sel.addEventListener('change', ()=>{
+      const id = sel.dataset.id;
+      const variant = currentVariantOf(id);
+      const badge = document.getElementById(`stockBadge-${id}`);
+      const outOfStock = (variant.stock ?? 0) <= 0;
+      const lowStock = !outOfStock && variant.stock <= 5;
+      badge.style.color = outOfStock ? 'var(--danger)' : lowStock ? '#e0a83c' : '#8fd98f';
+      badge.textContent = outOfStock ? 'خلصت الكمية' : lowStock ? `متبقي ${variant.stock} بس` : 'متوفر';
+      const qtyEl = document.getElementById(`qty-${id}`);
+      if (qtyEl) qtyEl.textContent = Math.min(Math.max(1, variant.stock), parseInt(qtyEl.textContent) || 1);
+    });
+  });
 
   grid.querySelectorAll('.qty-minus').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -694,16 +773,17 @@ function renderProducts(){
   });
   grid.querySelectorAll('.qty-plus').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const product = allProducts.find(p => p.id === btn.dataset.id);
       const el = document.getElementById(`qty-${btn.dataset.id}`);
-      el.textContent = Math.min(product.stock, parseInt(el.textContent) + 1);
+      const max = currentStockLimit(btn.dataset.id);
+      el.textContent = Math.min(max, parseInt(el.textContent) + 1);
     });
   });
   grid.querySelectorAll('.add-to-cart').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const product = allProducts.find(p => p.id === btn.dataset.id);
       const qty = parseInt(document.getElementById(`qty-${btn.dataset.id}`).textContent);
-      addToCart(product, qty);
+      const variant = currentVariantOf(btn.dataset.id);
+      addToCart(product, qty, variant);
     });
   });
 }
@@ -711,25 +791,29 @@ function renderProducts(){
 // ----- Cart (persisted in localStorage so it survives page reloads) -----
 let cart = [];
 try { cart = JSON.parse(localStorage.getItem('monsela_cart') || '[]'); } catch(e) { cart = []; }
+cart.forEach(i => { if (!i.cartKey) i.cartKey = i.id; });
 
 function saveCart(){
   try { localStorage.setItem('monsela_cart', JSON.stringify(cart)); } catch(e) {}
   renderCartUI();
 }
 
-function addToCart(product, qty){
-  const existing = cart.find(i => i.id === product.id);
+function addToCart(product, qty, variant){
+  const cartKey = variant ? `${product.id}::${variant.label}` : product.id;
+  const displayName = variant ? `${product.name} (${variant.label})` : product.name;
+  const price = variant ? variant.price : (product.price || 0);
+  const existing = cart.find(i => i.cartKey === cartKey);
   if (existing) { existing.qty += qty; }
-  else { cart.push({ id: product.id, name: product.name, price: product.price || 0, qty }); }
+  else { cart.push({ id: product.id, cartKey, variantLabel: variant ? variant.label : null, name: displayName, price, qty }); }
   saveCart();
   openCart();
 }
-function removeFromCart(id){
-  cart = cart.filter(i => i.id !== id);
+function removeFromCart(cartKey){
+  cart = cart.filter(i => i.cartKey !== cartKey);
   saveCart();
 }
-function changeCartQty(id, delta){
-  const item = cart.find(i => i.id === id);
+function changeCartQty(cartKey, delta){
+  const item = cart.find(i => i.cartKey === cartKey);
   if (!item) return;
   item.qty = Math.max(1, item.qty + delta);
   saveCart();
@@ -757,19 +841,19 @@ function renderCartUI(){
         <div style="font-size:0.8rem;color:var(--smoke);">${i.price} جنيه × ${i.qty}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
-        <button class="opt cart-minus" data-id="${i.id}" style="width:28px;padding:4px 0;">−</button>
+        <button class="opt cart-minus" data-key="${i.cartKey}" aria-label="نقص الكمية" style="width:28px;padding:4px 0;">−</button>
         <span>${i.qty}</span>
-        <button class="opt cart-plus" data-id="${i.id}" style="width:28px;padding:4px 0;">+</button>
-        <button class="cart-remove" data-id="${i.id}" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-right:6px;">✕</button>
+        <button class="opt cart-plus" data-key="${i.cartKey}" aria-label="زود الكمية" style="width:28px;padding:4px 0;">+</button>
+        <button class="cart-remove" data-key="${i.cartKey}" aria-label="احذف من السلة" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-right:6px;">✕</button>
       </div>
     </div>
   `).join('');
 
   document.getElementById('cartTotal').textContent = cart.reduce((s,i)=>s+i.price*i.qty,0) + ' جنيه';
 
-  itemsEl.querySelectorAll('.cart-minus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.id,-1)));
-  itemsEl.querySelectorAll('.cart-plus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.id,1)));
-  itemsEl.querySelectorAll('.cart-remove').forEach(b=>b.addEventListener('click', ()=>removeFromCart(b.dataset.id)));
+  itemsEl.querySelectorAll('.cart-minus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,-1)));
+  itemsEl.querySelectorAll('.cart-plus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,1)));
+  itemsEl.querySelectorAll('.cart-remove').forEach(b=>b.addEventListener('click', ()=>removeFromCart(b.dataset.key)));
 }
 
 function openCart(){
@@ -783,6 +867,14 @@ function closeCartUI(){
 document.getElementById('cartFab').addEventListener('click', openCart);
 document.getElementById('closeCart').addEventListener('click', closeCartUI);
 document.getElementById('cartOverlay').addEventListener('click', closeCartUI);
+document.getElementById('cartEmptyShopBtn').addEventListener('click', closeCartUI);
+
+document.addEventListener('keydown', (e)=>{
+  if (e.key !== 'Escape') return;
+  const checkoutOverlay = document.getElementById('checkoutOverlay');
+  if (checkoutOverlay.style.display === 'flex') { checkoutOverlay.style.display = 'none'; return; }
+  if (document.getElementById('cartDrawer').style.display === 'block') { closeCartUI(); }
+});
 
 // ----- Delivery zones & coupons -----
 let deliveryZones = [];
@@ -800,7 +892,7 @@ loadDeliveryZones();
 document.getElementById('checkoutZone').addEventListener('change', updateCheckoutSummary);
 
 document.getElementById('applyCouponBtn').addEventListener('click', async ()=>{
-  const code = document.getElementById('checkoutCoupon').value.trim();
+  const code = document.getElementById('checkoutCoupon').value.trim().toUpperCase();
   const statusEl = document.getElementById('couponStatus');
   if (!code) { appliedCoupon = null; statusEl.textContent=''; updateCheckoutSummary(); return; }
 
@@ -817,6 +909,28 @@ document.getElementById('applyCouponBtn').addEventListener('click', async ()=>{
     statusEl.style.color = 'var(--danger)'; statusEl.textContent = `الكود ده يشتغل بس فوق ${data.min_order} جنيه.`;
     updateCheckoutSummary();
     return;
+  }
+  if (data.max_uses != null && (data.used_count || 0) >= data.max_uses) {
+    appliedCoupon = null;
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده خلص عدد مرات استخدامه.';
+    updateCheckoutSummary();
+    return;
+  }
+  if (data.per_customer) {
+    const phone = document.getElementById('checkoutPhone').value.trim();
+    if (!phone) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'الكود ده مرة واحدة للعميل — اكتب رقم موبايلك فوق الأول عشان نتأكد.';
+      updateCheckoutSummary();
+      return;
+    }
+    const { data: usedBefore } = await sb.rpc('coupon_already_used_by_phone', { p_code: code, p_phone: phone });
+    if (usedBefore) {
+      appliedCoupon = null;
+      statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده مستخدم قبل كده برقمك.';
+      updateCheckoutSummary();
+      return;
+    }
   }
   appliedCoupon = data;
   statusEl.style.color = 'var(--success)'; statusEl.textContent = `✓ ${data.label || 'الكود اتفعل'}`;
@@ -861,11 +975,36 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   const address = document.getElementById('checkoutAddress').value.trim();
   const statusEl = document.getElementById('checkoutStatus');
 
+  // Honeypot: real customers never fill this hidden field; bots often do
+  if (document.getElementById('hpField').value.trim() !== '') {
+    return; // silently drop suspected bot submissions
+  }
+
   if (!name || !phone) {
     statusEl.style.color = 'var(--danger)';
     statusEl.textContent = 'من فضلك اكتب الاسم ورقم الموبايل.';
     return;
   }
+  const egyptianPhone = /^01[0-2,5]\d{8}$/;
+  if (!egyptianPhone.test(phone)) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'رقم الموبايل لازم يبدأ بـ 01 ويكون 11 رقم (مثال: 01012345678).';
+    return;
+  }
+
+  // Re-validate the coupon is still eligible right before submitting (cart may have changed since it was applied)
+  if (appliedCoupon) {
+    const currentSubtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    if (currentSubtotal < appliedCoupon.min_order || (appliedCoupon.max_uses != null && (appliedCoupon.used_count||0) >= appliedCoupon.max_uses)) {
+      appliedCoupon = null;
+      document.getElementById('couponStatus').textContent = '';
+      updateCheckoutSummary();
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'كود الخصم بقى مش صالح بعد تغيير السلة، شيلناه من الطلب. راجع الإجمالي وأكّد تاني.';
+      return;
+    }
+  }
+
   const { subtotal, discount, deliveryFee, total, zone } = calcOrderTotals();
   const btn = document.getElementById('confirmOrderBtn');
   btn.disabled = true;
@@ -896,7 +1035,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     (discount > 0 ? `%0aالخصم: -${discount.toFixed(0)} جنيه (${appliedCoupon.code})` : '') +
     (deliveryFee > 0 ? `%0aالتوصيل: ${deliveryFee} جنيه (${zone.name})` : '') +
     `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
-  window.open(`https://wa.me/201000000000?text=${msg}`, '_blank');
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
 
   cart = [];
   appliedCoupon = null;
@@ -915,7 +1054,12 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
 renderCartUI();
 loadProducts();
 
-document.getElementById('productSearch').addEventListener('input', renderProducts);
+let searchDebounceTimer;
+document.getElementById('productSearch').addEventListener('input', ()=>{
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(renderProducts, 250);
+});
+document.getElementById('productSort').addEventListener('change', renderProducts);
 
 const previewCaption = document.getElementById('previewCaption');
 const summaryBox = document.getElementById('summaryBox');
@@ -1193,8 +1337,9 @@ shareBtn.addEventListener('click', async ()=>{
 
 <script type="module">
 // ===== Monsela 3D Bottle Viewer (Three.js) =====
-// Lazy-loaded after page load so it never blocks the initial page paint.
-window.addEventListener('load', () => {
+// Lazy-loaded only when the customizer section is actually about to be seen —
+// either the user scrolls to it, or a shared design link (?design=) needs it immediately.
+function startBottleViewer() {
   import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').then((THREE) => {
     const wrap = document.getElementById('rotateWrap');
     const loadingLabel = document.getElementById('bottleLoading');
@@ -1346,9 +1491,28 @@ window.addEventListener('load', () => {
     window.MonselaBottle = { setShape, setColor, setCapColor, setName };
   }).catch((err) => {
     console.error('3D bottle viewer failed to load:', err);
-    if (loadingLabel) loadingLabel.textContent = 'المعاينة ثلاثية الأبعاد مش متاحة على المتصفح ده';
+    if (loadingLabel) loadingLabel.textContent = 'المعاينة ثلاثية الأبعاد مش مدعومة على المتصفح أو الجهاز ده — جرب متصفح تاني أو جهاز تاني، وممكن كمان تختار الشكل واللون والاسم عادي من الفورم جنبها';
   });
-});
+}
+
+const hasSharedDesign = new URLSearchParams(window.location.search).has('design');
+if (hasSharedDesign) {
+  // A shared design link needs the 3D preview right away, no need to wait for scroll.
+  startBottleViewer();
+} else if ('IntersectionObserver' in window) {
+  const customizerEl = document.getElementById('customizer');
+  const bottleObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if (entry.isIntersecting) {
+        startBottleViewer();
+        bottleObserver.disconnect();
+      }
+    });
+  }, { rootMargin: '200px' });
+  if (customizerEl) bottleObserver.observe(customizerEl);
+} else {
+  window.addEventListener('load', startBottleViewer);
+}
 </script>
 
 </body>

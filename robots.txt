@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://monsela-selim-s-projects2.vercel.app/sitemap.xml
