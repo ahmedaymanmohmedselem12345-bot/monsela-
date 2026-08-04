@@ -11,7 +11,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Monsela | برفانات أصلية">
 <meta name="twitter:description" content="تسوق برفانات أصلية، وصمم قزازتك الخاصة كميزة إضافية.">
-<meta name="theme-color" content="#1b1420">
+<meta name="theme-color" content="#faf6ee">
 <!-- Content-Security-Policy: restricts which domains can load scripts/styles/images/API calls.
      Note: 'unsafe-inline' for scripts is required because this site is intentionally a single
      HTML file (all JS is inline) rather than external .js files — a deliberate trade-off for
@@ -56,21 +56,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
-  --ink:#1b1420;
-  --ink-2:#241a29;
-  --ink-3:#150f19;
-  --amber:#c08552;
-  --amber-light:#e0b083;
-  --gold:#c9a227;
-  --gold-light:#e0bc4f;
-  --gold-dark:#9c7c1f;
-  --cream:#f3ede4;
-  --rose:#8b3a4a;
-  --rose-light:#a85465;
-  --smoke:#8a8390;
-  --line:rgba(243,237,228,0.14);
-  --success:#6fbf73;
-  --danger:#e0787a;
+  --ink:#faf6ee;
+  --ink-2:#fffdf9;
+  --ink-3:#f2ead9;
+  --amber:#b8985e;
+  --amber-light:#d4bd8e;
+  --gold:#a3814a;
+  --gold-light:#c4a572;
+  --gold-dark:#7d6238;
+  --cream:#2b2620;
+  --rose:#a8776b;
+  --rose-light:#c29a90;
+  --smoke:#5f584d;
+  --line:rgba(43,38,32,0.12);
+  --success:#5f7d52;
+  --danger:#a8524a;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -87,8 +87,9 @@ h1,h2,h3,.display{
 .eyebrow{
   font-family:'Markazi Text',serif;
   letter-spacing:2px;
-  color:var(--gold);
+  color:var(--gold-dark);
   font-size:1.1rem;
+  font-weight:600;
   text-transform:uppercase;
 }
 a{color:inherit;text-decoration:none;}
@@ -97,15 +98,15 @@ a{color:inherit;text-decoration:none;}
 /* NAV */
 nav{
   position:sticky;top:0;z-index:50;
-  background:rgba(27,20,32,0.72);
+  background:rgba(255,253,249,0.75);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line);
   transition:box-shadow .3s ease, background .3s ease;
 }
 nav.scrolled{
-  background:rgba(27,20,32,0.92);
-  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  background:rgba(255,253,249,0.94);
+  box-shadow:0 10px 30px rgba(43,38,32,0.08);
 }
 nav .container{
   display:flex;align-items:center;justify-content:space-between;
@@ -117,7 +118,7 @@ nav .container{
 .nav-links a{opacity:0.85;transition:opacity .2s;}
 .nav-links a:hover{opacity:1;color:var(--gold);}
 .nav-cta{
-  background:var(--gold);color:var(--ink);
+  background:var(--gold);color:var(--cream);
   padding:10px 22px;border-radius:999px;font-weight:700;font-size:0.9rem;
 }
 
@@ -132,7 +133,7 @@ nav .container{
   background:radial-gradient(ellipse at 75% 30%, rgba(192,133,82,0.18), transparent 60%);
   pointer-events:none;
 }
-.hero h1{font-size:clamp(1.9rem, 6vw, 3.4rem);line-height:1.25;margin:14px 0 20px;text-shadow:0 2px 24px rgba(0,0,0,0.3);}
+.hero h1{font-size:clamp(1.9rem, 6vw, 3.4rem);line-height:1.25;margin:14px 0 20px;}
 .hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
 
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
@@ -145,8 +146,8 @@ nav .container{
 .gallery-grid.reveal.in-view .perfume-card:nth-child(n+5){animation-delay:.25s;}
 @keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 
-.skeleton-card{background:rgba(36,26,41,0.55);border:1px solid var(--line);border-radius:18px;padding:28px;}
-.skeleton-shimmer{background:linear-gradient(90deg, rgba(243,237,228,0.06) 25%, rgba(243,237,228,0.14) 37%, rgba(243,237,228,0.06) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;}
+.skeleton-card{background:rgba(255,253,249,0.6);border:1px solid var(--line);border-radius:18px;padding:28px;}
+.skeleton-shimmer{background:linear-gradient(90deg, rgba(43,38,32,0.04) 25%, rgba(43,38,32,0.09) 37%, rgba(43,38,32,0.04) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;}
 @keyframes shimmer{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
 .skeleton-img{width:100%;aspect-ratio:1/1;border-radius:14px;margin-bottom:16px;}
 .skeleton-line{height:14px;margin-bottom:10px;}
@@ -161,20 +162,20 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 }
 .hero-ctas{display:flex;gap:16px;}
 .btn-primary{
-  background:linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-dark));color:var(--ink);padding:16px 32px;border-radius:999px;
+  background:linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-dark));color:var(--cream);padding:16px 32px;border-radius:999px;
   font-weight:700;font-size:1rem;border:none;cursor:pointer;
-  box-shadow:0 8px 24px rgba(201,162,39,0.25);
+  box-shadow:0 4px 16px rgba(184,152,94,0.18);
   transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(201,162,39,0.4);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(184,152,94,0.28);}
 .btn-ghost{
   border:1px solid var(--line);padding:16px 32px;border-radius:12px;
-  font-weight:600;color:var(--cream);background:rgba(243,237,228,0.03);
+  font-weight:600;color:var(--cream);background:rgba(43,38,32,0.03);
   transition:border-color .3s ease, background .3s ease, transform .3s ease;
 }
-.btn-ghost:hover{border-color:var(--gold);background:rgba(201,162,39,0.08);transform:translateY(-2px);}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(184,152,94,0.08);transform:translateY(-2px);}
 .hero-visual{position:relative;display:flex;justify-content:center;}
-.hero-visual svg{filter:drop-shadow(0 30px 60px rgba(0,0,0,0.5));animation:float 5s ease-in-out infinite;max-width:220px;width:60vw;height:auto;}
+.hero-visual svg{filter:drop-shadow(0 30px 60px rgba(43,38,32,0.15));animation:float 5s ease-in-out infinite;max-width:220px;width:60vw;height:auto;}
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
 
 /* SECTION LABELS */
@@ -186,19 +187,19 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 /* GALLERY */
 .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
 .perfume-card{
-  background:rgba(36,26,41,0.55);
+  background:rgba(255,253,249,0.7);
   backdrop-filter:blur(10px);
   -webkit-backdrop-filter:blur(10px);
   border:1px solid var(--line);border-radius:18px;
   padding:28px;text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  box-shadow:0 6px 18px rgba(43,38,32,0.06);
   transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s ease, box-shadow .3s ease;
 }
-.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 18px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,162,39,0.15);}
+.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 16px 32px rgba(43,38,32,0.1), 0 0 0 1px rgba(184,152,94,0.18);}
 .perfume-card .glass{
   width:70px;height:100px;margin:0 auto 20px;border-radius:10px 10px 22px 22px;
   background:linear-gradient(180deg, var(--amber-light), var(--amber));
-  position:relative;box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
+  position:relative;box-shadow:inset 0 0 20px rgba(43,38,32,0.15);
 }
 .perfume-card .glass::before{
   content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);
@@ -207,28 +208,28 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 .perfume-card h3{font-size:1.3rem;margin-bottom:8px;}
 .perfume-card p{color:var(--smoke);font-size:0.9rem;margin-bottom:14px;}
 .tag{
-  display:inline-block;font-size:0.75rem;color:var(--gold);
+  display:inline-block;font-size:0.75rem;color:var(--gold-dark);
   border:1px solid var(--gold);padding:4px 12px;border-radius:999px;
 }
 
 /* CUSTOMIZER */
 .customizer{
-  background:rgba(36,26,41,0.5);
+  background:rgba(255,253,249,0.65);
   backdrop-filter:blur(16px);
   -webkit-backdrop-filter:blur(16px);
   border-radius:28px;border:1px solid var(--line);
-  box-shadow:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(243,237,228,0.05);
+  box-shadow:0 16px 40px rgba(43,38,32,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
   padding:50px;display:grid;grid-template-columns:0.9fr 1.1fr;gap:50px;
 }
 .preview-panel{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at center, rgba(201,162,39,0.1), transparent 70%);
+  background:radial-gradient(ellipse at center, rgba(184,152,94,0.1), transparent 70%);
   border-radius:20px;padding:30px;position:relative;
 }
 .preview-panel::after{
   content:'';position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
   width:120px;height:18px;border-radius:50%;
-  background:radial-gradient(ellipse, rgba(0,0,0,0.45), transparent 70%);
+  background:radial-gradient(ellipse, rgba(43,38,32,0.18), transparent 70%);
   filter:blur(2px);pointer-events:none;
 }
 .preview-panel svg{transition:all .4s ease;}
@@ -247,7 +248,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
   padding:10px 16px;border-radius:12px;cursor:pointer;font-family:'Cairo';font-size:0.9rem;
   transition:all .2s;
 }
-.opt.active, .opt:hover{border-color:var(--gold);background:rgba(201,162,39,0.1);}
+.opt.active, .opt:hover{border-color:var(--gold);background:rgba(184,152,94,0.1);}
 .color-dot{
   width:34px;height:34px;border-radius:50%;cursor:pointer;border:2px solid transparent;
   transition:transform .2s;
@@ -261,11 +262,11 @@ input[type=text]:focus{outline:none;border-color:var(--gold);}
 .scent-card{
   border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;
 }
-.scent-card.active{border-color:var(--gold);background:rgba(201,162,39,0.08);}
+.scent-card.active{border-color:var(--gold);background:rgba(184,152,94,0.08);}
 .scent-card h4{font-size:1rem;margin-bottom:4px;}
 .scent-card p{font-size:0.8rem;color:var(--smoke);}
 .scent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.notes-pyramid{margin-top:12px;font-size:0.82rem;color:var(--amber-light);display:none;}
+.notes-pyramid{margin-top:12px;font-size:0.82rem;color:var(--gold-dark);display:none;}
 .notes-pyramid.show{display:block;}
 
 .submit-bar{
@@ -336,7 +337,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <script type="application/ld+json" id="productSchemaLD"></script>
 </head>
 <body>
-<a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--ink);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
+<a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--cream);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
 <style>a[href="#main-content"]:focus{right:0;}</style>
 
 <nav>
@@ -361,7 +362,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </nav>
 
 <!-- Floating cart button -->
-<button id="cartFab" aria-label="السلة" style="position:fixed;bottom:24px;left:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--ink);border:none;box-shadow:0 10px 30px rgba(201,162,39,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+<button id="cartFab" aria-label="السلة" style="position:fixed;bottom:24px;left:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--cream);border:none;box-shadow:0 8px 20px rgba(184,152,94,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
   <span id="cartCount" style="position:absolute;top:-4px;left:-4px;background:var(--rose);color:var(--cream);border-radius:50%;width:22px;height:22px;font-size:0.75rem;display:none;align-items:center;justify-content:center;">0</span>
 </button>
@@ -393,7 +394,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Cart drawer -->
 <div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:70;"></div>
-<div id="cartDrawer" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(0,0,0,0.5);padding:26px;overflow-y:auto;">
+<div id="cartDrawer" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;">سلة التسوق</h3>
     <button id="closeCart" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
@@ -526,17 +527,17 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
   <div class="hero-visual" aria-hidden="true">
     <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg">
-      <rect x="90" y="10" width="40" height="26" rx="4" fill="#c9a227"/>
-      <rect x="95" y="0" width="30" height="14" rx="3" fill="#8b3a4a"/>
+      <rect x="90" y="10" width="40" height="26" rx="4" fill="#b8985e"/>
+      <rect x="95" y="0" width="30" height="14" rx="3" fill="#a8776b"/>
       <path d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
-        fill="url(#g1)" stroke="#c9a227" stroke-width="1.5" opacity="0.95"/>
+        fill="url(#g1)" stroke="#b8985e" stroke-width="1.5" opacity="0.95"/>
       <defs>
         <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#e0b083"/>
-          <stop offset="100%" stop-color="#c08552"/>
+          <stop offset="0%" stop-color="#f2ead9"/>
+          <stop offset="100%" stop-color="#d4bd8e"/>
         </linearGradient>
       </defs>
-      <text x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="26" fill="#1b1420">Monsela</text>
+      <text x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="26" fill="#2b2620">Monsela</text>
     </svg>
   </div>
 </header>
@@ -615,7 +616,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <div class="eyebrow">ميزة إضافية</div>
       <h2>حابب تحط بصمتك الشخصية؟ صمم قزازتك</h2>
       <p>ميزة اختيارية: اختار شكل ولون القزازة، اكتب اسمك عليها، وحدد التركيبة — وابعتلنا التصميم كطلب منفصل.</p>
-      <div id="sharedBanner" style="display:none;margin-top:18px;background:rgba(201,162,39,0.12);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;color:var(--gold);font-size:0.9rem;"></div>
+      <div id="sharedBanner" style="display:none;margin-top:18px;background:rgba(184,152,94,0.12);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;color:var(--gold);font-size:0.9rem;"></div>
     </div>
 
     <div class="customizer reveal">
@@ -876,7 +877,7 @@ function showErrorToast(){
   if (document.getElementById('globalErrorToast')) return;
   const toast = document.createElement('div');
   toast.id = 'globalErrorToast';
-  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink-2);border:1px solid var(--danger);color:var(--cream);padding:12px 20px;border-radius:12px;font-size:0.85rem;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.4);';
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink-2);border:1px solid var(--danger);color:var(--cream);padding:12px 20px;border-radius:12px;font-size:0.85rem;z-index:200;box-shadow:0 10px 30px rgba(43,38,32,0.1);';
   toast.textContent = '⚠️ حصلت مشكلة بسيطة في الصفحة. لو حاجة مش شغالة، جرب تحدّث الصفحة.';
   document.body.appendChild(toast);
   setTimeout(()=> toast.remove(), 6000);
@@ -1062,7 +1063,7 @@ function renderProducts(){
     <div class="perfume-card" style="position:relative;">
       <div style="position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:2;">
         ${hasDiscount ? `<span style="background:var(--rose);color:var(--cream);font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:999px;">-${discountPct}%</span>` : ''}
-        ${isNew ? `<span style="background:var(--gold);color:var(--ink);font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:999px;">جديد</span>` : ''}
+        ${isNew ? `<span style="background:var(--gold);color:var(--cream);font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:999px;">جديد</span>` : ''}
       </div>
       ${p.image_url
         ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
@@ -1095,10 +1096,10 @@ function renderProducts(){
       `}
       <div style="display:flex;gap:8px;">
         <button class="btn-ghost view-details" data-id="${p.id}" style="flex:1;">عرض التفاصيل</button>
-        <button class="wishlist-toggle" data-id="${p.id}" aria-label="أضف للمفضلة" style="width:44px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;">
+        <button class="wishlist-toggle" data-id="${p.id}" aria-label="${wishlist.includes(p.id) ? 'شيل من المفضلة' : 'أضف للمفضلة'}" style="width:44px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? 'var(--rose)' : 'none'}" stroke="var(--rose)" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
         </button>
-        <button class="compare-toggle opt ${compareList.includes(p.id) ? 'active' : ''}" data-id="${p.id}" style="width:44px;padding:0;display:flex;align-items:center;justify-content:center;">
+        <button class="compare-toggle opt ${compareList.includes(p.id) ? 'active' : ''}" data-id="${p.id}" aria-label="${compareList.includes(p.id) ? 'شيل من المقارنة' : 'أضف للمقارنة'}" style="width:44px;padding:0;display:flex;align-items:center;justify-content:center;">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 16v3a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3"/></svg>
         </button>
       </div>
@@ -2023,7 +2024,7 @@ document.getElementById('wishlistPrintBtn').addEventListener('click', ()=>{
   const win = window.open('', '_blank');
   win.document.write(`
     <html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة أمنياتي - Monsela</title>
-    <style>body{font-family:Arial;padding:40px;} h1{color:#8b3a4a;} li{margin-bottom:10px;font-size:16px;}</style></head>
+    <style>body{font-family:Arial;padding:40px;} h1{color:#8f7240;} li{margin-bottom:10px;font-size:16px;}</style></head>
     <body><h1>قائمة أمنياتي - Monsela</h1><ul>
     ${items.map(p => `<li>${p.name} ${p.price ? '— ' + p.price + ' جنيه' : ''}</li>`).join('')}
     </ul></body></html>
@@ -2163,7 +2164,7 @@ saveOrderBtn.addEventListener('click', async ()=>{
   }
   saveOrderBtn.disabled = true;
   saveOrderBtn.textContent = 'جاري الحفظ...';
-  orderStatus.style.color = '#c9a227';
+  orderStatus.style.color = '#b8985e';
   orderStatus.textContent = '';
 
   const { error } = await sb.from('orders').insert({
@@ -2329,7 +2330,7 @@ shareBtn.addEventListener('click', async ()=>{
     shareStatus.style.color = '#8fd98f';
     shareStatus.textContent = `✓ اتنسخ الرابط! ${shareUrl}`;
   }catch(e){
-    shareStatus.style.color = '#c9a227';
+    shareStatus.style.color = '#b8985e';
     shareStatus.textContent = shareUrl;
   }
 });
