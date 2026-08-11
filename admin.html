@@ -164,9 +164,32 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div id="variantsRows"></div>
       <button type="button" class="btn btn-ghost" id="addVariantRow" style="margin-bottom:16px;">+ أضف حجم</button>
       <br>
+      <label style="margin-top:10px;">ألوان القزازة المتاحة (اختياري — العميل يختار لون الزجاجة اللي هتوصله)</label>
+      <div id="bottleColorRows"></div>
+      <button type="button" class="btn btn-ghost" id="addBottleColorRow" style="margin-bottom:16px;">+ أضف لون</button>
+      <br>
       <button class="btn" id="saveProductBtn">حفظ المنتج</button>
       <button class="btn btn-ghost" id="cancelEditBtn" style="display:none;">إلغاء التعديل</button>
       <div class="status" id="productStatus"></div>
+    </div>
+
+    <div class="card" style="border-color:var(--gold);">
+      <h2>⚡ إضافة سريعة لعدة منتجات مرة واحدة</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">
+        بدل ما تضيف كل منتج لوحده، اكتب كل منتج في سطر منفصل بالشكل ده بالظبط، وافصل بين كل معلومة بعلامة <b>|</b>:<br>
+        <code style="background:var(--ink);padding:2px 6px;border-radius:4px;">اسم المنتج | السعر | الوصف أو النوتات</code><br>
+        <span style="font-size:0.8rem;">مثال:</span><br>
+        <code style="background:var(--ink);padding:6px 10px;border-radius:6px;display:block;margin-top:6px;white-space:pre-line;">عود ملكي | 450 | عود وعنبر، دافئ وثقيل
+نسيم الياسمين | 380 | ياسمين وحمضيات، خفيف ومنعش</code>
+      </p>
+      <div class="row">
+        <div><label>القسم الافتراضي لكل المنتجات دي</label><input type="text" id="bulkDepartment" value="عطور"></div>
+        <div><label>المخزون الافتراضي لكل واحد</label><input type="number" id="bulkStock" value="10"></div>
+      </div>
+      <label>الصق المنتجات هنا (منتج في كل سطر)</label>
+      <textarea id="bulkProductsText" style="min-height:160px;" placeholder="عود ملكي | 450 | عود وعنبر، دافئ وثقيل"></textarea>
+      <button class="btn" id="bulkAddBtn">أضف كل المنتجات دي دفعة واحدة</button>
+      <div class="status" id="bulkAddStatus"></div>
     </div>
 
     <div class="card">
@@ -750,6 +773,33 @@ function addVariantRow(label = '', price = '', stock = ''){
 }
 document.getElementById('addVariantRow').addEventListener('click', ()=> addVariantRow());
 
+// ===== Bottle color options (simple color choice, replaces the old 3D bottle designer) =====
+function addBottleColorRow(name = '', hex = '#c08552'){
+  const row = document.createElement('div');
+  row.className = 'row bottle-color-row';
+  row.style.alignItems = 'center';
+  row.innerHTML = `
+    <input type="text" class="bc-name" placeholder="مثال: عنبري" value="${name}">
+    <input type="color" class="bc-hex" value="${hex}" style="height:44px;padding:4px;">
+    <button type="button" class="btn btn-danger remove-bottle-color" style="flex:0;padding:10px 14px;">✕</button>
+  `;
+  document.getElementById('bottleColorRows').appendChild(row);
+  row.querySelector('.remove-bottle-color').addEventListener('click', ()=> row.remove());
+}
+document.getElementById('addBottleColorRow').addEventListener('click', ()=> addBottleColorRow());
+
+function readBottleColorsFromForm(){
+  const rows = document.querySelectorAll('#bottleColorRows .bottle-color-row');
+  const colors = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.bc-name').value.trim();
+    const hex = row.querySelector('.bc-hex').value;
+    if (name) colors.push({ name, hex });
+  });
+  return colors.length ? colors : null;
+}
+function clearBottleColorRows(){ document.getElementById('bottleColorRows').innerHTML = ''; }
+
 function readVariantsFromForm(){
   const rows = document.querySelectorAll('#variantsRows .variant-row');
   const variants = [];
@@ -793,6 +843,7 @@ function resetForm(){
   document.getElementById('currentImagePreview').innerHTML = '';
   document.getElementById('cancelEditBtn').style.display = 'none';
   clearVariantRows();
+  clearBottleColorRows();
   editingImageUrl = null;
   editingGalleryImages = [];
 }
@@ -884,6 +935,7 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     featured: document.getElementById('pFeatured').checked,
     gallery_images: galleryUrls.length ? galleryUrls : null,
     variants: readVariantsFromForm(),
+    bottle_colors: readBottleColorsFromForm(),
     image_url: imageUrl
   };
 
@@ -902,6 +954,49 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
   }
   statusEl.style.color = 'var(--success)'; statusEl.textContent = 'اتحفظ بنجاح ✓';
   resetForm();
+  loadProductsList();
+});
+
+// ===== Bulk add many products at once =====
+document.getElementById('bulkAddBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('bulkAddStatus');
+  const raw = document.getElementById('bulkProductsText').value;
+  const department = document.getElementById('bulkDepartment').value.trim() || 'عطور';
+  const defaultStock = Number(document.getElementById('bulkStock').value) || 0;
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length === 0) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصق منتج واحد على الأقل الأول.'; return; }
+
+  const btn = document.getElementById('bulkAddBtn');
+  btn.disabled = true;
+  const rows = [];
+  let skipped = 0;
+  lines.forEach(line => {
+    const parts = line.split('|').map(p => p.trim());
+    const name = parts[0];
+    const price = parts[1] ? Number(parts[1].replace(/[^\d.]/g, '')) : null;
+    const notes = parts[2] || null;
+    if (!name) { skipped++; return; }
+    rows.push({ name, price: price || null, notes, department, stock: defaultStock });
+  });
+
+  if (rows.length === 0) {
+    btn.disabled = false;
+    statusEl.style.color='var(--danger)'; statusEl.textContent='محصلتش أي منتج صحيح — تأكد إنك مستخدم | بين المعلومات.';
+    return;
+  }
+
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = `جاري إضافة ${rows.length} منتج...`;
+  const { error } = await sb.from('products').insert(rows);
+  btn.disabled = false;
+
+  if (error) {
+    statusEl.style.color='var(--danger)'; statusEl.textContent = 'حصلت مشكلة: ' + error.message;
+    return;
+  }
+  statusEl.style.color='var(--success)';
+  statusEl.textContent = `✓ اتضاف ${rows.length} منتج بنجاح!${skipped ? ` (اتجاهل ${skipped} سطر فاضي)` : ''} تقدر تدخل على أي منتج تحت وتزوّده بصورة وتفاصيل زيادة.`;
+  document.getElementById('bulkProductsText').value = '';
   loadProductsList();
 });
 
@@ -977,6 +1072,10 @@ function editProduct(p){
   clearVariantRows();
   if (Array.isArray(p.variants)) {
     p.variants.forEach(v => addVariantRow(v.label, v.price, v.stock));
+  }
+  clearBottleColorRows();
+  if (Array.isArray(p.bottle_colors)) {
+    p.bottle_colors.forEach(c => addBottleColorRow(c.name, c.hex));
   }
   editingImageUrl = p.image_url || null;
   editingGalleryImages = Array.isArray(p.gallery_images) ? p.gallery_images : [];

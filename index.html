@@ -305,6 +305,33 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </div>
 
 <!-- Compare modal -->
+<!-- Filter panel -->
+<div id="filterOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:97;"></div>
+<div id="filterPanel" style="display:none;position:fixed;top:0;bottom:0;right:0;width:min(360px,90vw);background:var(--ink-2);z-index:98;box-shadow:-20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;">تصفية</h3>
+    <button id="closeFilterPanel" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
+  </div>
+
+  <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">السعر</h4>
+  <div style="display:flex;gap:10px;margin-bottom:24px;align-items:center;">
+    <input type="number" id="filterPriceMin" placeholder="من" style="width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+    <span style="color:var(--smoke);">إلى</span>
+    <input type="number" id="filterPriceMax" placeholder="إلى" style="width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+  </div>
+
+  <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">الماركة</h4>
+  <div id="filterBrandsList" style="margin-bottom:24px;max-height:180px;overflow-y:auto;"></div>
+
+  <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">تركيز العطر</h4>
+  <div id="filterConcentrationList" style="margin-bottom:28px;"></div>
+
+  <div style="display:flex;gap:10px;">
+    <button id="applyFiltersBtn" class="btn-primary" style="flex:1;">تطبيق</button>
+    <button id="clearFiltersBtn" class="btn-ghost" style="flex:1;">مسح الكل</button>
+  </div>
+</div>
+
 <div id="compareOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:96;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:28px;max-width:600px;width:100%;max-height:85vh;overflow:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -508,18 +535,22 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <h2>تسوق مجموعتنا</h2>
       <p>اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.</p>
     </div>
-    <div style="max-width:560px;margin:0 auto 20px;display:flex;gap:10px;flex-wrap:wrap;">
+    <div style="max-width:560px;margin:0 auto 16px;display:flex;gap:10px;flex-wrap:wrap;">
       <input type="text" id="productSearch" placeholder="ابحث عن منتج..." style="flex:1;min-width:160px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
-      <select id="productBrandFilter" style="background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.9rem;">
-        <option value="الكل">كل الماركات</option>
-      </select>
+      <button id="openFilterPanelBtn" class="btn-ghost" style="padding:12px 22px;font-size:0.9rem;">
+        تصفية <span id="activeFilterCount" style="display:none;background:var(--gold);color:var(--cream);border-radius:999px;font-size:0.7rem;padding:1px 7px;margin-right:4px;">0</span>
+      </button>
       <select id="productSort" style="background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.9rem;">
-        <option value="default">الترتيب الافتراضي</option>
+        <option value="default">الأكثر تميّزًا</option>
+        <option value="bestselling">الأفضل مبيعًا</option>
         <option value="newest">الأحدث</option>
+        <option value="name_asc">أبجديًا: أ ← ي</option>
+        <option value="name_desc">أبجديًا: ي ← أ</option>
         <option value="price_asc">السعر: من الأقل</option>
         <option value="price_desc">السعر: من الأعلى</option>
       </select>
     </div>
+    <p id="resultsCount" style="text-align:center;color:var(--smoke);font-size:0.85rem;margin-bottom:16px;"></p>
     <div class="option-row reveal" id="departmentFilters" style="justify-content:center;margin-bottom:16px;"></div>
     <div class="option-row reveal" id="categoryFilters" style="justify-content:center;margin-bottom:28px;"></div>
     <div class="gallery-grid reveal" id="productsGrid">
@@ -708,7 +739,10 @@ function canSubmitAgain(key, cooldownMs = 15000){
 let allProducts = [];
 let activeDepartment = 'الكل';
 let activeCategory = 'الكل';
-let activeBrand = 'الكل';
+let selectedBrands = new Set();
+let selectedConcentrations = new Set();
+let filterPriceMin = null;
+let filterPriceMax = null;
 let visibleCount = 12;
 
 function renderSkeletonCards(count = 8){
@@ -741,7 +775,7 @@ async function loadProducts(){
   allProducts = data || [];
   renderDepartmentFilters();
   renderCategoryFilters();
-  renderBrandFilter();
+  renderFilterPanelOptions();
   renderProducts();
 
   const sharedProductId = new URLSearchParams(location.search).get('product');
@@ -761,14 +795,38 @@ async function loadProducts(){
   }
 }
 
-function renderBrandFilter(){
-  const sel = document.getElementById('productBrandFilter');
-  const brands = ['الكل', ...new Set(allProducts.map(p => p.brand).filter(Boolean))];
-  if (brands.length <= 1) { sel.style.display = 'none'; return; }
-  sel.style.display = 'inline-block';
-  const current = sel.value || 'الكل';
-  sel.innerHTML = brands.map(b => `<option value="${b}">${b === 'الكل' ? 'كل الماركات' : b}</option>`).join('');
-  sel.value = brands.includes(current) ? current : 'الكل';
+function renderFilterPanelOptions(){
+  const scoped = activeDepartment === 'الكل' ? allProducts : allProducts.filter(p => p.department === activeDepartment);
+
+  const brandsWrap = document.getElementById('filterBrandsList');
+  const brands = [...new Set(scoped.map(p => p.brand).filter(Boolean))];
+  if (brands.length === 0) {
+    brandsWrap.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش ماركات مضافة.</p>';
+  } else {
+    brandsWrap.innerHTML = brands.map(b => {
+      const count = scoped.filter(p => p.brand === b).length;
+      const checked = selectedBrands.has(b) ? 'checked' : '';
+      return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85rem;cursor:pointer;">
+        <input type="checkbox" class="filter-brand-cb" value="${escapeHTML(b)}" ${checked} style="width:auto;">
+        ${escapeHTML(b)} <span style="color:var(--smoke);">(${count})</span>
+      </label>`;
+    }).join('');
+  }
+
+  const concWrap = document.getElementById('filterConcentrationList');
+  const concentrations = [...new Set(scoped.map(p => p.concentration).filter(Boolean))];
+  if (concentrations.length === 0) {
+    concWrap.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش بيانات كافية.</p>';
+  } else {
+    concWrap.innerHTML = concentrations.map(c => {
+      const count = scoped.filter(p => p.concentration === c).length;
+      const checked = selectedConcentrations.has(c) ? 'checked' : '';
+      return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85rem;cursor:pointer;">
+        <input type="checkbox" class="filter-conc-cb" value="${escapeHTML(c)}" ${checked} style="width:auto;">
+        ${escapeHTML(c)} <span style="color:var(--smoke);">(${count})</span>
+      </label>`;
+    }).join('');
+  }
 }
 
 function renderDepartmentFilters(){
@@ -817,7 +875,10 @@ function renderProducts(){
   const query = (document.getElementById('productSearch').value || '').trim().toLowerCase();
   let list = activeDepartment === 'الكل' ? allProducts : allProducts.filter(p => p.department === activeDepartment);
   list = activeCategory === 'الكل' ? list : list.filter(p => p.category === activeCategory);
-  list = activeBrand === 'الكل' ? list : list.filter(p => p.brand === activeBrand);
+  list = selectedBrands.size === 0 ? list : list.filter(p => selectedBrands.has(p.brand));
+  list = selectedConcentrations.size === 0 ? list : list.filter(p => selectedConcentrations.has(p.concentration));
+  if (filterPriceMin != null) list = list.filter(p => (p.price ?? 0) >= filterPriceMin);
+  if (filterPriceMax != null) list = list.filter(p => (p.price ?? 0) <= filterPriceMax);
   if (query) {
     list = list.filter(p =>
       (p.name || '').toLowerCase().includes(query) ||
@@ -834,7 +895,15 @@ function renderProducts(){
     list.sort((a,b) => (a.price||0) - (b.price||0));
   } else if (sortBy === 'price_desc') {
     list.sort((a,b) => (b.price||0) - (a.price||0));
+  } else if (sortBy === 'name_asc') {
+    list.sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+  } else if (sortBy === 'name_desc') {
+    list.sort((a,b) => b.name.localeCompare(a.name, 'ar'));
+  } else if (sortBy === 'bestselling' && bestSellerRanking) {
+    list.sort((a,b) => (bestSellerRanking[b.id] || 0) - (bestSellerRanking[a.id] || 0));
   }
+
+  document.getElementById('resultsCount').textContent = `${list.length} منتج`;
 
   if (list.length === 0) {
     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات في القسم ده.</p>';
@@ -883,6 +952,7 @@ function renderProducts(){
         </div>
       ` : ''}
       ${hasVariants ? `
+        <p style="color:var(--gold);font-weight:700;margin:6px 0 2px;">ابتداءً من ${Math.min(...p.variants.map(v=>v.price))} جنيه</p>
         <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin:8px 0;">
           ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
         </select>
@@ -1206,8 +1276,13 @@ async function loadBanners(){
 }
 
 // ===== Best sellers (real order data) =====
+let bestSellerRanking = null;
 async function loadBestSellers(){
-  const { data: bestData } = await sb.rpc('get_best_sellers', { limit_count: 8 });
+  const { data: bestData } = await sb.rpc('get_best_sellers', { limit_count: 50 });
+  if (bestData && bestData.length) {
+    bestSellerRanking = {};
+    bestData.forEach(b => { bestSellerRanking[b.product_id] = b.total_sold; });
+  }
   const section = document.getElementById('bestSellers');
   if (!bestData || bestData.length === 0) { section.style.display = 'none'; return; }
   const ids = bestData.map(b => b.product_id);
@@ -1923,7 +1998,51 @@ document.getElementById('productSearch').addEventListener('input', ()=>{
   }, 800);
 });
 document.getElementById('productSort').addEventListener('change', ()=>{ visibleCount = 12; renderProducts(); });
-document.getElementById('productBrandFilter').addEventListener('change', (e)=>{ activeBrand = e.target.value; visibleCount = 12; renderProducts(); });
+document.getElementById('openFilterPanelBtn').addEventListener('click', ()=>{
+  renderFilterPanelOptions();
+  document.getElementById('filterOverlay').style.display = 'block';
+  document.getElementById('filterPanel').style.display = 'block';
+  document.getElementById('filterPriceMin').value = filterPriceMin ?? '';
+  document.getElementById('filterPriceMax').value = filterPriceMax ?? '';
+});
+function closeFilterPanel(){
+  document.getElementById('filterOverlay').style.display = 'none';
+  document.getElementById('filterPanel').style.display = 'none';
+}
+document.getElementById('closeFilterPanel').addEventListener('click', closeFilterPanel);
+document.getElementById('filterOverlay').addEventListener('click', closeFilterPanel);
+
+function updateActiveFilterCount(){
+  const count = selectedBrands.size + selectedConcentrations.size + (filterPriceMin != null ? 1 : 0) + (filterPriceMax != null ? 1 : 0);
+  const badge = document.getElementById('activeFilterCount');
+  badge.style.display = count > 0 ? 'inline-block' : 'none';
+  badge.textContent = count;
+}
+
+document.getElementById('applyFiltersBtn').addEventListener('click', ()=>{
+  selectedBrands = new Set(Array.from(document.querySelectorAll('.filter-brand-cb:checked')).map(cb => cb.value));
+  selectedConcentrations = new Set(Array.from(document.querySelectorAll('.filter-conc-cb:checked')).map(cb => cb.value));
+  const min = document.getElementById('filterPriceMin').value;
+  const max = document.getElementById('filterPriceMax').value;
+  filterPriceMin = min ? Number(min) : null;
+  filterPriceMax = max ? Number(max) : null;
+  visibleCount = 12;
+  updateActiveFilterCount();
+  renderProducts();
+  closeFilterPanel();
+});
+document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
+  selectedBrands = new Set();
+  selectedConcentrations = new Set();
+  filterPriceMin = null;
+  filterPriceMax = null;
+  document.getElementById('filterPriceMin').value = '';
+  document.getElementById('filterPriceMax').value = '';
+  visibleCount = 12;
+  updateActiveFilterCount();
+  renderFilterPanelOptions();
+  renderProducts();
+});
 
 // ===== Mobile menu toggle =====
 const menuToggle = document.getElementById('menuToggle');
