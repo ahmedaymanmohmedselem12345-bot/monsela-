@@ -426,7 +426,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">المبلغ اللي حوّلته</label>
       <input type="number" id="paymentAmountPaid" placeholder="0" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
       <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">صورة إثبات الدفع (Screenshot) <span style="color:var(--rose);">*</span></label>
-      <input type="file" id="paymentProofFile" accept="image/jpeg,image/png,image/webp">
+      <input type="file" id="paymentProofFile" accept="image/*">
       <div id="paymentProofPreview" style="margin-top:10px;"></div>
       <p style="font-size:0.72rem;color:var(--smoke);margin-top:8px;">✓ الطلب مش هيتأكد إلا بعد ما فريقنا يراجع إثبات الدفع.</p>
     </div>
@@ -1865,8 +1865,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     if (!txId) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب رقم عملية التحويل.'; return; }
     if (!amount) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب المبلغ اللي حوّلته.'; return; }
     if (!paymentProofFile) { statusEl.style.color='var(--danger)'; statusEl.textContent='ارفع صورة إثبات الدفع.'; return; }
-    if (!['image/jpeg','image/png','image/webp'].includes(paymentProofFile.type)) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة لازم تكون JPG أو PNG أو WEBP.'; return; }
-    if (paymentProofFile.size > 5 * 1024 * 1024) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة كبيرة جدًا (أقصى حجم 5 ميجا).'; return; }
+    if (paymentProofFile.size > 10 * 1024 * 1024) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة كبيرة جدًا (أقصى حجم 10 ميجا).'; return; }
   }
 
   // Re-validate the coupon is still eligible right before submitting (cart may have changed since it was applied)
@@ -1890,9 +1889,11 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   let paymentProofPath = null;
   if (paymentProofFile) {
     statusEl.textContent = 'جاري رفع إثبات الدفع...';
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-    const { error: uploadError } = await sb.storage.from('payment-proofs').upload(path, paymentProofFile);
+    const origExt = (paymentProofFile.name && paymentProofFile.name.includes('.')) ? paymentProofFile.name.split('.').pop().slice(0,5) : 'jpg';
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${origExt}`;
+    const { error: uploadError } = await sb.storage.from('payment-proofs').upload(path, paymentProofFile, { contentType: paymentProofFile.type || 'application/octet-stream' });
     if (uploadError) {
+      console.error('Payment proof upload failed:', uploadError);
       btn.disabled = false;
       statusEl.style.color = 'var(--danger)';
       statusEl.textContent = 'حصلت مشكلة في رفع صورة الدفع، حاول تاني.';
