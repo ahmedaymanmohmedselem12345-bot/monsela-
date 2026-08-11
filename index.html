@@ -158,7 +158,7 @@ button, .btn-primary, .btn-ghost, .opt{transition-property:transform, box-shadow
 button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:scale(0.96);}
 @media (prefers-reduced-motion: reduce){
   .reveal{opacity:1;transform:none;transition:none;}
-  .hero-visual svg{animation:none;}
+  .hero-visual svg, .hero-visual img{animation:none;}
 }
 .hero-ctas{display:flex;gap:16px;}
 .btn-primary{
@@ -176,6 +176,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 .btn-ghost:hover{border-color:var(--gold);background:rgba(184,152,94,0.08);transform:translateY(-2px);}
 .hero-visual{position:relative;display:flex;justify-content:center;}
 .hero-visual svg{filter:drop-shadow(0 30px 60px rgba(43,38,32,0.15));animation:float 5s ease-in-out infinite;max-width:220px;width:60vw;height:auto;}
+.hero-visual img{filter:drop-shadow(0 30px 60px rgba(43,38,32,0.18));animation:float 5s ease-in-out infinite;max-width:320px;width:75vw;max-height:420px;object-fit:cover;border-radius:20px;}
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
 
 /* SECTION LABELS */
@@ -185,7 +186,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 .section-head p{color:var(--smoke);font-size:clamp(0.9rem, 2vw, 1.05rem);line-height:1.8;}
 
 /* GALLERY */
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 300px));gap:24px;justify-content:center;}
 .perfume-card{
   background:rgba(255,253,249,0.7);
   backdrop-filter:blur(10px);
@@ -475,8 +476,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <a href="#whyMonsela" class="btn-ghost">ليه Monsela؟</a>
     </div>
   </div>
-  <div class="hero-visual" aria-hidden="true">
-    <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg">
+  <div class="hero-visual" id="heroVisual" aria-hidden="true">
+    <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg" id="heroVisualFallback">
       <rect x="90" y="10" width="40" height="26" rx="4" fill="#b8985e"/>
       <rect x="95" y="0" width="30" height="14" rx="3" fill="#a8776b"/>
       <path d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
@@ -758,6 +759,20 @@ function renderSkeletonCards(count = 8){
 }
 renderSkeletonCards();
 
+function updateHeroVisual(){
+  const wrap = document.getElementById('heroVisual');
+  if (wrap.querySelector('img')) return; // already swapped in, don't duplicate
+  // products are already fetched ordered featured-first, then newest — pick the best real photo
+  const candidate = allProducts.find(p => p.image_url);
+  if (!candidate) return; // keep the illustrated placeholder until a real photo exists
+  const fallback = document.getElementById('heroVisualFallback');
+  if (fallback) fallback.remove();
+  const img = document.createElement('img');
+  img.src = candidate.image_url;
+  img.alt = candidate.name;
+  wrap.appendChild(img);
+}
+
 async function loadProducts(){
   const grid = document.getElementById('productsGrid');
   const { data, error } = await sb
@@ -777,6 +792,7 @@ async function loadProducts(){
   renderCategoryFilters();
   renderFilterPanelOptions();
   renderProducts();
+  updateHeroVisual();
 
   const sharedProductId = new URLSearchParams(location.search).get('product');
   if (sharedProductId && allProducts.some(p => p.id === sharedProductId)) {
