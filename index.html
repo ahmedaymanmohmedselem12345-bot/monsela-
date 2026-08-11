@@ -411,6 +411,26 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     </label>
     <textarea id="checkoutGiftMessage" placeholder="اكتب رسالة الإهداء هنا..." style="display:none;width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
     <textarea id="checkoutNotes" placeholder="مثال: يريت التغليف يبقى هدية" style="width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+
+    <label style="display:block;font-weight:700;margin-bottom:8px;">طريقة الدفع <span style="color:var(--rose);">*</span></label>
+    <div class="option-row" id="paymentMethodOptions" style="margin-bottom:16px;">
+      <button type="button" class="opt payment-method-opt active" data-method="cod">كاش عند الاستلام</button>
+      <button type="button" class="opt payment-method-opt" data-method="vodafone_cash">فودافون كاش</button>
+      <button type="button" class="opt payment-method-opt" data-method="instapay">InstaPay</button>
+    </div>
+
+    <div id="manualPaymentBox" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <p id="paymentDetailsText" style="font-size:0.85rem;color:var(--gold-dark);margin-bottom:12px;"></p>
+      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">رقم العملية / المرجع</label>
+      <input type="text" id="paymentTransactionId" placeholder="مثال: 123456789" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">المبلغ اللي حوّلته</label>
+      <input type="number" id="paymentAmountPaid" placeholder="0" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">صورة إثبات الدفع (Screenshot) <span style="color:var(--rose);">*</span></label>
+      <input type="file" id="paymentProofFile" accept="image/jpeg,image/png,image/webp">
+      <div id="paymentProofPreview" style="margin-top:10px;"></div>
+      <p style="font-size:0.72rem;color:var(--smoke);margin-top:8px;">✓ الطلب مش هيتأكد إلا بعد ما فريقنا يراجع إثبات الدفع.</p>
+    </div>
+
     <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);margin-bottom:16px;line-height:1.9;"></div>
     <div style="display:flex;gap:10px;">
       <button id="confirmOrderBtn" class="btn-primary" style="flex:1;">تأكيد الطلب</button>
@@ -1749,9 +1769,55 @@ function updateCheckoutSummary(){
 }
 
 // ----- Checkout -----
-document.getElementById('checkoutBtn').addEventListener('click', ()=>{
+let paymentSettings = null;
+let selectedPaymentMethod = 'cod';
+
+async function loadPaymentSettingsForCheckout(){
+  if (paymentSettings) return paymentSettings;
+  const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
+  paymentSettings = data || {};
+  return paymentSettings;
+}
+
+function updatePaymentDetailsText(){
+  const box = document.getElementById('manualPaymentBox');
+  const textEl = document.getElementById('paymentDetailsText');
+  if (selectedPaymentMethod === 'cod') { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  const s = paymentSettings || {};
+  if (selectedPaymentMethod === 'vodafone_cash') {
+    textEl.textContent = s.vodafone_cash_number
+      ? `حوّل على رقم فودافون كاش: ${s.vodafone_cash_number}${s.payment_instructions ? ' — ' + s.payment_instructions : ''}`
+      : 'رقم فودافون كاش هيتأكد معاك بعد الطلب.';
+  } else if (selectedPaymentMethod === 'instapay') {
+    textEl.textContent = s.instapay_info
+      ? `حوّل عبر InstaPay: ${s.instapay_info}${s.payment_instructions ? ' — ' + s.payment_instructions : ''}`
+      : 'بيانات InstaPay هتتأكد معاك بعد الطلب.';
+  }
+}
+
+document.querySelectorAll('.payment-method-opt').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.payment-method-opt').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedPaymentMethod = btn.dataset.method;
+    updatePaymentDetailsText();
+  });
+});
+
+document.getElementById('paymentProofFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  const preview = document.getElementById('paymentProofPreview');
+  if (!file) { preview.innerHTML = ''; return; }
+  const url = URL.createObjectURL(file);
+  preview.innerHTML = `<img src="${url}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
+});
+
+document.getElementById('checkoutBtn').addEventListener('click', async ()=>{
   document.getElementById('checkoutOverlay').style.display = 'flex';
   updateCheckoutSummary();
+  await loadPaymentSettingsForCheckout();
+  updatePaymentDetailsText();
 });
 document.getElementById('checkoutGift').addEventListener('change', (e)=>{
   document.getElementById('checkoutGiftMessage').style.display = e.target.checked ? 'block' : 'none';
@@ -1791,6 +1857,18 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     return;
   }
 
+  let paymentProofFile = null;
+  if (selectedPaymentMethod === 'vodafone_cash' || selectedPaymentMethod === 'instapay') {
+    const txId = document.getElementById('paymentTransactionId').value.trim();
+    const amount = document.getElementById('paymentAmountPaid').value;
+    paymentProofFile = document.getElementById('paymentProofFile').files[0];
+    if (!txId) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب رقم عملية التحويل.'; return; }
+    if (!amount) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب المبلغ اللي حوّلته.'; return; }
+    if (!paymentProofFile) { statusEl.style.color='var(--danger)'; statusEl.textContent='ارفع صورة إثبات الدفع.'; return; }
+    if (!['image/jpeg','image/png','image/webp'].includes(paymentProofFile.type)) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة لازم تكون JPG أو PNG أو WEBP.'; return; }
+    if (paymentProofFile.size > 5 * 1024 * 1024) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة كبيرة جدًا (أقصى حجم 5 ميجا).'; return; }
+  }
+
   // Re-validate the coupon is still eligible right before submitting (cart may have changed since it was applied)
   if (appliedCoupon) {
     const currentSubtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -1809,6 +1887,21 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   btn.disabled = true;
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري تأكيد الطلب...';
 
+  let paymentProofPath = null;
+  if (paymentProofFile) {
+    statusEl.textContent = 'جاري رفع إثبات الدفع...';
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const { error: uploadError } = await sb.storage.from('payment-proofs').upload(path, paymentProofFile);
+    if (uploadError) {
+      btn.disabled = false;
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'حصلت مشكلة في رفع صورة الدفع، حاول تاني.';
+      return;
+    }
+    paymentProofPath = path;
+  }
+  statusEl.textContent = 'جاري تأكيد الطلب...';
+
   const { data: insertedOrder, error } = await sb.from('store_orders').insert({
     customer_name: name,
     customer_phone: phone,
@@ -1822,7 +1915,12 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     delivery_zone: zone ? zone.name : null,
     delivery_fee: deliveryFee,
     is_gift: document.getElementById('checkoutGift').checked,
-    gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null
+    gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null,
+    payment_method: selectedPaymentMethod,
+    payment_status: selectedPaymentMethod === 'cod' ? 'cod' : 'pending_verification',
+    payment_transaction_id: selectedPaymentMethod !== 'cod' ? document.getElementById('paymentTransactionId').value.trim() : null,
+    payment_amount: selectedPaymentMethod !== 'cod' ? Number(document.getElementById('paymentAmountPaid').value) : null,
+    payment_proof_url: paymentProofPath
   }).select().single();
 
   if (currentCustomer) {
@@ -1840,11 +1938,13 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   const itemsList = cart.map(i => `- ${i.name} × ${i.qty} (${i.price * i.qty} جنيه)`).join('%0a');
   const isGift = document.getElementById('checkoutGift').checked;
   const giftMsg = document.getElementById('checkoutGiftMessage').value.trim();
-  const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${itemsList}%0aالمنتجات: ${subtotal} جنيه` +
+  const payMethodLabel = selectedPaymentMethod === 'vodafone_cash' ? 'فودافون كاش' : selectedPaymentMethod === 'instapay' ? 'InstaPay' : 'كاش عند الاستلام';
+  const orderNumText = insertedOrder && insertedOrder.order_number ? `رقم الطلب: ${insertedOrder.order_number}%0a` : '';
+  const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${orderNumText}${itemsList}%0aالمنتجات: ${subtotal} جنيه` +
     (discount > 0 ? `%0aالخصم: -${discount.toFixed(0)} جنيه (${appliedCoupon.code})` : '') +
     (deliveryFee > 0 ? `%0aالتوصيل: ${deliveryFee} جنيه (${zone.name})` : '') +
     (isGift ? `%0a🎁 ده هدية${giftMsg ? ' — الرسالة: ' + giftMsg : ''}` : '') +
-    `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
+    `%0aالإجمالي: ${total.toFixed(0)} جنيه%0aطريقة الدفع: ${payMethodLabel}%0aالاسم: ${name}%0aالعنوان: ${address || 'هحدده معاكم'}%0aرقمي: ${phone}`;
   openWhatsAppMessage(msg);
 
   cart = [];
@@ -1862,11 +1962,22 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   document.getElementById('checkoutGift').checked = false;
   document.getElementById('checkoutGiftMessage').value = '';
   document.getElementById('checkoutGiftMessage').style.display = 'none';
+  document.getElementById('paymentTransactionId').value = '';
+  document.getElementById('paymentAmountPaid').value = '';
+  document.getElementById('paymentProofFile').value = '';
+  document.getElementById('paymentProofPreview').innerHTML = '';
+  selectedPaymentMethod = 'cod';
+  document.querySelectorAll('.payment-method-opt').forEach(b=>b.classList.toggle('active', b.dataset.method === 'cod'));
+  document.getElementById('manualPaymentBox').style.display = 'none';
 
   const etaText = insertedOrder && insertedOrder.estimated_delivery_date
     ? `المتوقع يوصلك حوالي يوم ${new Date(insertedOrder.estimated_delivery_date).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' })}.`
     : 'هنأكد معاك ميعاد التسليم بالظبط قريب.';
-  alert(`✓ تم تأكيد طلبك!\n${etaText}\nتقدر تتابع حالة طلبك في أي وقت من "حسابي" في الموقع.`);
+  const orderNum = insertedOrder && insertedOrder.order_number ? `رقم طلبك: ${insertedOrder.order_number}\n` : '';
+  const paymentText = (insertedOrder && insertedOrder.payment_method !== 'cod')
+    ? 'تم استلام إثبات الدفع، وهيتراجع من فريقنا قبل ما نبدأ تجهيز طلبك.\n'
+    : '';
+  alert(`✓ تم تأكيد طلبك!\n${orderNum}${paymentText}${etaText}\nتقدر تتابع حالة طلبك في أي وقت من "تتبع طلبك" أو "حسابي" في الموقع.`);
 });
 
 renderCartUI();
@@ -1987,6 +2098,22 @@ function etaHTML(o){
   if (days === 0) return `<p style="color:var(--gold-dark);font-size:0.78rem;margin-top:6px;">📦 متوقع يوصلك النهاردة</p>`;
   return `<p style="color:var(--smoke);font-size:0.78rem;margin-top:6px;">📦 هنأكد معاك ميعاد التسليم</p>`;
 }
+function paymentStatusHTML(o){
+  const labels = {
+    cod: { text: 'الدفع: كاش عند الاستلام', color: 'var(--smoke)' },
+    pending_verification: { text: '💳 إثبات الدفع مستنى المراجعة من فريقنا', color: 'var(--gold-dark)' },
+    approved: { text: '✓ الدفع اتأكد', color: 'var(--success)' },
+    rejected: { text: '✕ الدفع اترفض', color: 'var(--danger)' },
+    need_new_proof: { text: '⚠ محتاجين إثبات دفع جديد منك', color: 'var(--danger)' }
+  };
+  const info = labels[o.payment_status];
+  if (!info) return '';
+  let html = `<p style="color:${info.color};font-size:0.78rem;margin-top:6px;">${info.text}</p>`;
+  if ((o.payment_status === 'rejected' || o.payment_status === 'need_new_proof') && o.payment_rejection_reason) {
+    html += `<p style="color:var(--smoke);font-size:0.75rem;margin-top:2px;">السبب: ${escapeHTML(o.payment_rejection_reason)}</p>`;
+  }
+  return html;
+}
 
 // ===== Guest order tracking (no account needed) =====
 document.getElementById('trackOrderBtn').addEventListener('click', ()=>{
@@ -2008,15 +2135,20 @@ document.getElementById('trackOrderSearchBtn').addEventListener('click', async (
   resultsEl.innerHTML = orders.map(o => `
     <div style="border-bottom:1px solid var(--line);padding:14px 0;font-size:0.85rem;">
       <div style="display:flex;justify-content:space-between;">
-        <b>${o.total} جنيه</b>
+        <b>${escapeHTML(o.order_number || '')} — ${o.total} جنيه</b>
         <span style="color:var(--gold);">${o.status}</span>
       </div>
       <div style="color:var(--smoke);margin-top:4px;">${(o.items||[]).map(i=>`${escapeHTML(i.name)} ×${i.qty}`).join('، ')}</div>
       <div style="color:var(--smoke);font-size:0.75rem;margin-top:4px;">${new Date(o.created_at).toLocaleDateString('ar-EG')}</div>
       ${trackerHTML(o.status)}
       ${etaHTML(o)}
+      ${paymentStatusHTML(o)}
+      <button class="btn-ghost order-whatsapp-btn" data-order="${escapeHTML(o.order_number || '')}" style="width:100%;margin-top:10px;font-size:0.8rem;padding:8px;">تواصل بخصوص الطلب ده</button>
     </div>
   `).join('');
+  resultsEl.querySelectorAll('.order-whatsapp-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> openWhatsAppMessage(`مرحبا Monsela! عندي استفسار عن طلبي رقم ${btn.dataset.order}`));
+  });
 });
 
 async function refreshAccountView(){
@@ -2052,13 +2184,14 @@ async function refreshAccountView(){
   ordersListEl.innerHTML = myOrders.map(o => `
     <div style="border-bottom:1px solid var(--line);padding:14px 0;font-size:0.85rem;">
       <div style="display:flex;justify-content:space-between;">
-        <b>${o.total} جنيه</b>
+        <b>${escapeHTML(o.order_number || '')} — ${o.total} جنيه</b>
         <span style="color:var(--gold);">${o.status}</span>
       </div>
-      <div style="color:var(--smoke);margin-top:4px;">${(o.items||[]).map(i=>`${i.name} ×${i.qty}`).join('، ')}</div>
+      <div style="color:var(--smoke);margin-top:4px;">${(o.items||[]).map(i=>`${escapeHTML(i.name)} ×${i.qty}`).join('، ')}</div>
       <div style="color:var(--smoke);font-size:0.75rem;margin-top:4px;">${new Date(o.created_at).toLocaleDateString('ar-EG')}</div>
       ${trackerHTML(o.status)}
       ${etaHTML(o)}
+      ${paymentStatusHTML(o)}
     </div>
   `).join('');
 }

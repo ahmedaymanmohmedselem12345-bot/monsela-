@@ -223,6 +223,24 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
     </div>
 
     <div class="card">
+      <h2>إعدادات الدفع اليدوي</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">دي البيانات اللي هتظهر للعميل وقت الدفع - تقدر تغيّرها في أي وقت من غير أي تعديل في الكود.</p>
+      <label>رقم فودافون كاش</label>
+      <input type="text" id="vodafoneNumber" placeholder="01xxxxxxxxx">
+      <label>بيانات InstaPay</label>
+      <input type="text" id="instapayInfo" placeholder="مثال: @monsela_ig أو رقم الحساب">
+      <label>تعليمات الدفع (هتظهر للعميل)</label>
+      <textarea id="paymentInstructions" placeholder="حوّل المبلغ بالظبط، وارفع إثبات الدفع بعد كده."></textarea>
+      <button class="btn" id="savePaymentSettingsBtn">حفظ إعدادات الدفع</button>
+      <div class="status" id="paymentSettingsStatus"></div>
+    </div>
+
+    <div class="card" style="border-color:var(--gold);">
+      <h2>💳 مراجعة إثباتات الدفع</h2>
+      <div id="paymentVerificationList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+
+    <div class="card">
       <h2>عرض لفترة محدودة (Flash Sale)</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">لو حطيت تاريخ ووقت، شريط عداد تنازلي هيظهر في الموقع لحد ما ينتهي.</p>
       <label>نص العرض</label>
@@ -418,6 +436,8 @@ async function showAdmin(){
   subscribeToNewOrders();
   loadViewCounter();
   loadShopSettings();
+  loadPaymentSettings();
+  loadPaymentVerificationQueue();
   loadAboutStats();
   loadBanners();
   loadBrandLogos();
@@ -438,6 +458,94 @@ async function loadShopSettings(){
   const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
   if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
 }
+async function loadShopSettings(){
+  const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
+  if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
+}
+
+// ===== Payment settings (admin-editable, no code changes needed) =====
+async function loadPaymentSettings(){
+  const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
+  if (!data) return;
+  document.getElementById('vodafoneNumber').value = data.vodafone_cash_number || '';
+  document.getElementById('instapayInfo').value = data.instapay_info || '';
+  document.getElementById('paymentInstructions').value = data.payment_instructions || '';
+}
+document.getElementById('savePaymentSettingsBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('paymentSettingsStatus');
+  const { error } = await sb.from('shop_settings').update({
+    vodafone_cash_number: document.getElementById('vodafoneNumber').value.trim() || null,
+    instapay_info: document.getElementById('instapayInfo').value.trim() || null,
+    payment_instructions: document.getElementById('paymentInstructions').value.trim() || null
+  }).eq('id', 1);
+  statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
+  statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظت ✓ هتظهر للعميل فورًا.';
+});
+
+// ===== Payment verification queue =====
+async function loadPaymentVerificationQueue(){
+  const listEl = document.getElementById('paymentVerificationList');
+  const { data, error } = await sb.from('store_orders').select('*').eq('payment_status', 'pending_verification').order('created_at', { ascending: true });
+  if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في التحميل.</p>'; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">مفيش إثباتات دفع مستنية المراجعة دلوقتي.</p>'; return; }
+
+  const cards = await Promise.all(data.map(async o => {
+    let imgHTML = '<p style="color:var(--smoke);font-size:0.8rem;">مفيش صورة مرفوعة</p>';
+    if (o.payment_proof_url) {
+      const { data: signed } = await sb.storage.from('payment-proofs').createSignedUrl(o.payment_proof_url, 3600);
+      if (signed) imgHTML = `<a href="${signed.signedUrl}" target="_blank"><img src="${signed.signedUrl}" style="max-width:220px;max-height:220px;border-radius:10px;border:1px solid var(--line);"></a>`;
+    }
+    const methodLabel = o.payment_method === 'vodafone_cash' ? 'فودافون كاش' : o.payment_method === 'instapay' ? 'InstaPay' : o.payment_method;
+    return `
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div>
+            <h4>${escapeHTML(o.order_number)} — ${escapeHTML(o.customer_name)}</h4>
+            <p style="color:var(--smoke);font-size:0.85rem;">📞 ${escapeHTML(o.customer_phone)}</p>
+            <p style="font-size:0.85rem;">طريقة الدفع: <b>${methodLabel}</b></p>
+            <p style="font-size:0.85rem;">إجمالي الطلب: <b>${o.total} جنيه</b> — المبلغ المُرسل: <b>${o.payment_amount ?? '—'} جنيه</b></p>
+            <p style="font-size:0.85rem;">رقم العملية: <b>${escapeHTML(o.payment_transaction_id || '—')}</b></p>
+            ${o.payment_note ? `<p style="font-size:0.8rem;color:var(--smoke);">ملاحظة العميل: ${escapeHTML(o.payment_note)}</p>` : ''}
+            <p style="font-size:0.75rem;color:var(--smoke);">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
+          </div>
+          <div>${imgHTML}</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+          <button class="btn" data-approve-payment="${o.id}">✓ قبول الدفع</button>
+          <button class="btn btn-danger" data-reject-payment="${o.id}">✕ رفض</button>
+          <button class="btn btn-ghost" data-newproof-payment="${o.id}">اطلب إثبات جديد</button>
+        </div>
+      </div>`;
+  }));
+  listEl.innerHTML = cards.join('');
+
+  listEl.querySelectorAll('[data-approve-payment]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('store_orders').update({ payment_status: 'approved' }).eq('id', btn.dataset.approvePayment);
+      loadPaymentVerificationQueue();
+      loadOrdersList();
+    });
+  });
+  listEl.querySelectorAll('[data-reject-payment]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const reason = prompt('اكتب سبب الرفض (هيظهر للعميل):');
+      if (reason === null) return;
+      await sb.from('store_orders').update({ payment_status: 'rejected', payment_rejection_reason: reason }).eq('id', btn.dataset.rejectPayment);
+      loadPaymentVerificationQueue();
+      loadOrdersList();
+    });
+  });
+  listEl.querySelectorAll('[data-newproof-payment]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const reason = prompt('اكتب ليه محتاج إثبات جديد (هيظهر للعميل):', 'الصورة مش واضحة، يريت ترفع صورة أوضح.');
+      if (reason === null) return;
+      await sb.from('store_orders').update({ payment_status: 'need_new_proof', payment_rejection_reason: reason }).eq('id', btn.dataset.newproofPayment);
+      loadPaymentVerificationQueue();
+      loadOrdersList();
+    });
+  });
+}
+
 document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('settingsStatus');
   const value = Number(document.getElementById('freeShippingThreshold').value) || 0;
@@ -1138,10 +1246,13 @@ async function loadOrdersList(){
   listEl.innerHTML = data.map(o => {
     const itemsText = (o.items || []).map(i => `${escapeHTML(i.name)} × ${i.qty}`).join('، ');
     const statusOptions = ORDER_STATUSES.map(s => `<option value="${s}" ${s === o.status ? 'selected' : ''}>${s}</option>`).join('');
+    const payLabels = { cod: 'كاش عند الاستلام', pending_verification: 'مستنية مراجعة الدفع', approved: 'الدفع مؤكد ✓', rejected: 'الدفع مرفوض ✕', need_new_proof: 'مطلوب إثبات جديد' };
+    const payColors = { cod: 'var(--smoke)', pending_verification: '#c9a227', approved: 'var(--success)', rejected: 'var(--danger)', need_new_proof: 'var(--danger)' };
     return `
     <div class="product-item" style="align-items:flex-start;">
       <div class="info">
-        <h4>${escapeHTML(o.customer_name)} — ${o.total} جنيه</h4>
+        <h4>${escapeHTML(o.order_number || '')} — ${escapeHTML(o.customer_name)} — ${o.total} جنيه</h4>
+        <p style="color:${payColors[o.payment_status] || 'var(--smoke)'};">💳 ${payLabels[o.payment_status] || o.payment_status}</p>
         <p>${itemsText}</p>
         <p>📞 ${escapeHTML(o.customer_phone)} ${o.customer_address ? '· ' + escapeHTML(o.customer_address) : ''}</p>
         ${o.notes ? `<p style="color:var(--gold);">📝 ${escapeHTML(o.notes)}</p>` : ''}
