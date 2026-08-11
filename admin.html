@@ -49,6 +49,16 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
 #authScreen, #adminScreen{display:none;}
 #authScreen.show, #adminScreen.show{display:block;}
 .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.admin-tab-btn{background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 18px;border-radius:999px;font-family:'Cairo';font-size:0.9rem;cursor:pointer;font-weight:600;transition:all .2s;}
+.admin-tab-btn:hover{border-color:var(--gold);}
+.admin-tab-btn.active{background:var(--gold);color:var(--ink);border-color:var(--gold);}
+.card[data-tab]{display:none;}
+body.tab-dashboard .card[data-tab="dashboard"],
+body.tab-products .card[data-tab="products"],
+body.tab-orders .card[data-tab="orders"],
+body.tab-marketing .card[data-tab="marketing"],
+body.tab-customers .card[data-tab="customers"],
+body.tab-settings .card[data-tab="settings"]{display:block;}
 </style>
 </head>
 <body>
@@ -91,7 +101,16 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <button class="btn btn-ghost" id="logoutBtn">تسجيل الخروج</button>
     </div>
 
-    <div class="card">
+    <div id="adminTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;border-bottom:1px solid var(--line);padding-bottom:16px;">
+      <button class="admin-tab-btn active" data-tab="dashboard">📊 نظرة عامة</button>
+      <button class="admin-tab-btn" data-tab="products">🧴 المنتجات</button>
+      <button class="admin-tab-btn" data-tab="orders">📦 الطلبات والدفع</button>
+      <button class="admin-tab-btn" data-tab="marketing">📣 التسويق والعروض</button>
+      <button class="admin-tab-btn" data-tab="customers">👥 العملاء</button>
+      <button class="admin-tab-btn" data-tab="settings">⚙️ الإعدادات</button>
+    </div>
+
+    <div class="card" data-tab="products">
       <h2 id="formTitle">إضافة برفان جديد</h2>
       <input type="hidden" id="productId">
       <label>اسم البرفان</label>
@@ -131,6 +150,10 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <textarea id="pNotes" placeholder="مثال: عود، عنبر، خشب صندل — دافئ وثقيل"></textarea>
       <label>وصف تفصيلي (اختياري، مش ظاهر في الكارت)</label>
       <textarea id="pDescription"></textarea>
+
+      <label style="margin-top:6px;">النسخة الإنجليزية (اختياري - يظهر لو العميل بدّل للإنجليزي، وإلا هيفضل يشوف العربي)</label>
+      <input type="text" id="pNameEn" placeholder="Product name in English">
+      <textarea id="pDescriptionEn" placeholder="Description in English"></textarea>
 
       <label style="margin-top:6px;">هرم النوتات والملف الكامل (اختياري - يظهر في صفحة تفاصيل المنتج)</label>
       <div class="row">
@@ -173,7 +196,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div class="status" id="productStatus"></div>
     </div>
 
-    <div class="card" style="border-color:var(--gold);">
+    <div class="card" style="border-color:var(--gold);" data-tab="products">
       <h2>⚡ إضافة سريعة لعدة منتجات مرة واحدة</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">
         بدل ما تضيف كل منتج لوحده، اكتب كل منتج في سطر منفصل بالشكل ده بالظبط، وافصل بين كل معلومة بعلامة <b>|</b>:<br>
@@ -192,14 +215,14 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div class="status" id="bulkAddStatus"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="products">
       <h2>منتجاتك الحالية</h2>
       <button class="btn btn-ghost" id="exportProductsBtn" style="margin-bottom:14px;">⬇ تصدير المنتجات Excel</button>
       <div id="lowStockAlert" style="margin-bottom:14px;"></div>
       <div id="productsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="dashboard">
       <h2>لوحة المعلومات</h2>
       <div class="row" id="dashboardStats" style="margin-bottom:20px;"></div>
       <div class="row">
@@ -214,7 +237,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="settings">
       <h2>إعدادات المتجر</h2>
       <label>حد الشحن المجاني (جنيه) — 0 يعني معطّل</label>
       <input type="number" id="freeShippingThreshold" placeholder="1500">
@@ -222,7 +245,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div class="status" id="settingsStatus"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="settings">
       <h2>إعدادات الدفع اليدوي</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">دي البيانات اللي هتظهر للعميل وقت الدفع - تقدر تغيّرها في أي وقت من غير أي تعديل في الكود.</p>
       <label>رقم فودافون كاش</label>
@@ -235,12 +258,12 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div class="status" id="paymentSettingsStatus"></div>
     </div>
 
-    <div class="card" style="border-color:var(--gold);">
+    <div class="card" style="border-color:var(--gold);" data-tab="orders">
       <h2>💳 مراجعة إثباتات الدفع</h2>
       <div id="paymentVerificationList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="marketing">
       <h2>عرض لفترة محدودة (Flash Sale)</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">لو حطيت تاريخ ووقت، شريط عداد تنازلي هيظهر في الموقع لحد ما ينتهي.</p>
       <label>نص العرض</label>
@@ -252,34 +275,34 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div class="status" id="saleFormStatus"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="customers">
       <h2>طلبات "أبلغني لو السعر قلّ"</h2>
       <div id="priceAlertList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="customers">
       <h2>طلبات "أبلغني لما يتوفر"</h2>
       <div id="stockNotifyList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="marketing">
       <h2>مشتركين النشرة البريدية</h2>
       <button class="btn btn-ghost" id="exportNewsletterBtn" style="margin-bottom:14px;">⬇ تصدير Excel</button>
       <div id="newsletterList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="orders">
       <h2>طلبات المتجر (السلة)</h2>
       <button class="btn btn-ghost" id="exportOrdersBtn" style="margin-bottom:14px;">⬇ تصدير الطلبات Excel</button>
       <div id="ordersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="orders">
       <h2>طلبات تصميم القزازة</h2>
       <div id="customizerOrdersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="marketing">
       <h2>أكواد الخصم</h2>
       <div class="row">
         <div><label>الكود</label><input type="text" id="cCode" placeholder="WELCOME10"></div>
@@ -306,7 +329,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div id="couponsList" style="margin-top:16px;"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="settings">
       <h2>مناطق التوصيل</h2>
       <div class="row">
         <div><label>اسم المنطقة</label><input type="text" id="zName" placeholder="القاهرة الكبرى"></div>
@@ -319,7 +342,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div id="zonesList" style="margin-top:16px;"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="settings">
       <h2>أرقام قسم "من احنا"</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">ده بديل الأرقام الوهمية — اكتب أرقامك الحقيقية بس. سيبها فاضية لو مفيش أرقام حقيقية لسه.</p>
       <div class="row">
@@ -334,7 +357,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div class="status" id="statsFormStatus"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="marketing">
       <h2>بانرات الصفحة الرئيسية</h2>
       <label>رابط صورة البانر</label>
       <input type="text" id="bImageUrl" placeholder="https://...">
@@ -347,7 +370,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div id="bannersList" style="margin-top:16px;"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="marketing">
       <h2>شعارات الماركات</h2>
       <div class="row">
         <div><label>اسم الماركة (زي ما مكتوب بالظبط في المنتجات)</label><input type="text" id="brName" placeholder="Ibrahim Al Qurashi"></div>
@@ -358,7 +381,7 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
       <div id="brandLogosList" style="margin-top:16px;"></div>
     </div>
 
-    <div class="card">
+    <div class="card" data-tab="customers">
       <h2>مراجعات العملاء (تحتاج موافقتك)</h2>
       <div id="reviewsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
@@ -422,12 +445,23 @@ document.getElementById('logoutBtn').addEventListener('click', async ()=>{
   location.reload();
 });
 
+document.querySelectorAll('.admin-tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.body.className = document.body.className.replace(/\btab-\w+\b/g, '').trim();
+    document.body.classList.add('tab-' + btn.dataset.tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
 async function showAdmin(){
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return;
   document.getElementById('whoami').textContent = `مسجل دخول كـ ${user.email}`;
   authScreen.classList.remove('show');
   adminScreen.classList.add('show');
+  document.body.classList.add('tab-dashboard');
   loadProductsList();
   loadOrdersList();
   loadCustomizerOrdersList();
@@ -938,6 +972,8 @@ function resetForm(){
   document.getElementById('pCategory').value = '';
   document.getElementById('pNotes').value = '';
   document.getElementById('pDescription').value = '';
+  document.getElementById('pNameEn').value = '';
+  document.getElementById('pDescriptionEn').value = '';
   document.getElementById('pTopNotes').value = '';
   document.getElementById('pHeartNotes').value = '';
   document.getElementById('pBaseNotes').value = '';
@@ -1032,6 +1068,8 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     category: document.getElementById('pCategory').value.trim() || null,
     notes: document.getElementById('pNotes').value.trim() || null,
     description: document.getElementById('pDescription').value.trim() || null,
+    name_en: document.getElementById('pNameEn').value.trim() || null,
+    description_en: document.getElementById('pDescriptionEn').value.trim() || null,
     top_notes: document.getElementById('pTopNotes').value.trim() || null,
     heart_notes: document.getElementById('pHeartNotes').value.trim() || null,
     base_notes: document.getElementById('pBaseNotes').value.trim() || null,
@@ -1168,6 +1206,8 @@ function editProduct(p){
   document.getElementById('pCategory').value = p.category || '';
   document.getElementById('pNotes').value = p.notes || '';
   document.getElementById('pDescription').value = p.description || '';
+  document.getElementById('pNameEn').value = p.name_en || '';
+  document.getElementById('pDescriptionEn').value = p.description_en || '';
   document.getElementById('pTopNotes').value = p.top_notes || '';
   document.getElementById('pHeartNotes').value = p.heart_notes || '';
   document.getElementById('pBaseNotes').value = p.base_notes || '';

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,7 +52,7 @@
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -74,6 +74,17 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
+
+/* ===== LTR (English) mode ===== */
+html[dir="ltr"] body{direction:ltr;text-align:left;font-family:'Cairo',sans-serif;}
+html[dir="ltr"] .eyebrow, html[dir="ltr"] h1, html[dir="ltr"] h2, html[dir="ltr"] h3, html[dir="ltr"] h4{font-family:'Playfair Display', Georgia, serif;}
+html[dir="ltr"] .perfume-card, html[dir="ltr"] .section-head{text-align:center;}
+html[dir="ltr"] #cartFab{left:auto;right:24px;}
+html[dir="ltr"] #backToTop{right:auto;left:24px;}
+html[dir="ltr"] #filterPanel{right:auto;left:0;box-shadow:20px 0 60px rgba(43,38,32,0.12);}
+html[dir="ltr"] #compareBar, html[dir="ltr"] #flashSaleBanner{direction:ltr;}
+html[dir="ltr"] .nav-links{direction:ltr;}
+[data-i18n], [data-i18n-ph]{transition:none;}
 body{
   background: radial-gradient(ellipse at top, var(--ink-2) 0%, var(--ink) 45%, var(--ink-3) 100%) fixed;
   color:var(--cream);
@@ -270,19 +281,20 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   <div class="container">
     <div class="logo">Mon<span>sela</span></div>
     <div class="nav-links" id="navLinks">
-      <a href="#gallery">مجموعتنا</a>
-      <a href="#scentFinder">لاقي عطرك</a>
-      <a href="contact.html">تواصل معنا</a>
+      <a href="#gallery" data-i18n="nav_shop">مجموعتنا</a>
+      <a href="#scentFinder" data-i18n="nav_finder">لاقي عطرك</a>
+      <a href="contact.html" data-i18n="nav_contact">تواصل معنا</a>
     </div>
     <button id="trackOrderBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      تتبع طلبك
+      <span data-i18n="nav_track">تتبع طلبك</span>
     </button>
     <button id="accountBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      حسابي
+      <span data-i18n="nav_account">حسابي</span>
     </button>
-    <a href="#gallery" class="nav-cta">تسوق دلوقتي</a>
+    <a href="#gallery" class="nav-cta" data-i18n="nav_shop_now">تسوق دلوقتي</a>
+    <button id="langSwitchBtn" style="background:none;border:1px solid var(--line);color:var(--cream);padding:9px 14px;border-radius:999px;font-family:'Cairo';font-size:0.8rem;cursor:pointer;margin-left:10px;font-weight:700;">EN</button>
     <button id="menuToggle" aria-label="القائمة" style="display:none;background:none;border:1px solid var(--line);color:var(--cream);width:42px;height:42px;border-radius:10px;cursor:pointer;align-items:center;justify-content:center;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
@@ -340,7 +352,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <div id="compareOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:96;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:28px;max-width:600px;width:100%;max-height:85vh;overflow:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="font-family:'Aref Ruqaa',serif;">مقارنة المنتجات</h3>
+      <h3 style="font-family:'Aref Ruqaa',serif;" data-i18n="compare_title">مقارنة المنتجات</h3>
       <button id="closeCompare" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
     </div>
     <div id="compareModalContent"></div>
@@ -351,7 +363,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:70;"></div>
 <div id="cartDrawer" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;">سلة التسوق</h3>
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;" data-i18n="cart_title">سلة التسوق</h3>
     <button id="closeCart" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
   </div>
   <div id="freeShippingBar" style="display:none;margin-bottom:16px;"></div>
@@ -370,7 +382,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <span>الإجمالي</span><span id="cartTotal">0 جنيه</span>
     </div>
     <p style="font-size:0.75rem;color:var(--smoke);margin-bottom:12px;">رسوم التوصيل بتتحدد عند إتمام الطلب حسب منطقتك.</p>
-    <button id="checkoutBtn" class="btn-primary" style="width:100%;">إتمام الطلب</button>
+    <button id="checkoutBtn" class="btn-primary" style="width:100%;" data-i18n="cart_checkout">إتمام الطلب</button>
   </div>
 </div>
 
@@ -387,44 +399,44 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <div id="checkoutOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
-    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:18px;">بيانات التوصيل</h3>
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:18px;" data-i18n="checkout_title">بيانات التوصيل</h3>
     <!-- honeypot field: invisible to humans, bots tend to fill every field -->
     <input type="text" id="hpField" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
-    <label for="checkoutName" style="display:block;font-weight:700;margin-bottom:8px;">الاسم <span style="color:var(--rose);">*</span></label>
+    <label for="checkoutName" style="display:block;font-weight:700;margin-bottom:8px;"><span data-i18n="field_name">الاسم</span> <span style="color:var(--rose);">*</span></label>
     <input type="text" id="checkoutName" placeholder="اسمك بالكامل" required style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-    <label for="checkoutPhone" style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل <span style="color:var(--rose);">*</span></label>
+    <label for="checkoutPhone" style="display:block;font-weight:700;margin-bottom:8px;"><span data-i18n="field_phone">رقم الموبايل</span> <span style="color:var(--rose);">*</span></label>
     <input type="text" id="checkoutPhone" placeholder="01xxxxxxxxx" required style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-    <label for="checkoutAddress" style="display:block;font-weight:700;margin-bottom:8px;">العنوان</label>
+    <label for="checkoutAddress" style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_address">العنوان</label>
     <textarea id="checkoutAddress" placeholder="المحافظة، المنطقة، تفاصيل العنوان" style="width:100%;min-height:70px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
     <label for="checkoutZone" style="display:block;font-weight:700;margin-bottom:8px;">منطقة التوصيل</label>
     <select id="checkoutZone" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
       <option value="">بدون تحديد (هنأكد التوصيل معاك)</option>
     </select>
-    <label for="checkoutCoupon" style="display:block;font-weight:700;margin-bottom:8px;">كود خصم (لو عندك)</label>
+    <label for="checkoutCoupon" style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_coupon">كود خصم (لو عندك)</label>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <input type="text" id="checkoutCoupon" placeholder="مثال: WELCOME10" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-      <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;">تطبيق</button>
+      <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;" data-i18n="btn_apply">تطبيق</button>
     </div>
     <div id="couponStatus" style="font-size:0.8rem;margin-bottom:14px;"></div>
-    <label for="checkoutNotes" style="display:block;font-weight:700;margin-bottom:8px;">عندك ملاحظة على طلبك؟</label>
+    <label for="checkoutNotes" style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_notes">عندك ملاحظة على طلبك؟</label>
     <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <input type="checkbox" id="checkoutGift" style="width:auto;margin:0;"> ده هدية؟ (تغليف خاص + رسالة)
+      <input type="checkbox" id="checkoutGift" style="width:auto;margin:0;"> <span data-i18n="field_gift">ده هدية؟ (تغليف خاص + رسالة)</span>
     </label>
     <textarea id="checkoutGiftMessage" placeholder="اكتب رسالة الإهداء هنا..." style="display:none;width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
     <textarea id="checkoutNotes" placeholder="مثال: يريت التغليف يبقى هدية" style="width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
 
-    <label style="display:block;font-weight:700;margin-bottom:8px;">طريقة الدفع <span style="color:var(--rose);">*</span></label>
+    <label style="display:block;font-weight:700;margin-bottom:8px;"><span data-i18n="field_payment_method">طريقة الدفع</span> <span style="color:var(--rose);">*</span></label>
     <div class="option-row" id="paymentMethodOptions" style="margin-bottom:16px;">
-      <button type="button" class="opt payment-method-opt active" data-method="cod">كاش عند الاستلام</button>
-      <button type="button" class="opt payment-method-opt" data-method="vodafone_cash">فودافون كاش</button>
+      <button type="button" class="opt payment-method-opt active" data-method="cod" data-i18n="pay_cod">كاش عند الاستلام</button>
+      <button type="button" class="opt payment-method-opt" data-method="vodafone_cash" data-i18n="pay_vodafone">فودافون كاش</button>
       <button type="button" class="opt payment-method-opt" data-method="instapay">InstaPay</button>
     </div>
 
     <div id="manualPaymentBox" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;">
       <p id="paymentDetailsText" style="font-size:0.85rem;color:var(--gold-dark);margin-bottom:12px;"></p>
-      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">رقم العملية / المرجع</label>
+      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;" data-i18n="field_transaction_id">رقم العملية / المرجع</label>
       <input type="text" id="paymentTransactionId" placeholder="مثال: 123456789" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
-      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">المبلغ اللي حوّلته</label>
+      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;" data-i18n="field_amount_paid">المبلغ اللي حوّلته</label>
       <input type="number" id="paymentAmountPaid" placeholder="0" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
       <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">صورة إثبات الدفع (Screenshot) <span style="color:var(--rose);">*</span></label>
       <input type="file" id="paymentProofFile" accept="image/*">
@@ -435,7 +447,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);margin-bottom:16px;line-height:1.9;"></div>
     <div style="display:flex;gap:10px;">
       <button id="confirmOrderBtn" class="btn-primary" style="flex:1;">تأكيد الطلب</button>
-      <button id="cancelCheckout" class="btn-ghost" style="flex:0;">إلغاء</button>
+      <button id="cancelCheckout" class="btn-ghost" style="flex:0;" data-i18n="btn_cancel">إلغاء</button>
     </div>
     <div id="checkoutStatus" style="margin-top:12px;font-size:0.85rem;"></div>
   </div>
@@ -446,16 +458,16 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <div id="trackOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-      <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;">تتبع طلبك</h3>
+      <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;" data-i18n="track_title">تتبع طلبك</h3>
       <button id="closeTrackOrder" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
     </div>
     <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:16px;">لأمان بياناتك، محتاجين رقم الطلب (موجود في رسالة التأكيد) مع رقم موبايلك مع بعض.</p>
-    <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الطلب</label>
+    <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_order_number">رقم الطلب</label>
     <input type="text" id="trackOrderNumberInput" placeholder="MON-2026-000001" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
     <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل اللي طلبت بيه</label>
     <div style="display:flex;gap:8px;margin-bottom:16px;">
       <input type="text" id="trackPhoneInput" placeholder="01xxxxxxxxx" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-      <button id="trackOrderSearchBtn" class="btn-primary" style="padding:0 20px;">دوّر</button>
+      <button id="trackOrderSearchBtn" class="btn-primary" style="padding:0 20px;" data-i18n="btn_search">دوّر</button>
     </div>
     <div id="trackOrderResults"></div>
   </div>
@@ -464,37 +476,37 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <div id="accountOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-      <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;">حسابي</h3>
+      <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;" data-i18n="nav_account">حسابي</h3>
       <button id="closeAccount" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
     </div>
 
     <div id="accountLoggedOut">
       <div class="option-row" style="margin-bottom:18px;">
-        <button class="opt active" id="tabCustomerLogin">تسجيل الدخول</button>
-        <button class="opt" id="tabCustomerSignup">حساب جديد</button>
+        <button class="opt active" id="tabCustomerLogin" data-i18n="btn_login">تسجيل الدخول</button>
+        <button class="opt" id="tabCustomerSignup" data-i18n="btn_signup">حساب جديد</button>
       </div>
       <div id="customerLoginForm">
-        <label style="display:block;font-weight:700;margin-bottom:8px;">الإيميل</label>
+        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_email">الإيميل</label>
         <input type="email" id="custLoginEmail" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-        <label style="display:block;font-weight:700;margin-bottom:8px;">كلمة المرور</label>
+        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_password">كلمة المرور</label>
         <input type="password" id="custLoginPassword" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-        <button id="custLoginBtn" class="btn-primary" style="width:100%;">دخول</button>
+        <button id="custLoginBtn" class="btn-primary" style="width:100%;" data-i18n="btn_login_action">دخول</button>
       </div>
       <div id="customerSignupForm" style="display:none;">
-        <label style="display:block;font-weight:700;margin-bottom:8px;">الإيميل</label>
+        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_email">الإيميل</label>
         <input type="email" id="custSignupEmail" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-        <label style="display:block;font-weight:700;margin-bottom:8px;">كلمة المرور</label>
+        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_password">كلمة المرور</label>
         <input type="password" id="custSignupPassword" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-        <button id="custSignupBtn" class="btn-primary" style="width:100%;">إنشاء الحساب</button>
+        <button id="custSignupBtn" class="btn-primary" style="width:100%;" data-i18n="btn_signup_action">إنشاء الحساب</button>
       </div>
       <div id="accountStatus" style="margin-top:12px;font-size:0.85rem;"></div>
     </div>
 
     <div id="accountLoggedIn" style="display:none;">
       <p id="accountEmail" style="color:var(--smoke);margin-bottom:16px;"></p>
-      <h4 style="margin-bottom:12px;">طلباتي</h4>
+      <h4 style="margin-bottom:12px;" data-i18n="my_orders">طلباتي</h4>
       <div id="myOrdersList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
-      <button id="custLogoutBtn" class="btn-ghost" style="width:100%;margin-top:18px;">تسجيل الخروج</button>
+      <button id="custLogoutBtn" class="btn-ghost" style="width:100%;margin-top:18px;" data-i18n="btn_logout">تسجيل الخروج</button>
     </div>
 
     <h4 style="margin:20px 0 12px;display:flex;align-items:center;gap:8px;">
@@ -503,20 +515,20 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     </h4>
     <div id="wishlistInAccount"></div>
     <div id="wishlistActions" style="display:none;gap:8px;margin-top:10px;">
-      <button id="wishlistShareBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;">مشاركة كرابط</button>
-      <button id="wishlistPrintBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;">طباعة / PDF</button>
+      <button id="wishlistShareBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;" data-i18n="btn_share_link">مشاركة كرابط</button>
+      <button id="wishlistPrintBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;" data-i18n="btn_print">طباعة / PDF</button>
     </div>
   </div>
 </div>
 
 <header class="hero container" id="main-content">
   <div>
-    <div class="eyebrow">Monsela — برفاناتك المفضلة</div>
-    <h1>عطور أصلية،<br>بلمستك الخاصة</h1>
-    <p class="lead">تسوق مجموعتنا من البرفانات الأصلية، واختار لون الزجاجة اللي يعجبك.</p>
+    <div class="eyebrow" data-i18n="hero_eyebrow">Monsela — برفاناتك المفضلة</div>
+    <h1 data-i18n="hero_heading">عطور أصلية،<br>بلمستك الخاصة</h1>
+    <p class="lead" data-i18n="hero_lead">تسوق مجموعتنا من البرفانات الأصلية، واختار لون الزجاجة اللي يعجبك.</p>
     <div class="hero-ctas">
-      <a href="#gallery" class="btn-primary">تسوق دلوقتي</a>
-      <a href="#whyMonsela" class="btn-ghost">ليه Monsela؟</a>
+      <a href="#gallery" class="btn-primary" data-i18n="nav_shop_now">تسوق دلوقتي</a>
+      <a href="#whyMonsela" class="btn-ghost" data-i18n="hero_why">ليه Monsela؟</a>
     </div>
   </div>
   <div class="hero-visual" id="heroVisual" aria-hidden="true">
@@ -575,12 +587,12 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <section class="section" id="gallery">
   <div class="container">
     <div class="section-head reveal">
-      <div class="eyebrow">المتجر</div>
-      <h2>تسوق مجموعتنا</h2>
-      <p>اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.</p>
+      <div class="eyebrow" data-i18n="shop_eyebrow">المتجر</div>
+      <h2 data-i18n="shop_heading">تسوق مجموعتنا</h2>
+      <p data-i18n="shop_sub">اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.</p>
     </div>
     <div style="max-width:560px;margin:0 auto 16px;display:flex;gap:10px;flex-wrap:wrap;">
-      <input type="text" id="productSearch" placeholder="ابحث بالاسم، النوتات، الموسم، المناسبة..." style="flex:1;min-width:160px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
+      <input type="text" id="productSearch" data-i18n-ph="search_ph" placeholder="ابحث بالاسم، النوتات، الموسم، المناسبة..." style="flex:1;min-width:160px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';font-size:0.95rem;">
       <button id="openFilterPanelBtn" class="btn-ghost" style="padding:12px 22px;font-size:0.9rem;">
         تصفية <span id="activeFilterCount" style="display:none;background:var(--gold);color:var(--cream);border-radius:999px;font-size:0.7rem;padding:1px 7px;margin-right:4px;">0</span>
       </button>
@@ -611,33 +623,33 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <section class="section" id="scentFinder" style="display:none;">
   <div class="container">
     <div class="section-head reveal">
-      <div class="eyebrow">مكتشف العطور</div>
-      <h2>لاقي عطرك المناسب</h2>
-      <p style="color:var(--smoke);">جاوب على أسئلة بسيطة، وهنرشحلك من منتجاتنا الحقيقية</p>
+      <div class="eyebrow" data-i18n="sf_eyebrow">مكتشف العطور</div>
+      <h2 data-i18n="sf_heading">لاقي عطرك المناسب</h2>
+      <p style="color:var(--smoke);" data-i18n="sf_sub">جاوب على أسئلة بسيطة، وهنرشحلك من منتجاتنا الحقيقية</p>
     </div>
     <div id="scentFinderQuiz" style="max-width:560px;margin:0 auto;">
       <div style="margin-bottom:20px;">
-        <p style="font-weight:700;margin-bottom:10px;">عائلة العطر اللي بتحبها؟</p>
+        <p style="font-weight:700;margin-bottom:10px;" data-i18n="sf_q1">عائلة العطر اللي بتحبها؟</p>
         <div class="option-row" id="sfFamily" style="justify-content:center;"></div>
       </div>
       <div style="margin-bottom:20px;">
-        <p style="font-weight:700;margin-bottom:10px;">تفضل تلبسه إمتى؟</p>
+        <p style="font-weight:700;margin-bottom:10px;" data-i18n="sf_q2">تفضل تلبسه إمتى؟</p>
         <div class="option-row" id="sfSeason" style="justify-content:center;">
-          <button class="opt" data-v="صيفي">صيفي</button>
-          <button class="opt" data-v="شتوي">شتوي</button>
-          <button class="opt" data-v="كل المواسم">كل المواسم</button>
+          <button class="opt" data-v="صيفي" data-i18n="season_summer">صيفي</button>
+          <button class="opt" data-v="شتوي" data-i18n="season_winter">شتوي</button>
+          <button class="opt" data-v="كل المواسم" data-i18n="season_all">كل المواسم</button>
         </div>
       </div>
       <div style="margin-bottom:24px;">
-        <p style="font-weight:700;margin-bottom:10px;">المناسبة؟</p>
+        <p style="font-weight:700;margin-bottom:10px;" data-i18n="sf_q3">المناسبة؟</p>
         <div class="option-row" id="sfOccasion" style="justify-content:center;">
-          <button class="opt" data-v="يومي">يومي</button>
-          <button class="opt" data-v="سهرة">سهرة</button>
-          <button class="opt" data-v="عمل">عمل</button>
+          <button class="opt" data-v="يومي" data-i18n="occ_daily">يومي</button>
+          <button class="opt" data-v="سهرة" data-i18n="occ_evening">سهرة</button>
+          <button class="opt" data-v="عمل" data-i18n="occ_work">عمل</button>
         </div>
       </div>
       <div style="text-align:center;">
-        <button id="sfSubmit" class="btn-primary">✓ اطلع توصياتي</button>
+        <button id="sfSubmit" class="btn-primary" data-i18n="sf_submit">✓ اطلع توصياتي</button>
       </div>
       <div id="scentFinderResults" style="margin-top:30px;"></div>
     </div>
@@ -647,8 +659,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <section class="section" id="whyMonsela">
   <div class="container">
     <div class="section-head reveal">
-      <div class="eyebrow">ليه Monsela</div>
-      <h2>وعدنا ليك في كل قزازة</h2>
+      <div class="eyebrow" data-i18n="why_eyebrow">ليه Monsela</div>
+      <h2 data-i18n="why_heading">وعدنا ليك في كل قزازة</h2>
     </div>
     <div class="gallery-grid reveal">
       <div class="perfume-card">
@@ -731,7 +743,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <footer id="contact">
   <div class="container">
     <div class="logo">Mon<span>sela</span></div>
-    <p>صُنع بحب في مصر — كل قزازة ليها حكاية</p>
+    <p data-i18n="footer_tagline">صُنع بحب في مصر — كل قزازة ليها حكاية</p>
     <p style="margin-top:14px;">تواصل معانا: <a href="#" id="footerWhatsapp" style="color:var(--gold);" target="_blank">واتساب</a> &nbsp;|&nbsp; <a href="https://www.instagram.com/monsela_luxuryperfumes/" style="color:var(--gold);" target="_blank">Instagram</a> &nbsp;|&nbsp; <a href="https://www.facebook.com/profile.php?id=61583522579606" style="color:var(--gold);" target="_blank">Facebook</a></p>
     <p style="margin-top:16px;font-size:0.85rem;">
       <a href="about.html" style="color:var(--smoke);">قصتنا</a> &nbsp;|&nbsp;
@@ -762,6 +774,118 @@ function escapeHTML(str){
   div.textContent = str ?? '';
   return div.innerHTML;
 }
+
+// ===== Bilingual system (Arabic / English) =====
+// NOTE: this covers the core customer journey (nav, hero, shop, cart, checkout, footer).
+// Many secondary strings (modals, status messages, admin-adjacent text) are still Arabic-only
+// and will be translated in a follow-up pass — this is a large, ongoing effort by design.
+const translations = {
+  ar: {
+    nav_shop: 'مجموعتنا', nav_finder: 'لاقي عطرك', nav_contact: 'تواصل معنا',
+    nav_track: 'تتبع طلبك', nav_account: 'حسابي', nav_shop_now: 'تسوق دلوقتي',
+    hero_eyebrow: 'Monsela — برفاناتك المفضلة',
+    hero_heading: 'عطور أصلية،<br>بلمستك الخاصة',
+    hero_lead: 'تسوق مجموعتنا من البرفانات الأصلية، واختار لون الزجاجة اللي يعجبك.',
+    hero_why: 'ليه Monsela؟',
+    shop_eyebrow: 'المتجر', shop_heading: 'تسوق مجموعتنا',
+    shop_sub: 'اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.',
+    search_ph: 'ابحث بالاسم، النوتات، الموسم، المناسبة...',
+    cart_title: 'سلة التسوق', cart_checkout: 'إتمام الطلب',
+    checkout_title: 'بيانات التوصيل',
+    field_name: 'الاسم', field_phone: 'رقم الموبايل', field_address: 'العنوان',
+    footer_tagline: 'صُنع بحب في مصر — كل قزازة ليها حكاية',
+    pd_share: 'شارك المنتج ده', pd_copy_link: 'نسخ الرابط', pd_related: 'منتجات مشابهة',
+    pd_write_review: 'اكتب مراجعة', pd_submit_review: 'إرسال المراجعة',
+    ph_your_name: 'اسمك', ph_review: 'رأيك في المنتج...',
+    field_coupon: 'كود خصم (لو عندك)', btn_apply: 'تطبيق', field_notes: 'عندك ملاحظة على طلبك؟',
+    field_gift: 'ده هدية؟ (تغليف خاص + رسالة)', field_payment_method: 'طريقة الدفع',
+    pay_cod: 'كاش عند الاستلام', pay_vodafone: 'فودافون كاش',
+    field_transaction_id: 'رقم العملية / المرجع', field_amount_paid: 'المبلغ اللي حوّلته',
+    btn_cancel: 'إلغاء', compare_title: 'مقارنة المنتجات', track_title: 'تتبع طلبك',
+    field_order_number: 'رقم الطلب', btn_search: 'دوّر',
+    btn_login: 'تسجيل الدخول', btn_signup: 'حساب جديد', btn_login_action: 'دخول', btn_signup_action: 'إنشاء الحساب',
+    my_orders: 'طلباتي', btn_logout: 'تسجيل الخروج', btn_share_link: 'مشاركة كرابط', btn_print: 'طباعة / PDF',
+    field_email: 'الإيميل', field_password: 'كلمة المرور',
+    btn_add_to_cart: 'أضف للسلة', btn_view_details: 'عرض التفاصيل',
+    btn_notify_stock: 'أبلغني لما يتوفر', btn_price_alert: 'نبّهني لو السعر قلّ',
+    sf_eyebrow: 'مكتشف العطور', sf_heading: 'لاقي عطرك المناسب',
+    sf_sub: 'جاوب على أسئلة بسيطة، وهنرشحلك من منتجاتنا الحقيقية',
+    sf_q1: 'عائلة العطر اللي بتحبها؟', sf_q2: 'تفضل تلبسه إمتى؟', sf_q3: 'المناسبة؟',
+    sf_submit: '✓ اطلع توصياتي',
+    why_eyebrow: 'ليه Monsela', why_heading: 'وعدنا ليك في كل قزازة',
+    season_summer: 'صيفي', season_winter: 'شتوي', season_all: 'كل المواسم',
+    occ_daily: 'يومي', occ_evening: 'سهرة', occ_work: 'عمل'
+  },
+  en: {
+    nav_shop: 'Shop', nav_finder: 'Find Your Scent', nav_contact: 'Contact Us',
+    nav_track: 'Track Order', nav_account: 'My Account', nav_shop_now: 'Shop Now',
+    hero_eyebrow: 'Monsela — Your Signature Fragrance',
+    hero_heading: 'Authentic Perfumes,<br>Your Own Touch',
+    hero_lead: 'Shop our collection of authentic perfumes, and choose the bottle color you love.',
+    hero_why: 'Why Monsela?',
+    shop_eyebrow: 'The Shop', shop_heading: 'Shop Our Collection',
+    shop_sub: 'Choose the products you love, add them to your cart, and check out in one go.',
+    search_ph: 'Search by name, notes, season, occasion...',
+    cart_title: 'Shopping Cart', cart_checkout: 'Checkout',
+    checkout_title: 'Delivery Information',
+    field_name: 'Full Name', field_phone: 'Mobile Number', field_address: 'Address',
+    footer_tagline: 'Made with love in Egypt — every bottle has a story',
+    pd_share: 'Share this product', pd_copy_link: 'Copy Link', pd_related: 'Related Products',
+    pd_write_review: 'Write a Review', pd_submit_review: 'Submit Review',
+    ph_your_name: 'Your name', ph_review: 'Your thoughts on this product...',
+    field_coupon: 'Promo code (if any)', btn_apply: 'Apply', field_notes: 'Any note on your order?',
+    field_gift: 'Is this a gift? (special wrapping + message)', field_payment_method: 'Payment Method',
+    pay_cod: 'Cash on Delivery', pay_vodafone: 'Vodafone Cash',
+    field_transaction_id: 'Transaction ID / Reference', field_amount_paid: 'Amount Paid',
+    btn_cancel: 'Cancel', compare_title: 'Compare Products', track_title: 'Track Your Order',
+    field_order_number: 'Order Number', btn_search: 'Search',
+    btn_login: 'Sign In', btn_signup: 'New Account', btn_login_action: 'Sign In', btn_signup_action: 'Create Account',
+    my_orders: 'My Orders', btn_logout: 'Log Out', btn_share_link: 'Share as Link', btn_print: 'Print / PDF',
+    field_email: 'Email', field_password: 'Password',
+    btn_add_to_cart: 'Add to Cart', btn_view_details: 'View Details',
+    btn_notify_stock: 'Notify Me', btn_price_alert: 'Notify on Price Drop',
+    sf_eyebrow: 'Scent Finder', sf_heading: 'Find Your Signature Scent',
+    sf_sub: 'Answer a few simple questions and we\'ll recommend from our real collection',
+    sf_q1: 'Which fragrance family do you love?', sf_q2: 'When do you like to wear it?', sf_q3: 'Occasion?',
+    sf_submit: '✓ Get My Recommendations',
+    why_eyebrow: 'Why Monsela', why_heading: 'Our Promise in Every Bottle',
+    season_summer: 'Summer', season_winter: 'Winter', season_all: 'All Seasons',
+    occ_daily: 'Daily', occ_evening: 'Evening', occ_work: 'Work'
+  }
+};
+
+let currentLang = localStorage.getItem('monsela_lang') || 'ar';
+
+function applyLanguage(lang){
+  currentLang = lang;
+  const dict = translations[lang];
+  document.getElementById('htmlRoot').setAttribute('lang', lang);
+  document.getElementById('htmlRoot').setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-ph');
+    if (dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+  });
+  const langBtn = document.getElementById('langSwitchBtn');
+  if (langBtn) langBtn.textContent = lang === 'ar' ? 'EN' : 'AR';
+  try { localStorage.setItem('monsela_lang', lang); } catch(e) {}
+  // re-render dynamic content so product names/descriptions use the right language field
+  if (typeof renderProducts === 'function' && typeof allProducts !== 'undefined' && allProducts.length) renderProducts();
+}
+
+// Returns the right-language text for database content, falling back to Arabic
+// when no English translation has been entered for that product yet.
+function localizedField(obj, baseField){
+  if (currentLang === 'en' && obj[baseField + '_en']) return obj[baseField + '_en'];
+  return obj[baseField];
+}
+
+document.getElementById('langSwitchBtn').addEventListener('click', ()=>{
+  applyLanguage(currentLang === 'ar' ? 'en' : 'ar');
+});
 
 // ===== Global error safety net =====
 // If something breaks unexpectedly, tell the visitor gently instead of failing silently.
@@ -1021,7 +1145,7 @@ function renderProducts(){
       ${p.image_url
         ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
         : `<div class="glass"></div>`}
-      <h3>${p.name} ${p.featured ? '<span style="color:var(--gold);font-size:0.8rem;">⭐ مميز</span>' : ''}</h3>
+      <h3>${localizedField(p,'name')} ${p.featured ? '<span style="color:var(--gold);font-size:0.8rem;">⭐ مميز</span>' : ''}</h3>
       <p>${p.notes || p.description || ''}</p>
       ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
         <div style="margin:8px 0;">
@@ -1049,15 +1173,15 @@ function renderProducts(){
           <span id="qty-${p.id}" style="min-width:24px;text-align:center;">1</span>
           <button class="opt qty-plus" data-id="${p.id}" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
         </div>
-        <button class="btn-primary add-to-cart" data-id="${p.id}" style="width:100%;margin-bottom:8px;">أضف للسلة</button>
+        <button class="btn-primary add-to-cart" data-id="${p.id}" style="width:100%;margin-bottom:8px;">${translations[currentLang].btn_add_to_cart}</button>
       ` : `
         <div style="margin-bottom:8px;">
           <input type="email" class="notify-email" data-id="${p.id}" placeholder="إيميلك للإشعار" style="width:100%;margin-bottom:6px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:8px 10px;border-radius:8px;font-size:0.8rem;">
-          <button class="btn-ghost notify-btn" data-id="${p.id}" style="width:100%;font-size:0.85rem;">أبلغني لما يتوفر</button>
+          <button class="btn-ghost notify-btn" data-id="${p.id}" style="width:100%;font-size:0.85rem;">${translations[currentLang].btn_notify_stock}</button>
         </div>
       `}
       <div style="display:flex;gap:8px;">
-        <button class="btn-ghost view-details" data-id="${p.id}" style="flex:1;">عرض التفاصيل</button>
+        <button class="btn-ghost view-details" data-id="${p.id}" style="flex:1;">${translations[currentLang].btn_view_details}</button>
         <button class="wishlist-toggle" data-id="${p.id}" aria-label="${wishlist.includes(p.id) ? 'شيل من المفضلة' : 'أضف للمفضلة'}" style="width:44px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? 'var(--rose)' : 'none'}" stroke="var(--rose)" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
         </button>
@@ -1065,7 +1189,7 @@ function renderProducts(){
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 16v3a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3"/></svg>
         </button>
       </div>
-      ${!hasDiscount ? `<button class="price-alert-btn" data-id="${p.id}" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:none;color:var(--smoke);font-size:0.75rem;cursor:pointer;margin-top:8px;width:100%;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> نبّهني لو السعر قلّ</button>` : ''}
+      ${!hasDiscount ? `<button class="price-alert-btn" data-id="${p.id}" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:none;color:var(--smoke);font-size:0.75rem;cursor:pointer;margin-top:8px;width:100%;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> ${translations[currentLang].btn_price_alert}</button>` : ''}
     </div>`;
   }).join('');
 
@@ -1181,6 +1305,7 @@ function renderProducts(){
 async function openProductDetail(productId){
   const p = allProducts.find(x => x.id === productId);
   if (!p) return;
+  const hasVariants = Array.isArray(p.variants) && p.variants.length > 0;
   trackRecentlyViewed(productId);
   document.getElementById('productSchemaLD').textContent = JSON.stringify({
     "@context": "https://schema.org",
@@ -1217,25 +1342,49 @@ async function openProductDetail(productId){
       ${p.price ? p.price + ' جنيه' : ''}
       ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.85rem;margin-right:8px;">${p.original_price} جنيه</span>` : ''}
     </p>
-    <p style="color:var(--smoke);line-height:1.8;margin-bottom:20px;">${p.description || p.notes || ''}</p>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;">
+    <p style="color:var(--smoke);line-height:1.8;margin-bottom:20px;">${localizedField(p,'description') || localizedField(p,'notes') || ''}</p>
+
+    <div id="pdPurchaseBox">
+      ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
+        <div style="margin-bottom:14px;">
+          <p style="font-size:0.8rem;color:var(--smoke);margin-bottom:6px;">لون الزجاجة:</p>
+          <div class="bottle-color-picker" data-id="${p.id}" style="display:flex;gap:8px;flex-wrap:wrap;">
+            ${p.bottle_colors.map((c,i) => `<span class="bottle-color-swatch ${i===0?'active':''}" data-name="${escapeHTML(c.name)}" title="${escapeHTML(c.name)}" style="width:26px;height:26px;border-radius:50%;background:${c.hex};cursor:pointer;border:2px solid ${i===0?'var(--gold)':'transparent'};box-shadow:0 0 0 1px var(--line);"></span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+      ${hasVariants ? `
+        <select class="opt" id="pdVariantSelect" style="width:100%;margin-bottom:14px;">
+          ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+        </select>
+      ` : ''}
+      <div id="pdStockBadge" style="margin-bottom:12px;"></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;">
+        <button class="opt" id="pdQtyMinus" aria-label="نقص الكمية" style="width:34px;padding:6px 0;">−</button>
+        <span id="pdQty" style="min-width:24px;text-align:center;">1</span>
+        <button class="opt" id="pdQtyPlus" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
+      </div>
+      <button class="btn-primary" id="pdAddToCart" style="width:100%;">${translations[currentLang].btn_add_to_cart}</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;margin-top:20px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
       <div style="font-size:0.8rem;">
-        <p style="color:var(--cream);margin-bottom:6px;">شارك المنتج ده</p>
-        <button id="pdCopyLink" class="btn-ghost" style="padding:6px 14px;font-size:0.78rem;">نسخ الرابط</button>
+        <p style="color:var(--cream);margin-bottom:6px;" data-i18n="pd_share">شارك المنتج ده</p>
+        <button id="pdCopyLink" class="btn-ghost" style="padding:6px 14px;font-size:0.78rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
       </div>
     </div>
     <div id="pdReviewsSummary" style="margin-bottom:16px;"></div>
     <div id="pdReviewsList" style="margin-bottom:20px;"></div>
         <div id="pdFragranceProfile" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px;font-size:0.82rem;"></div>
     <div id="pdRelatedWrap" style="display:none;margin-bottom:20px;">
-      <h4 style="margin-bottom:10px;color:var(--gold);">منتجات مشابهة</h4>
+      <h4 style="margin-bottom:10px;color:var(--gold);" data-i18n="pd_related">منتجات مشابهة</h4>
       <div id="pdRelatedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
     </div>
     <details style="margin-bottom:10px;">
-      <summary style="cursor:pointer;color:var(--gold);">اكتب مراجعة</summary>
+      <summary style="cursor:pointer;color:var(--gold);" data-i18n="pd_write_review">اكتب مراجعة</summary>
       <div style="margin-top:12px;">
-        <input type="text" id="pdReviewName" placeholder="اسمك" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+        <input type="text" id="pdReviewName" data-i18n-ph="ph_your_name" placeholder="اسمك" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
         <input type="text" id="pdReviewPhone" placeholder="رقم موبايلك اللي طلبت بيه (اختياري - يظهر شارة مشترى موثقة)" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
         <select id="pdReviewRating" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;">
           <option value="5">⭐⭐⭐⭐⭐</option>
@@ -1244,8 +1393,8 @@ async function openProductDetail(productId){
           <option value="2">⭐⭐</option>
           <option value="1">⭐</option>
         </select>
-        <textarea id="pdReviewComment" placeholder="رأيك في المنتج..." style="width:100%;min-height:60px;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
-        <button id="pdSubmitReview" class="btn-ghost" style="width:100%;">إرسال المراجعة</button>
+        <textarea id="pdReviewComment" data-i18n-ph="ph_review" placeholder="رأيك في المنتج..." style="width:100%;min-height:60px;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+        <button id="pdSubmitReview" class="btn-ghost" style="width:100%;" data-i18n="pd_submit_review">إرسال المراجعة</button>
         <div id="pdReviewStatus" style="font-size:0.8rem;margin-top:8px;"></div>
       </div>
     </details>
@@ -1265,6 +1414,60 @@ async function openProductDetail(productId){
   } else {
     profileEl.style.display = 'none';
   }
+
+  // ===== Purchase controls in the product detail modal =====
+  function pdCurrentVariant(){
+    if (!hasVariants) return null;
+    const sel = document.getElementById('pdVariantSelect');
+    return sel ? p.variants[Number(sel.value)] : null;
+  }
+  function pdUpdateStockBadge(){
+    const variant = pdCurrentVariant();
+    const stock = variant ? variant.stock : (p.stock ?? 0);
+    const badge = document.getElementById('pdStockBadge');
+    const addBtn = document.getElementById('pdAddToCart');
+    const qtyWrap = document.getElementById('pdQty');
+    const outOfStock = (stock ?? 0) <= 0;
+    if (outOfStock) {
+      badge.innerHTML = `<span style="color:var(--danger);font-size:0.8rem;">خلصت الكمية حاليًا</span>`;
+      addBtn.disabled = true; addBtn.style.opacity = '0.5';
+    } else {
+      const lowStock = stock <= 5;
+      badge.innerHTML = `<span style="color:${lowStock ? '#c98a2c' : 'var(--success)'};font-size:0.8rem;">${lowStock ? 'متبقي ' + stock + ' بس' : 'متوفر'}</span>`;
+      addBtn.disabled = false; addBtn.style.opacity = '1';
+    }
+    if (qtyWrap) qtyWrap.textContent = Math.min(Math.max(1, stock), Number(qtyWrap.textContent) || 1);
+  }
+  pdUpdateStockBadge();
+  const pdVariantSelectEl = document.getElementById('pdVariantSelect');
+  if (pdVariantSelectEl) pdVariantSelectEl.addEventListener('change', pdUpdateStockBadge);
+
+  document.getElementById('pdQtyMinus').addEventListener('click', ()=>{
+    const el = document.getElementById('pdQty');
+    el.textContent = Math.max(1, Number(el.textContent) - 1);
+  });
+  document.getElementById('pdQtyPlus').addEventListener('click', ()=>{
+    const el = document.getElementById('pdQty');
+    const variant = pdCurrentVariant();
+    const stock = variant ? variant.stock : (p.stock ?? 0);
+    el.textContent = Math.min(stock, Number(el.textContent) + 1);
+  });
+
+  content.querySelectorAll('.bottle-color-swatch').forEach(sw=>{
+    sw.addEventListener('click', ()=>{
+      content.querySelectorAll('.bottle-color-swatch').forEach(s=>{ s.classList.remove('active'); s.style.borderColor = 'transparent'; });
+      sw.classList.add('active');
+      sw.style.borderColor = 'var(--gold)';
+    });
+  });
+
+  document.getElementById('pdAddToCart').addEventListener('click', ()=>{
+    const qty = Number(document.getElementById('pdQty').textContent) || 1;
+    const variant = pdCurrentVariant();
+    const colorPicker = content.querySelector('.bottle-color-picker .bottle-color-swatch.active');
+    const bottleColor = colorPicker ? colorPicker.dataset.name : null;
+    addToCart(p, qty, variant, bottleColor);
+  });
 
   content.querySelectorAll('.pd-thumb').forEach(thumb=>{
     thumb.addEventListener('click', ()=>{ document.getElementById('pdMainImage').src = thumb.src; });
@@ -1376,10 +1579,10 @@ async function loadBestSellers(){
   document.getElementById('bestSellersGrid').innerHTML = ordered.map(p => `
     <div class="perfume-card">
       ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
-      <h3>${p.name}</h3>
+      <h3>${localizedField(p,'name')}</h3>
       <p>${p.notes || ''}</p>
       ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
-      <button class="btn-ghost view-details-bs" data-id="${p.id}" style="width:100%;">عرض التفاصيل</button>
+      <button class="btn-ghost view-details-bs" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
     </div>
   `).join('');
   document.querySelectorAll('.view-details-bs').forEach(btn=>{
@@ -1443,9 +1646,9 @@ async function loadNewArrivals(){
   document.getElementById('newArrivalsGrid').innerHTML = data.map(p => `
     <div class="perfume-card">
       ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
-      <h3>${p.name}</h3>
+      <h3>${localizedField(p,'name')}</h3>
       ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
-      <button class="btn-ghost view-details-new" data-id="${p.id}" style="width:100%;">عرض التفاصيل</button>
+      <button class="btn-ghost view-details-new" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
     </div>
   `).join('');
   document.querySelectorAll('.view-details-new').forEach(btn=>{
@@ -1453,6 +1656,7 @@ async function loadNewArrivals(){
   });
 }
 
+applyLanguage(currentLang);
 loadBanners();
 loadBestSellers();
 // ===== Real Scent Finder (recommends actual catalog products, not random/fake) =====
@@ -1503,9 +1707,9 @@ document.getElementById('sfSubmit').addEventListener('click', ()=>{
       ${scored.map(({p}) => `
         <div class="perfume-card">
           ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
-          <h3>${p.name}</h3>
+          <h3>${localizedField(p,'name')}</h3>
           ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
-          <button class="btn-ghost sf-view-details" data-id="${p.id}" style="width:100%;">عرض التفاصيل</button>
+          <button class="btn-ghost sf-view-details" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
         </div>
       `).join('')}
     </div>
@@ -1623,9 +1827,9 @@ async function loadRecentlyViewed(){
   document.getElementById('recentlyViewedGrid').innerHTML = ordered.map(p => `
     <div class="perfume-card">
       ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
-      <h3>${p.name}</h3>
+      <h3>${localizedField(p,'name')}</h3>
       ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
-      <button class="btn-ghost view-details-rv" data-id="${p.id}" style="width:100%;">عرض التفاصيل</button>
+      <button class="btn-ghost view-details-rv" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
     </div>
   `).join('');
   document.querySelectorAll('.view-details-rv').forEach(btn=>{
