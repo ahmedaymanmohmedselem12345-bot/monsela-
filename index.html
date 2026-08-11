@@ -271,9 +271,12 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <div class="logo">Mon<span>sela</span></div>
     <div class="nav-links" id="navLinks">
       <a href="#gallery">مجموعتنا</a>
-      <a href="#testimonials">آراء العملاء</a>
       <a href="contact.html">تواصل معنا</a>
     </div>
+    <button id="trackOrderBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      تتبع طلبك
+    </button>
     <button id="accountBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       حسابي
@@ -418,6 +421,22 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </div>
 
 <!-- Customer account modal -->
+<!-- Track order by phone (no account needed) -->
+<div id="trackOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;">تتبع طلبك</h3>
+      <button id="closeTrackOrder" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
+    </div>
+    <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل اللي طلبت بيه</label>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <input type="text" id="trackPhoneInput" placeholder="01xxxxxxxxx" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+      <button id="trackOrderSearchBtn" class="btn-primary" style="padding:0 20px;">دوّر</button>
+    </div>
+    <div id="trackOrderResults"></div>
+  </div>
+</div>
+
 <div id="accountOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
@@ -615,29 +634,6 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </section>
 
-<section class="section" id="testimonials" style="padding-top:0;">
-  <div class="container">
-    <div class="section-head reveal">
-      <div class="eyebrow">آراء عملائنا</div>
-      <h2>ناس صممت قزازتها معانا</h2>
-      <p style="font-size:0.85rem;opacity:0.7;">* نماذج توضيحية — هتتستبدل بآراء عملاء حقيقية بعد أول دفعة طلبات</p>
-    </div>
-    <div class="gallery-grid">
-      <div class="perfume-card" style="text-align:right;">
-        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"صممت قزازة لأمي في عيد ميلادها وحطيت اسمها عليها بالعربي — لما فتحتها بجد عيطت من الفرحة"</p>
-        <p style="color:var(--gold);font-weight:700;margin:0;">— مريم، القاهرة</p>
-      </div>
-      <div class="perfume-card" style="text-align:right;">
-        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"جربت التركيبة اللي رشحوها ليا في الكويز وطلعت بجد على مزاجي، والشكل مختلف عن أي حاجة شفتها قبل كده"</p>
-        <p style="color:var(--gold);font-weight:700;margin:0;">— أحمد، الإسكندرية</p>
-      </div>
-      <div class="perfume-card" style="text-align:right;">
-        <p style="color:var(--cream);line-height:1.8;margin-bottom:16px;">"الفكرة إني أصمم القزازة بنفسي من على الموبايل قبل ما أطلبها كانت حاجة جديدة عليا خالص"</p>
-        <p style="color:var(--gold);font-weight:700;margin:0;">— نور، الجيزة</p>
-      </div>
-    </div>
-  </div>
-</section>
 
 <section class="section" id="faq" style="padding-top:0;">
   <div class="container">
@@ -1660,6 +1656,8 @@ document.addEventListener('keydown', (e)=>{
   if (productDetailOverlay.style.display === 'flex') { productDetailOverlay.style.display = 'none'; return; }
   const accountOverlay = document.getElementById('accountOverlay');
   if (accountOverlay.style.display === 'flex') { accountOverlay.style.display = 'none'; return; }
+  const trackOrderOverlay = document.getElementById('trackOrderOverlay');
+  if (trackOrderOverlay.style.display === 'flex') { trackOrderOverlay.style.display = 'none'; return; }
   if (document.getElementById('cartDrawer').style.display === 'block') { closeCartUI(); }
 });
 document.getElementById('productDetailOverlay').addEventListener('click', (e)=>{
@@ -1811,7 +1809,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   btn.disabled = true;
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري تأكيد الطلب...';
 
-  const { error } = await sb.from('store_orders').insert({
+  const { data: insertedOrder, error } = await sb.from('store_orders').insert({
     customer_name: name,
     customer_phone: phone,
     customer_address: address || null,
@@ -1825,7 +1823,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     delivery_fee: deliveryFee,
     is_gift: document.getElementById('checkoutGift').checked,
     gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null
-  });
+  }).select().single();
 
   if (currentCustomer) {
     await sb.from('customer_profiles').upsert({ id: currentCustomer.id, name, phone, address: address || null });
@@ -1864,7 +1862,11 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   document.getElementById('checkoutGift').checked = false;
   document.getElementById('checkoutGiftMessage').value = '';
   document.getElementById('checkoutGiftMessage').style.display = 'none';
-  alert('تم تأكيد طلبك! هنتواصل معاك قريب.');
+
+  const etaText = insertedOrder && insertedOrder.estimated_delivery_date
+    ? `المتوقع يوصلك حوالي يوم ${new Date(insertedOrder.estimated_delivery_date).toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' })}.`
+    : 'هنأكد معاك ميعاد التسليم بالظبط قريب.';
+  alert(`✓ تم تأكيد طلبك!\n${etaText}\nتقدر تتابع حالة طلبك في أي وقت من "حسابي" في الموقع.`);
 });
 
 renderCartUI();
@@ -1960,6 +1962,63 @@ document.getElementById('custLogoutBtn').addEventListener('click', async ()=>{
   document.getElementById('accountLoggedOut').style.display = 'block';
 });
 
+// ===== Shared order tracking display helpers (used by both "حسابي" and guest tracking) =====
+const ORDER_TRACK_STEPS = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم'];
+function trackerHTML(status){
+  if (status === 'مرتجع') {
+    return `<p style="color:var(--danger);font-size:0.8rem;margin-top:8px;">↩ الطلب ده اتسجل كمرتجع</p>`;
+  }
+  const currentIndex = ORDER_TRACK_STEPS.indexOf(status);
+  return `
+    <div style="display:flex;align-items:center;margin-top:10px;">
+      ${ORDER_TRACK_STEPS.map((s, i) => `
+        <div style="flex:1;text-align:center;position:relative;">
+          <div style="width:16px;height:16px;border-radius:50%;margin:0 auto 6px;background:${i <= currentIndex ? 'var(--gold)' : 'var(--ink)'};border:1px solid ${i <= currentIndex ? 'var(--gold)' : 'var(--line)'};"></div>
+          <p style="font-size:0.68rem;color:${i <= currentIndex ? 'var(--gold-dark)' : 'var(--smoke)'};">${s}</p>
+          ${i < ORDER_TRACK_STEPS.length - 1 ? `<div style="position:absolute;top:8px;right:calc(50% + 10px);left:calc(-50% + 10px);height:2px;background:${i < currentIndex ? 'var(--gold)' : 'var(--line)'};"></div>` : ''}
+        </div>
+      `).join('')}
+    </div>`;
+}
+function etaHTML(o){
+  if (!o.estimated_delivery_date || o.status === 'اتسلم' || o.status === 'مرتجع') return '';
+  const days = Math.ceil((new Date(o.estimated_delivery_date) - new Date()) / (1000*60*60*24));
+  if (days > 0) return `<p style="color:var(--gold-dark);font-size:0.78rem;margin-top:6px;">📦 متوقع يوصلك خلال ${days} ${days === 1 ? 'يوم' : 'أيام'}</p>`;
+  if (days === 0) return `<p style="color:var(--gold-dark);font-size:0.78rem;margin-top:6px;">📦 متوقع يوصلك النهاردة</p>`;
+  return `<p style="color:var(--smoke);font-size:0.78rem;margin-top:6px;">📦 هنأكد معاك ميعاد التسليم</p>`;
+}
+
+// ===== Guest order tracking (no account needed) =====
+document.getElementById('trackOrderBtn').addEventListener('click', ()=>{
+  document.getElementById('trackOrderOverlay').style.display = 'flex';
+});
+document.getElementById('closeTrackOrder').addEventListener('click', ()=>{
+  document.getElementById('trackOrderOverlay').style.display = 'none';
+});
+document.getElementById('trackOrderSearchBtn').addEventListener('click', async ()=>{
+  const phone = document.getElementById('trackPhoneInput').value.trim();
+  const resultsEl = document.getElementById('trackOrderResults');
+  if (!phone) { resultsEl.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">اكتب رقم الموبايل الأول.</p>'; return; }
+  resultsEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">جاري البحث...</p>';
+  const { data: orders, error } = await sb.rpc('track_orders_by_phone', { p_phone: phone });
+  if (error || !orders || orders.length === 0) {
+    resultsEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">مفيش طلبات بالرقم ده.</p>';
+    return;
+  }
+  resultsEl.innerHTML = orders.map(o => `
+    <div style="border-bottom:1px solid var(--line);padding:14px 0;font-size:0.85rem;">
+      <div style="display:flex;justify-content:space-between;">
+        <b>${o.total} جنيه</b>
+        <span style="color:var(--gold);">${o.status}</span>
+      </div>
+      <div style="color:var(--smoke);margin-top:4px;">${(o.items||[]).map(i=>`${escapeHTML(i.name)} ×${i.qty}`).join('، ')}</div>
+      <div style="color:var(--smoke);font-size:0.75rem;margin-top:4px;">${new Date(o.created_at).toLocaleDateString('ar-EG')}</div>
+      ${trackerHTML(o.status)}
+      ${etaHTML(o)}
+    </div>
+  `).join('');
+});
+
 async function refreshAccountView(){
   const { data: { user } } = await sb.auth.getUser();
   if (!user) {
@@ -1987,14 +2046,19 @@ async function refreshAccountView(){
     ordersListEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه معملتش أي طلب.</p>';
     return;
   }
+
+  const STEPS = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم'];
+
   ordersListEl.innerHTML = myOrders.map(o => `
-    <div style="border-bottom:1px solid var(--line);padding:12px 0;font-size:0.85rem;">
+    <div style="border-bottom:1px solid var(--line);padding:14px 0;font-size:0.85rem;">
       <div style="display:flex;justify-content:space-between;">
         <b>${o.total} جنيه</b>
         <span style="color:var(--gold);">${o.status}</span>
       </div>
       <div style="color:var(--smoke);margin-top:4px;">${(o.items||[]).map(i=>`${i.name} ×${i.qty}`).join('، ')}</div>
       <div style="color:var(--smoke);font-size:0.75rem;margin-top:4px;">${new Date(o.created_at).toLocaleDateString('ar-EG')}</div>
+      ${trackerHTML(o.status)}
+      ${etaHTML(o)}
     </div>
   `).join('');
 }

@@ -294,6 +294,8 @@ input[type=file]{margin-bottom:18px;color:var(--smoke);}
         <div><label>اسم المنطقة</label><input type="text" id="zName" placeholder="القاهرة الكبرى"></div>
         <div><label>سعر التوصيل (جنيه)</label><input type="number" id="zFee" placeholder="30"></div>
       </div>
+      <label>عدد أيام التوصيل المتوقعة</label>
+      <input type="number" id="zEtaDays" placeholder="3" value="3">
       <button class="btn" id="saveZoneBtn">إضافة المنطقة</button>
       <div class="status" id="zoneFormStatus"></div>
       <div id="zonesList" style="margin-top:16px;"></div>
@@ -1257,10 +1259,10 @@ document.getElementById('saveZoneBtn').addEventListener('click', async ()=>{
   const fee = Number(document.getElementById('zFee').value);
   if (!name) { statusEl.style.color='var(--danger)'; statusEl.textContent='لازم تكتب اسم المنطقة.'; return; }
 
-  const { error } = await sb.from('delivery_zones').insert({ name, fee: fee || 0 });
+  const { error } = await sb.from('delivery_zones').insert({ name, fee: fee || 0, eta_days: Number(document.getElementById('zEtaDays').value) || 3 });
   if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: ' + error.message; return; }
   statusEl.style.color='var(--success)'; statusEl.textContent='اتضافت ✓';
-  document.getElementById('zName').value=''; document.getElementById('zFee').value='';
+  document.getElementById('zName').value=''; document.getElementById('zFee').value=''; document.getElementById('zEtaDays').value='3';
   loadZones();
 });
 
@@ -1272,7 +1274,7 @@ async function loadZones(){
     <div class="product-item">
       <div class="info">
         <h4>${z.name} ${z.active ? '' : '(معطّلة)'}</h4>
-        <p>${z.fee} جنيه توصيل</p>
+        <p>${z.fee} جنيه توصيل · ${z.eta_days || 3} أيام تقريبًا</p>
       </div>
       <div class="actions">
         <button class="btn btn-ghost" data-toggle-zone="${z.id}" data-active="${z.active}">${z.active ? 'تعطيل' : 'تفعيل'}</button>
