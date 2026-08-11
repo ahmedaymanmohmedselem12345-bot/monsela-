@@ -212,36 +212,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
   border:1px solid var(--gold);padding:4px 12px;border-radius:999px;
 }
 
-/* CUSTOMIZER */
-.customizer{
-  background:rgba(255,253,249,0.65);
-  backdrop-filter:blur(16px);
-  -webkit-backdrop-filter:blur(16px);
-  border-radius:28px;border:1px solid var(--line);
-  box-shadow:0 16px 40px rgba(43,38,32,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
-  padding:50px;display:grid;grid-template-columns:0.9fr 1.1fr;gap:50px;
-}
-.preview-panel{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(ellipse at center, rgba(184,152,94,0.1), transparent 70%);
-  border-radius:20px;padding:30px;position:relative;
-}
-.preview-panel::after{
-  content:'';position:absolute;bottom:56px;left:50%;transform:translateX(-50%);
-  width:120px;height:18px;border-radius:50%;
-  background:radial-gradient(ellipse, rgba(43,38,32,0.18), transparent 70%);
-  filter:blur(2px);pointer-events:none;
-}
-.preview-panel svg{transition:all .4s ease;}
-.preview-name{
-  margin-top:24px;font-family:'Aref Ruqaa',serif;font-size:1.4rem;color:var(--gold);
-  min-height:32px;
-}
-.form-panel .field{margin-bottom:30px;}
-.form-panel label.field-label{
-  display:block;font-weight:700;margin-bottom:14px;font-size:1.05rem;
-}
-.field-label small{display:block;color:var(--smoke);font-weight:400;font-size:0.85rem;margin-top:4px;}
+/* SHARED FILTER/OPTION BUTTONS (used by shop filters, compare, etc.) */
 .option-row{display:flex;gap:14px;flex-wrap:wrap;}
 .opt{
   border:1px solid var(--line);background:transparent;color:var(--cream);
@@ -249,43 +220,6 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
   transition:all .2s;
 }
 .opt.active, .opt:hover{border-color:var(--gold);background:rgba(184,152,94,0.1);}
-.color-dot{
-  width:34px;height:34px;border-radius:50%;cursor:pointer;border:2px solid transparent;
-  transition:transform .2s;
-}
-.color-dot.active{border-color:var(--cream);transform:scale(1.12);}
-input[type=text]{
-  width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);
-  padding:14px 16px;border-radius:12px;font-family:'Cairo';font-size:1rem;
-}
-input[type=text]:focus{outline:none;border-color:var(--gold);}
-.scent-card{
-  border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;
-}
-.scent-card.active{border-color:var(--gold);background:rgba(184,152,94,0.08);}
-.scent-card h4{font-size:1rem;margin-bottom:4px;}
-.scent-card p{font-size:0.8rem;color:var(--smoke);}
-.scent-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.notes-pyramid{margin-top:12px;font-size:0.82rem;color:var(--gold-dark);display:none;}
-.notes-pyramid.show{display:block;}
-
-.submit-bar{
-  margin-top:10px;display:flex;gap:14px;align-items:center;
-}
-.summary-box{
-  background:var(--ink);border:1px dashed var(--line);border-radius:14px;
-  padding:16px 18px;font-size:0.85rem;color:var(--smoke);line-height:1.8;margin-top:20px;
-}
-.summary-box b{color:var(--cream);}
-
-/* QUIZ TEASER */
-.quiz-box{
-  display:flex;align-items:center;justify-content:space-between;gap:40px;
-  background:linear-gradient(120deg, rgba(139,58,74,0.25), rgba(192,133,82,0.15));
-  border:1px solid var(--line);border-radius:24px;padding:44px;
-}
-.quiz-box h3{font-size:1.8rem;margin-bottom:12px;}
-.quiz-box p{color:var(--smoke);max-width:460px;line-height:1.8;}
 
 footer{
   border-top:1px solid var(--line);padding:50px 0;text-align:center;color:var(--smoke);font-size:0.9rem;
@@ -297,8 +231,6 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .hero p.lead{margin:0 auto 32px;}
   .hero-ctas{justify-content:center;flex-wrap:wrap;}
   .gallery-grid{grid-template-columns:1fr 1fr;}
-  .customizer{grid-template-columns:1fr;padding:28px;}
-  .quiz-box{padding:28px;}
   .nav-links{
     display:none;position:absolute;top:76px;right:0;left:0;
     background:var(--ink-2);flex-direction:column;gap:0;
@@ -318,15 +250,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .btn-primary, .btn-ghost{padding:14px 20px;font-size:0.95rem;}
   .gallery-grid{grid-template-columns:1fr;gap:16px;}
   .perfume-card{padding:22px;}
-  .customizer{padding:20px;border-radius:18px;}
-  .preview-panel{padding:16px;}
-  #rotateWrap{width:130px !important;height:200px !important;}
   .option-row{gap:10px;}
   .opt{padding:9px 14px;font-size:0.85rem;flex:1 1 auto;text-align:center;}
-  .scent-grid{grid-template-columns:1fr;}
-  .submit-bar{flex-direction:column;align-items:stretch;}
-  .submit-bar button{width:100%;text-align:center;}
-  .quiz-box{padding:20px;}
   #about .container{grid-template-columns:1fr !important;text-align:center;}
   #about > .container > div:last-child{grid-template-columns:1fr 1fr !important;}
   nav .container{padding:0 18px;}
@@ -345,9 +270,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
     <div class="logo">Mon<span>sela</span></div>
     <div class="nav-links" id="navLinks">
       <a href="#gallery">مجموعتنا</a>
-      <a href="#customizer">صمم قزازتك</a>
       <a href="#testimonials">آراء العملاء</a>
-      <a href="#quiz">مش عارف تختار؟</a>
       <a href="contact.html">تواصل معنا</a>
     </div>
     <button id="accountBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
@@ -518,11 +441,11 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <header class="hero container" id="main-content">
   <div>
     <div class="eyebrow">Monsela — برفاناتك المفضلة</div>
-    <h1>عطور أصلية،<br>وبصمتك لو حبيت</h1>
-    <p class="lead">تسوق مجموعتنا من البرفانات الأصلية، وكميزة إضافية اختيارية، اصمم قزازتك الخاصة واحط اسمك عليها.</p>
+    <h1>عطور أصلية،<br>بلمستك الخاصة</h1>
+    <p class="lead">تسوق مجموعتنا من البرفانات الأصلية، واختار لون الزجاجة اللي يعجبك.</p>
     <div class="hero-ctas">
       <a href="#gallery" class="btn-primary">تسوق دلوقتي</a>
-      <a href="#customizer" class="btn-ghost">صمم قزازتك</a>
+      <a href="#whyMonsela" class="btn-ghost">ليه Monsela؟</a>
     </div>
   </div>
   <div class="hero-visual" aria-hidden="true">
@@ -610,153 +533,34 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   <div class="container" style="display:flex;justify-content:center;align-items:center;gap:36px;flex-wrap:wrap;" id="brandLogosWrap"></div>
 </section>
 
-<section class="section" id="customizer">
+<section class="section" id="whyMonsela">
   <div class="container">
     <div class="section-head reveal">
-      <div class="eyebrow">ميزة إضافية</div>
-      <h2>حابب تحط بصمتك الشخصية؟ صمم قزازتك</h2>
-      <p>ميزة اختيارية: اختار شكل ولون القزازة، اكتب اسمك عليها، وحدد التركيبة — وابعتلنا التصميم كطلب منفصل.</p>
-      <div id="sharedBanner" style="display:none;margin-top:18px;background:rgba(184,152,94,0.12);border:1px solid var(--gold);border-radius:14px;padding:12px 20px;color:var(--gold);font-size:0.9rem;"></div>
+      <div class="eyebrow">ليه Monsela</div>
+      <h2>وعدنا ليك في كل قزازة</h2>
     </div>
-
-    <div class="customizer reveal">
-      <div class="preview-panel">
-        <div id="rotateWrap" style="cursor:grab;user-select:none;width:180px;height:280px;position:relative;">
-          <div id="bottleLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.75rem;color:var(--smoke);padding:10px;">جاري تحميل المعاينة ثلاثية الأبعاد…</div>
-        </div>
-        <div style="font-size:0.75rem;color:var(--smoke);margin-top:6px;">↔ اسحب القزازة عشان تلفها</div>
-        <div class="preview-name" id="previewCaption">اكتب اسمك عشان تشوفه على القزازة</div>
-        <div class="summary-box" id="summaryBox">
-          <b>الشكل:</b> كلاسيك &nbsp; | &nbsp; <b>اللون:</b> عنبري &nbsp; | &nbsp; <b>التركيبة:</b> لسه ما اخترتش
-        </div>
+    <div class="gallery-grid reveal">
+      <div class="perfume-card">
+        <h3 style="font-size:1.3rem;margin-bottom:10px;color:var(--gold);">✓ أصالة مضمونة</h3>
+        <p style="margin:0;">كل عطورنا من مصادر موثوقة، مفيش تقليد ولا خلطات مجهولة.</p>
       </div>
-
-      <div class="form-panel">
-        <div class="field">
-          <label class="field-label">1. شكل القزازة</label>
-          <div class="option-row" id="shapeOptions">
-            <button class="opt active" data-shape="classic">كلاسيك</button>
-            <button class="opt" data-shape="tall">طويلة</button>
-            <button class="opt" data-shape="round">مدورة</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">2. لون الزجاج</label>
-          <div class="option-row" id="colorOptions">
-            <span class="color-dot active" style="background:#c08552" data-color="#c08552,#e0b083"></span>
-            <span class="color-dot" style="background:#8b3a4a" data-color="#8b3a4a,#d9c2c8"></span>
-            <span class="color-dot" style="background:#3a4a3f" data-color="#3a4a3f,#7a9784"></span>
-            <span class="color-dot" style="background:#2c2c34" data-color="#2c2c34,#5c5c68"></span>
-            <span class="color-dot" style="background:#c9a227" data-color="#c9a227,#f2e2c4"></span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">3. اكتب اسمك على القزازة
-            <small>هيتنقش زي ما هيبان بالظبط في المعاينة</small>
-          </label>
-          <input type="text" id="nameInput" placeholder="مثال: سارة" maxlength="14">
-        </div>
-
-        <div class="field">
-          <label class="field-label">4. اختار التركيبة
-            <small>لو محتار، جرب "مش عارف تختار" تحت</small>
-          </label>
-          <div class="scent-grid" id="scentOptions">
-            <div class="scent-card active" data-scent="عود وخشب">
-              <h4>عود وخشب</h4><p>دافئ، شرقي، للسهرة</p>
-            </div>
-            <div class="scent-card" data-scent="زهور بيضاء">
-              <h4>زهور بيضاء</h4><p>ياسمين ومسك، للنهار</p>
-            </div>
-            <div class="scent-card" data-scent="حمضيات منعشة">
-              <h4>حمضيات منعشة</h4><p>ليمون وبرغموت، للصيف</p>
-            </div>
-            <div class="scent-card" data-scent="فانيليا وعنبر">
-              <h4>فانيليا وعنبر</h4><p>حلو وجذاب، للشتا</p>
-            </div>
-          </div>
-          <div class="notes-pyramid show" id="notesText">
-            نوتة علوية: عود خام &nbsp;•&nbsp; نوتة قلب: خشب صندل &nbsp;•&nbsp; نوتة قاعدية: عنبر ومسك
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">5. لون الغطاء</label>
-          <div class="option-row" id="capColorOptions">
-            <span class="color-dot active" style="background:#c9a227" data-color="#c9a227" data-label="ذهبي"></span>
-            <span class="color-dot" style="background:#b6b6bd" data-color="#b6b6bd" data-label="فضي"></span>
-            <span class="color-dot" style="background:#1b1420" data-color="#1b1420" data-label="أسود"></span>
-            <span class="color-dot" style="background:#8b3a4a" data-color="#8b3a4a" data-label="روز غولد"></span>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">6. التغليف</label>
-          <div class="option-row" id="packagingOptions">
-            <button class="opt active" data-v="علبة هدايا فاخرة">علبة هدايا فاخرة</button>
-            <button class="opt" data-v="علبة بسيطة">علبة بسيطة</button>
-            <button class="opt" data-v="من غير علبة">من غير علبة</button>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">7. رقم موبايلك
-            <small>عشان نأكدلك الطلب ونتواصل معاك</small>
-          </label>
-          <input type="text" id="phoneInput" placeholder="01xxxxxxxxx">
-        </div>
-
-        <div class="submit-bar">
-          <button id="saveOrderBtn" class="btn-primary">✓ احفظ الطلب وابعته لينا</button>
-          <button id="shareBtn" class="btn-ghost" type="button">🔗 اعمل رابط مشاركة</button>
-        </div>
-        <div id="orderStatus" style="margin-top:14px;font-size:0.9rem;"></div>
-        <div id="shareStatus" style="margin-top:8px;font-size:0.85rem;color:var(--gold);"></div>
+      <div class="perfume-card">
+        <h3 style="font-size:1.3rem;margin-bottom:10px;color:var(--gold);">✓ تغليف يليق بالهدية</h3>
+        <p style="margin:0;">كل طلب بيوصلك متغلف بعناية، جاهز يتقدّم كهدية من غير أي تعب زيادة.</p>
+      </div>
+      <div class="perfume-card">
+        <h3 style="font-size:1.3rem;margin-bottom:10px;color:var(--gold);">✓ توصيل لكل مصر</h3>
+        <p style="margin:0;">بنوصل لكل المحافظات، وبنأكد معاك التفاصيل قبل ما نبعت.</p>
+      </div>
+      <div class="perfume-card">
+        <h3 style="font-size:1.3rem;margin-bottom:10px;color:var(--gold);">✓ تواصل مباشر معانا</h3>
+        <p style="margin:0;">أي سؤال قبل أو بعد الطلب، إحنا على بعد رسالة واتساب واحدة.</p>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section" id="quiz">
-  <div class="container">
-    <div class="quiz-box reveal" id="quizBox" style="flex-direction:column;align-items:stretch;">
-      <div style="text-align:center;margin-bottom:20px;">
-        <div class="eyebrow">مش عارف تختار؟</div>
-        <h3>خليني أرشحلك تركيبة تناسبك</h3>
-        <p style="margin:0 auto;">جاوب 3 أسئلة بسيطة، وهنختارلك التركيبة المناسبة تلقائيًا في قسم التصميم.</p>
-      </div>
-      <div class="field">
-        <label class="field-label">1. إيه المناسبة؟</label>
-        <div class="option-row" id="q1">
-          <button class="opt" data-v="سهرة">سهرة</button>
-          <button class="opt" data-v="يومي">يومي / شغل</button>
-          <button class="opt" data-v="صيف">جو حر / صيف</button>
-        </div>
-      </div>
-      <div class="field">
-        <label class="field-label">2. تحب الروايح إيه أكتر؟</label>
-        <div class="option-row" id="q2">
-          <button class="opt" data-v="دافئة">دافئة وثقيلة</button>
-          <button class="opt" data-v="خفيفة">خفيفة ومنعشة</button>
-          <button class="opt" data-v="حلوة">حلوة وجذابة</button>
-        </div>
-      </div>
-      <div class="field">
-        <label class="field-label">3. الجو دلوقتي؟</label>
-        <div class="option-row" id="q3">
-          <button class="opt" data-v="شتا">برد / شتا</button>
-          <button class="opt" data-v="صيفي">حر / صيف</button>
-          <button class="opt" data-v="معتدل">معتدل</button>
-        </div>
-      </div>
-      <div style="text-align:center;margin-top:10px;">
-        <button id="quizSubmit" class="btn-primary">✓ اطلع التوصية بتاعتي</button>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 <section class="section" id="about">
   <div class="container" style="display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;">
@@ -1070,6 +874,14 @@ function renderProducts(){
         : `<div class="glass"></div>`}
       <h3>${p.name} ${p.featured ? '<span style="color:var(--gold);font-size:0.8rem;">⭐ مميز</span>' : ''}</h3>
       <p>${p.notes || p.description || ''}</p>
+      ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
+        <div style="margin:8px 0;">
+          <p style="font-size:0.75rem;color:var(--smoke);margin-bottom:6px;">لون الزجاجة:</p>
+          <div class="bottle-color-picker" data-id="${p.id}" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            ${p.bottle_colors.map((c,i) => `<span class="bottle-color-swatch ${i===0?'active':''}" data-name="${escapeHTML(c.name)}" title="${escapeHTML(c.name)}" style="width:26px;height:26px;border-radius:50%;background:${c.hex};cursor:pointer;border:2px solid ${i===0?'var(--gold)':'transparent'};box-shadow:0 0 0 1px var(--line);"></span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
       ${hasVariants ? `
         <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin:8px 0;">
           ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
@@ -1143,11 +955,12 @@ function renderProducts(){
   function currentVariantOf(productId){
     const sel = grid.querySelector(`.variant-select[data-id="${productId}"]`);
     const product = allProducts.find(p => p.id === productId);
-    if (sel && Array.isArray(product.variants)) return product.variants[Number(sel.value)];
+    if (sel && product && Array.isArray(product.variants)) return product.variants[Number(sel.value)];
     return null;
   }
   function currentStockLimit(productId){
     const product = allProducts.find(p => p.id === productId);
+    if (!product) return 0;
     const variant = currentVariantOf(productId);
     return variant ? variant.stock : (product.stock ?? 0);
   }
@@ -1156,6 +969,7 @@ function renderProducts(){
     sel.addEventListener('change', ()=>{
       const id = sel.dataset.id;
       const variant = currentVariantOf(id);
+      if (!variant) return;
       const badge = document.getElementById(`stockBadge-${id}`);
       const outOfStock = (variant.stock ?? 0) <= 0;
       const lowStock = !outOfStock && variant.stock <= 5;
@@ -1179,12 +993,25 @@ function renderProducts(){
       el.textContent = Math.min(max, parseInt(el.textContent) + 1);
     });
   });
+  grid.querySelectorAll('.bottle-color-picker').forEach(picker=>{
+    picker.querySelectorAll('.bottle-color-swatch').forEach(sw=>{
+      sw.addEventListener('click', ()=>{
+        picker.querySelectorAll('.bottle-color-swatch').forEach(s=>{ s.classList.remove('active'); s.style.borderColor = 'transparent'; });
+        sw.classList.add('active');
+        sw.style.borderColor = 'var(--gold)';
+      });
+    });
+  });
+
   grid.querySelectorAll('.add-to-cart').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const product = allProducts.find(p => p.id === btn.dataset.id);
+      if (!product) return;
       const qty = parseInt(document.getElementById(`qty-${btn.dataset.id}`).textContent);
       const variant = currentVariantOf(btn.dataset.id);
-      addToCart(product, qty, variant);
+      const colorPicker = grid.querySelector(`.bottle-color-picker[data-id="${btn.dataset.id}"] .bottle-color-swatch.active`);
+      const bottleColor = colorPicker ? colorPicker.dataset.name : null;
+      addToCart(product, qty, variant, bottleColor);
     });
   });
 
@@ -1603,13 +1430,15 @@ function saveCart(){
   renderCartUI();
 }
 
-function addToCart(product, qty, variant){
-  const cartKey = variant ? `${product.id}::${variant.label}` : product.id;
-  const displayName = variant ? `${product.name} (${variant.label})` : product.name;
+function addToCart(product, qty, variant, bottleColor){
+  if (!product) return;
+  const cartKey = `${product.id}${variant ? '::' + variant.label : ''}${bottleColor ? '::' + bottleColor : ''}`;
+  let displayName = variant ? `${product.name} (${variant.label})` : product.name;
+  if (bottleColor) displayName += ` — لون ${bottleColor}`;
   const price = variant ? variant.price : (product.price || 0);
   const existing = cart.find(i => i.cartKey === cartKey);
   if (existing) { existing.qty += qty; }
-  else { cart.push({ id: product.id, cartKey, variantLabel: variant ? variant.label : null, name: displayName, price, qty }); }
+  else { cart.push({ id: product.id, cartKey, variantLabel: variant ? variant.label : null, bottleColor: bottleColor || null, name: displayName, price, qty }); }
   saveCart();
   openCart();
 }
@@ -2096,17 +1925,6 @@ document.getElementById('productSearch').addEventListener('input', ()=>{
 document.getElementById('productSort').addEventListener('change', ()=>{ visibleCount = 12; renderProducts(); });
 document.getElementById('productBrandFilter').addEventListener('change', (e)=>{ activeBrand = e.target.value; visibleCount = 12; renderProducts(); });
 
-const previewCaption = document.getElementById('previewCaption');
-const summaryBox = document.getElementById('summaryBox');
-const nameInput = document.getElementById('nameInput');
-const phoneInput = document.getElementById('phoneInput');
-const saveOrderBtn = document.getElementById('saveOrderBtn');
-const shareBtn = document.getElementById('shareBtn');
-const shareStatus = document.getElementById('shareStatus');
-const sharedBanner = document.getElementById('sharedBanner');
-const orderStatus = document.getElementById('orderStatus');
-const notesText = document.getElementById('notesText');
-
 // ===== Mobile menu toggle =====
 const menuToggle = document.getElementById('menuToggle');
 const navLinks = document.getElementById('navLinks');
@@ -2141,417 +1959,6 @@ if ('IntersectionObserver' in window) {
   document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
 }
 
-const scentNotes = {
-  "عود وخشب": "نوتة علوية: عود خام • نوتة قلب: خشب صندل • نوتة قاعدية: عنبر ومسك",
-  "زهور بيضاء": "نوتة علوية: ياسمين • نوتة قلب: زهر البرتقال • نوتة قاعدية: مسك أبيض",
-  "حمضيات منعشة": "نوتة علوية: ليمون وبرغموت • نوتة قلب: نعناع • نوتة قاعدية: خشب أبيض",
-  "فانيليا وعنبر": "نوتة علوية: قرفة • نوتة قلب: فانيليا • نوتة قاعدية: عنبر دافئ"
-};
-
-let state = { shape: 'classic', shapeLabel:'كلاسيك', colorTop:'#e0b083', colorBottom:'#c08552', colorLabel:'عنبري', name:'', scent:'عود وخشب', capColor:'#c9a227', capColorLabel:'ذهبي', packaging:'علبة هدايا فاخرة' };
-window.state = state; // exposed for the 3D bottle viewer module
-
-function updateSummary(){
-  summaryBox.innerHTML = `<b>الشكل:</b> ${state.shapeLabel} &nbsp; | &nbsp; <b>اللون:</b> ${state.colorLabel} &nbsp; | &nbsp; <b>الغطاء:</b> ${state.capColorLabel} &nbsp; | &nbsp; <b>التركيبة:</b> ${state.scent} &nbsp; | &nbsp; <b>التغليف:</b> ${state.packaging}`;
-}
-
-saveOrderBtn.addEventListener('click', async ()=>{
-  const phone = phoneInput.value.trim();
-  if(!phone){
-    orderStatus.style.color = '#d98787';
-    orderStatus.textContent = 'من فضلك اكتب رقم موبايلك الأول عشان نقدر نأكدلك الطلب.';
-    return;
-  }
-  saveOrderBtn.disabled = true;
-  saveOrderBtn.textContent = 'جاري الحفظ...';
-  orderStatus.style.color = '#b8985e';
-  orderStatus.textContent = '';
-
-  const { error } = await sb.from('orders').insert({
-    bottle_shape: state.shape,
-    bottle_shape_label: state.shapeLabel,
-    glass_color_hex: state.colorBottom,
-    glass_color_label: state.colorLabel,
-    engraved_name: state.name || null,
-    scent: state.scent,
-    cap_color_hex: state.capColor,
-    cap_color_label: state.capColorLabel,
-    packaging: state.packaging,
-    customer_phone: phone
-  });
-
-  saveOrderBtn.disabled = false;
-  saveOrderBtn.textContent = '✓ احفظ الطلب وابعته لينا';
-
-  if(error){
-    orderStatus.style.color = '#d98787';
-    orderStatus.textContent = 'حصلت مشكلة في حفظ الطلب، حاول تاني كمان شوية.';
-    console.error(error);
-    return;
-  }
-
-  orderStatus.style.color = '#8fd98f';
-  orderStatus.textContent = '✓ الطلب اتحفظ! هنتواصل معاك على رقمك في أقرب وقت.';
-
-  const msg = `مرحبا Monsela! عايز اطلب قزازة بالتصميم ده:%0aالشكل: ${state.shapeLabel}%0aاللون: ${state.colorLabel}%0aالغطاء: ${state.capColorLabel}%0aالاسم المنقوش: ${state.name || 'بدون اسم'}%0aالتركيبة: ${state.scent}%0aالتغليف: ${state.packaging}%0aرقمي: ${phone}`;
-  openWhatsAppMessage(msg);
-});
-
-document.querySelectorAll('#shapeOptions .opt').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.shape = btn.dataset.shape;
-    state.shapeLabel = btn.textContent;
-    window.MonselaBottle?.setShape(state.shape);
-    updateSummary();
-  });
-});
-
-document.querySelectorAll('#colorOptions .color-dot').forEach(dot=>{
-  dot.addEventListener('click', ()=>{
-    document.querySelectorAll('#colorOptions .color-dot').forEach(d=>d.classList.remove('active'));
-    dot.classList.add('active');
-    const [bottom, top] = dot.dataset.color.split(',');
-    state.colorTop = top; state.colorBottom = bottom;
-    window.MonselaBottle?.setColor(bottom);
-    state.colorLabel = dot.style.background;
-    updateSummary();
-  });
-});
-
-document.querySelectorAll('#capColorOptions .color-dot').forEach(dot=>{
-  dot.addEventListener('click', ()=>{
-    document.querySelectorAll('#capColorOptions .color-dot').forEach(d=>d.classList.remove('active'));
-    dot.classList.add('active');
-    state.capColor = dot.dataset.color;
-    state.capColorLabel = dot.dataset.label;
-    window.MonselaBottle?.setCapColor(state.capColor);
-    updateSummary();
-  });
-});
-
-document.querySelectorAll('#packagingOptions .opt').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#packagingOptions .opt').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    state.packaging = btn.dataset.v;
-    updateSummary();
-  });
-});
-
-nameInput.addEventListener('input', ()=>{
-  state.name = nameInput.value.trim();
-  window.MonselaBottle?.setName(state.name);
-  previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
-  updateSummary();
-});
-
-document.querySelectorAll('.scent-card').forEach(card=>{
-  card.addEventListener('click', ()=>{
-    document.querySelectorAll('.scent-card').forEach(c=>c.classList.remove('active'));
-    card.classList.add('active');
-    state.scent = card.dataset.scent;
-    notesText.textContent = scentNotes[state.scent];
-    updateSummary();
-  });
-});
-
-// ===== Quiz logic =====
-let quizAnswers = { q1:null, q2:null, q3:null };
-['q1','q2','q3'].forEach(qid=>{
-  document.querySelectorAll(`#${qid} .opt`).forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll(`#${qid} .opt`).forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      quizAnswers[qid] = btn.dataset.v;
-    });
-  });
-});
-
-document.getElementById('quizSubmit').addEventListener('click', ()=>{
-  if(!quizAnswers.q1 || !quizAnswers.q2 || !quizAnswers.q3){
-    alert('جاوب على الأسئلة التلاتة الأول عشان نقدر نرشحلك صح 🙂');
-    return;
-  }
-  let recommended = 'عود وخشب';
-  if(quizAnswers.q1 === 'سهرة' || quizAnswers.q2 === 'دافئة'){
-    recommended = quizAnswers.q3 === 'شتا' ? 'فانيليا وعنبر' : 'عود وخشب';
-  } else if(quizAnswers.q1 === 'صيف' || quizAnswers.q3 === 'صيفي' || quizAnswers.q2 === 'خفيفة'){
-    recommended = 'حمضيات منعشة';
-  } else if(quizAnswers.q2 === 'حلوة'){
-    recommended = 'فانيليا وعنبر';
-  } else {
-    recommended = 'زهور بيضاء';
-  }
-
-  document.querySelectorAll('.scent-card').forEach(c=>{
-    c.classList.toggle('active', c.dataset.scent === recommended);
-  });
-  state.scent = recommended;
-  notesText.textContent = scentNotes[recommended];
-  updateSummary();
-
-  document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
-});
-
-updateSummary();
-
-// ===== Shareable design link =====
-shareBtn.addEventListener('click', async ()=>{
-  if (!canSubmitAgain('share', 5000)) return;
-  shareBtn.disabled = true;
-  const originalText = shareBtn.textContent;
-  shareBtn.textContent = 'جاري إنشاء الرابط...';
-  const { data, error } = await sb.from('designs').insert({
-    bottle_shape: state.shape,
-    bottle_shape_label: state.shapeLabel,
-    glass_color_hex: state.colorBottom,
-    glass_color_label: state.colorLabel,
-    engraved_name: state.name || null,
-    scent: state.scent,
-    cap_color_hex: state.capColor,
-    cap_color_label: state.capColorLabel,
-    packaging: state.packaging
-  }).select().single();
-
-  shareBtn.disabled = false;
-  shareBtn.textContent = originalText;
-
-  if(error || !data){
-    shareStatus.style.color = '#d98787';
-    shareStatus.textContent = 'حصلت مشكلة في إنشاء الرابط، حاول تاني.';
-    console.error(error);
-    return;
-  }
-  const shareUrl = `${window.location.origin}${window.location.pathname}?design=${data.id}`;
-  try{
-    await navigator.clipboard.writeText(shareUrl);
-    shareStatus.style.color = '#8fd98f';
-    shareStatus.textContent = `✓ اتنسخ الرابط! ${shareUrl}`;
-  }catch(e){
-    shareStatus.style.color = '#b8985e';
-    shareStatus.textContent = shareUrl;
-  }
-});
-
-// ===== Load a shared design from URL (?design=ID) =====
-(async function loadSharedDesign(){
-  const params = new URLSearchParams(window.location.search);
-  const designId = params.get('design');
-  if(!designId) return;
-
-  const { data, error } = await sb.from('designs').select('*').eq('id', designId).single();
-  if(error || !data) return;
-
-  state.shape = data.bottle_shape;
-  state.shapeLabel = data.bottle_shape_label;
-  state.colorBottom = data.glass_color_hex;
-  state.colorLabel = data.glass_color_label;
-  state.name = data.engraved_name || '';
-  state.scent = data.scent;
-  state.capColor = data.cap_color_hex || state.capColor;
-  state.capColorLabel = data.cap_color_label || state.capColorLabel;
-  state.packaging = data.packaging || state.packaging;
-
-  window.MonselaBottle?.setShape(state.shape);
-  window.MonselaBottle?.setColor(state.colorBottom);
-  window.MonselaBottle?.setName(state.name);
-  window.MonselaBottle?.setCapColor(state.capColor);
-  nameInput.value = state.name;
-  previewCaption.textContent = state.name ? `كده هيتنقش اسمك "${state.name}" على القزازة` : 'اكتب اسمك عشان تشوفه على القزازة';
-  notesText.textContent = scentNotes[state.scent] || '';
-
-  document.querySelectorAll('#shapeOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.shape === state.shape));
-  document.querySelectorAll('.scent-card').forEach(c=>c.classList.toggle('active', c.dataset.scent === state.scent));
-  document.querySelectorAll('#capColorOptions .color-dot').forEach(d=>d.classList.toggle('active', d.dataset.color === state.capColor));
-  document.querySelectorAll('#packagingOptions .opt').forEach(b=>b.classList.toggle('active', b.dataset.v === state.packaging));
-
-  sharedBanner.style.display = 'block';
-  sharedBanner.textContent = `👀 ده تصميم اتبعتلك من صاحبك — عدّل فيه زي ما تحب أو اطلبه زي ما هو`;
-  updateSummary();
-  document.getElementById('customizer').scrollIntoView({behavior:'smooth', block:'start'});
-})();
-</script>
-
-<script type="module">
-// ===== Monsela 3D Bottle Viewer (Three.js) =====
-// Lazy-loaded only when the customizer section is actually about to be seen —
-// either the user scrolls to it, or a shared design link (?design=) needs it immediately.
-function startBottleViewer() {
-  import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js').then((THREE) => {
-    const wrap = document.getElementById('rotateWrap');
-    const loadingLabel = document.getElementById('bottleLoading');
-    if (!wrap) return;
-
-    const PROFILES = {
-      classic: [[0,0],[0.38,0],[0.40,0.08],[0.37,0.50],[0.30,0.58],[0.35,0.66],[0.40,0.80],[0.40,0.95],[0.20,1.08],[0.16,1.25],[0.16,1.40],[0,1.40]],
-      tall:    [[0,0],[0.27,0],[0.29,0.06],[0.29,1.15],[0.25,1.26],[0.13,1.38],[0.13,1.52],[0,1.52]],
-      round:   [[0,0],[0.44,0],[0.50,0.14],[0.52,0.42],[0.47,0.72],[0.34,0.92],[0.29,1.02],[0.16,1.12],[0.16,1.28],[0,1.28]]
-    };
-
-    function lathePoints(key){
-      return PROFILES[key].map(([x,y]) => new THREE.Vector2(x,y));
-    }
-    function topHeight(key){
-      const pts = PROFILES[key];
-      return pts[pts.length - 1][1];
-    }
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, wrap.clientWidth / wrap.clientHeight, 0.1, 100);
-    camera.position.set(0, 0, 3.6);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    wrap.appendChild(renderer.domElement);
-    renderer.domElement.style.touchAction = 'none';
-
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x1b1420, 0.7));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
-    keyLight.position.set(2, 3, 4);
-    scene.add(keyLight);
-    const goldRim = new THREE.DirectionalLight(0xc9a227, 0.5);
-    goldRim.position.set(-3, 1, -2);
-    scene.add(goldRim);
-
-    const group = new THREE.Group();
-    scene.add(group);
-
-    const startColor = (window.state && window.state.colorBottom) || '#c08552';
-    const bottleMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(startColor),
-      transparent: true,
-      opacity: 0.86,
-      roughness: 0.12,
-      metalness: 0.0,
-      clearcoat: 0.6,
-      clearcoatRoughness: 0.2,
-      side: THREE.DoubleSide
-    });
-    const bottleMesh = new THREE.Mesh(new THREE.LatheGeometry(lathePoints('classic'), 48), bottleMaterial);
-    group.add(bottleMesh);
-
-    const capMaterial = new THREE.MeshStandardMaterial({ color: 0xc9a227, metalness: 0.6, roughness: 0.3 });
-    const capMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.2, 0.22, 32), capMaterial);
-    group.add(capMesh);
-
-    const ringMaterial = new THREE.MeshStandardMaterial({ color: 0x8b3a4a, metalness: 0.2, roughness: 0.5 });
-    const ringMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.06, 32), ringMaterial);
-    group.add(ringMesh);
-
-    // Engraved name, rendered as a canvas texture on a plane facing the camera
-    const nameCanvas = document.createElement('canvas');
-    nameCanvas.width = 256; nameCanvas.height = 128;
-    const nameCtx = nameCanvas.getContext('2d');
-    const nameTexture = new THREE.CanvasTexture(nameCanvas);
-    const namePlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.7, 0.35),
-      new THREE.MeshBasicMaterial({ map: nameTexture, transparent: true })
-    );
-    group.add(namePlane);
-
-    function drawName(text){
-      nameCtx.clearRect(0, 0, nameCanvas.width, nameCanvas.height);
-      if (text) {
-        nameCtx.fillStyle = '#1b1420';
-        nameCtx.textAlign = 'center';
-        nameCtx.textBaseline = 'middle';
-        nameCtx.font = '48px "Aref Ruqaa", serif';
-        nameCtx.fillText(text, nameCanvas.width / 2, nameCanvas.height / 2);
-      }
-      nameTexture.needsUpdate = true;
-    }
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => drawName((window.state && window.state.name) || ''));
-    }
-
-    function layoutForShape(key){
-      const h = topHeight(key);
-      capMesh.position.y = h + 0.11;
-      ringMesh.position.y = h - 0.02;
-      namePlane.position.set(0, h * 0.5, 0.42);
-      group.position.y = -h / 2;
-    }
-
-    function setShape(key){
-      if (!PROFILES[key]) return;
-      bottleMesh.geometry.dispose();
-      bottleMesh.geometry = new THREE.LatheGeometry(lathePoints(key), 48);
-      layoutForShape(key);
-    }
-    function setColor(hex){
-      bottleMaterial.color.set(hex);
-    }
-    function setCapColor(hex){
-      capMaterial.color.set(hex);
-    }
-    function setName(text){
-      drawName(text);
-    }
-
-    layoutForShape((window.state && window.state.shape) || 'classic');
-    drawName((window.state && window.state.name) || '');
-    if (window.state && window.state.capColor) capMaterial.color.set(window.state.capColor);
-
-    // Drag-to-rotate + gentle auto-rotate, using unified Pointer Events (mouse + touch)
-    let isDragging = false, lastX = 0;
-    wrap.addEventListener('pointerdown', (e) => {
-      isDragging = true; lastX = e.clientX; wrap.style.cursor = 'grabbing';
-      wrap.setPointerCapture(e.pointerId);
-    });
-    window.addEventListener('pointerup', () => { isDragging = false; wrap.style.cursor = 'grab'; });
-    window.addEventListener('pointermove', (e) => {
-      if (!isDragging) return;
-      const dx = e.clientX - lastX; lastX = e.clientX;
-      group.rotation.y += dx * 0.012;
-    });
-
-    const clock = new THREE.Clock();
-    function animate(){
-      requestAnimationFrame(animate);
-      if (!isDragging) group.rotation.y += clock.getDelta() * 0.35;
-      renderer.render(scene, camera);
-    }
-
-    function onResize(){
-      const w = wrap.clientWidth, h = wrap.clientHeight;
-      if (!w || !h) return;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    }
-    window.addEventListener('resize', onResize);
-
-    if (loadingLabel) loadingLabel.style.display = 'none';
-    animate();
-
-    window.MonselaBottle = { setShape, setColor, setCapColor, setName };
-  }).catch((err) => {
-    console.error('3D bottle viewer failed to load:', err);
-    if (loadingLabel) loadingLabel.textContent = 'المعاينة ثلاثية الأبعاد مش مدعومة على المتصفح أو الجهاز ده — جرب متصفح تاني أو جهاز تاني، وممكن كمان تختار الشكل واللون والاسم عادي من الفورم جنبها';
-  });
-}
-
-const hasSharedDesign = new URLSearchParams(window.location.search).has('design');
-if (hasSharedDesign) {
-  // A shared design link needs the 3D preview right away, no need to wait for scroll.
-  startBottleViewer();
-} else if ('IntersectionObserver' in window) {
-  const customizerEl = document.getElementById('customizer');
-  const bottleObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if (entry.isIntersecting) {
-        startBottleViewer();
-        bottleObserver.disconnect();
-      }
-    });
-  }, { rootMargin: '200px' });
-  if (customizerEl) bottleObserver.observe(customizerEl);
-} else {
-  window.addEventListener('load', startBottleViewer);
-}
 </script>
 
 </body>
