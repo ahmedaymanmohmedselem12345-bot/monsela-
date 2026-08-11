@@ -448,6 +448,9 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;">تتبع طلبك</h3>
       <button id="closeTrackOrder" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
     </div>
+    <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:16px;">لأمان بياناتك، محتاجين رقم الطلب (موجود في رسالة التأكيد) مع رقم موبايلك مع بعض.</p>
+    <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الطلب</label>
+    <input type="text" id="trackOrderNumberInput" placeholder="MON-2026-000001" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
     <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل اللي طلبت بيه</label>
     <div style="display:flex;gap:8px;margin-bottom:16px;">
       <input type="text" id="trackPhoneInput" placeholder="01xxxxxxxxx" style="flex:1;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
@@ -1978,7 +1981,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   const paymentText = (insertedOrder && insertedOrder.payment_method !== 'cod')
     ? 'تم استلام إثبات الدفع، وهيتراجع من فريقنا قبل ما نبدأ تجهيز طلبك.\n'
     : '';
-  alert(`✓ تم تأكيد طلبك!\n${orderNum}${paymentText}${etaText}\nتقدر تتابع حالة طلبك في أي وقت من "تتبع طلبك" أو "حسابي" في الموقع.`);
+  alert(`✓ تم تأكيد طلبك!\n${orderNum}${paymentText}${etaText}\n⚠️ احتفظ برقم الطلب ده - هتحتاجه عشان تتابع الطلب من "تتبع طلبك".`);
 });
 
 renderCartUI();
@@ -2124,13 +2127,15 @@ document.getElementById('closeTrackOrder').addEventListener('click', ()=>{
   document.getElementById('trackOrderOverlay').style.display = 'none';
 });
 document.getElementById('trackOrderSearchBtn').addEventListener('click', async ()=>{
+  const orderNumber = document.getElementById('trackOrderNumberInput').value.trim().toUpperCase();
   const phone = document.getElementById('trackPhoneInput').value.trim();
   const resultsEl = document.getElementById('trackOrderResults');
-  if (!phone) { resultsEl.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">اكتب رقم الموبايل الأول.</p>'; return; }
+  if (!orderNumber || !phone) { resultsEl.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">اكتب رقم الطلب ورقم الموبايل مع بعض.</p>'; return; }
+  if (!canSubmitAgain('track_order', 3000)) { resultsEl.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">استنى شوية قبل ما تدوّر تاني.</p>'; return; }
   resultsEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">جاري البحث...</p>';
-  const { data: orders, error } = await sb.rpc('track_orders_by_phone', { p_phone: phone });
+  const { data: orders, error } = await sb.rpc('track_order_logged', { p_order_number: orderNumber, p_phone: phone });
   if (error || !orders || orders.length === 0) {
-    resultsEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">مفيش طلبات بالرقم ده.</p>';
+    resultsEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">مفيش طلب مطابق لرقم الطلب ورقم الموبايل دول مع بعض. تأكد من رقم الطلب من رسالة التأكيد.</p>';
     return;
   }
   resultsEl.innerHTML = orders.map(o => `
