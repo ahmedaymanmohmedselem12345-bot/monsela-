@@ -785,7 +785,7 @@ async function loadReviews(){
   listEl.innerHTML = data.map(r => `
     <div class="product-item" style="align-items:flex-start;">
       <div class="info">
-        <h4>${escapeHTML(r.customer_name)} — ${'⭐'.repeat(r.rating)} ${r.approved ? '' : '(مستنية موافقة)'}</h4>
+        <h4>${escapeHTML(r.customer_name)} — ${'⭐'.repeat(r.rating)} ${r.approved ? '' : '(مستنية موافقة)'} ${r.verified_purchase ? '✓ مشترى موثقة' : ''}</h4>
         <p>${escapeHTML(r.comment || '')}</p>
         <p style="font-size:0.75rem;">على منتج: ${escapeHTML(r.products ? r.products.name : '(محذوف)')}</p>
       </div>
