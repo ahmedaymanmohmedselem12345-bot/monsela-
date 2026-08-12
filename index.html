@@ -1331,58 +1331,76 @@ async function openProductDetail(productId){
   const hasDiscount = p.original_price && p.original_price > p.price;
 
   content.innerHTML = `
-    <div style="text-align:center;margin-bottom:16px;">
-      <img id="pdMainImage" src="${allImages[0] || ''}" style="width:100%;max-width:320px;aspect-ratio:1/1;object-fit:cover;border-radius:14px;">
-      ${allImages.length > 1 ? `
-        <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-          ${allImages.map(url => `<img src="${url}" class="pd-thumb" style="width:50px;height:50px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);">`).join('')}
-        </div>` : ''}
-    </div>
-    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:8px;">${p.name}</h3>
-    <p style="color:var(--gold);font-weight:700;font-size:1.1rem;margin-bottom:8px;">
-      ${p.price ? p.price + ' جنيه' : ''}
-      ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.85rem;margin-right:8px;">${p.original_price} جنيه</span>` : ''}
-    </p>
-    <p style="color:var(--smoke);line-height:1.8;margin-bottom:20px;">${localizedField(p,'description') || localizedField(p,'notes') || ''}</p>
+    <div style="display:grid;grid-template-columns:1fr;gap:20px;">
+      <div style="text-align:center;">
+        <img id="pdMainImage" src="${allImages[0] || ''}" style="width:100%;max-width:280px;aspect-ratio:1/1;object-fit:cover;border-radius:14px;">
+        ${allImages.length > 1 ? `
+          <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            ${allImages.map(url => `<img src="${url}" class="pd-thumb" style="width:50px;height:50px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);">`).join('')}
+          </div>` : ''}
+      </div>
+      <div>
+        <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;margin-bottom:10px;">${localizedField(p,'name')}</h3>
+        <p style="margin-bottom:14px;">
+          ${hasDiscount ? `<span style="background:var(--rose);color:var(--cream);font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-left:8px;">-${Math.round((1 - p.price / p.original_price) * 100)}%</span>` : ''}
+          <span style="color:var(--gold);font-weight:700;font-size:1.3rem;">${p.price ? p.price + ' جنيه' : ''}</span>
+          ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.9rem;margin-right:8px;">${p.original_price} جنيه</span>` : ''}
+        </p>
 
-    <div id="pdPurchaseBox">
-      ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
-        <div style="margin-bottom:14px;">
-          <p style="font-size:0.8rem;color:var(--smoke);margin-bottom:6px;">لون الزجاجة:</p>
-          <div class="bottle-color-picker" data-id="${p.id}" style="display:flex;gap:8px;flex-wrap:wrap;">
-            ${p.bottle_colors.map((c,i) => `<span class="bottle-color-swatch ${i===0?'active':''}" data-name="${escapeHTML(c.name)}" title="${escapeHTML(c.name)}" style="width:26px;height:26px;border-radius:50%;background:${c.hex};cursor:pointer;border:2px solid ${i===0?'var(--gold)':'transparent'};box-shadow:0 0 0 1px var(--line);"></span>`).join('')}
+        <div id="pdPurchaseBox">
+          ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
+            <div style="margin-bottom:14px;">
+              <p style="font-size:0.8rem;color:var(--smoke);margin-bottom:6px;">لون الزجاجة:</p>
+              <div class="bottle-color-picker" data-id="${p.id}" style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${p.bottle_colors.map((c,i) => `<span class="bottle-color-swatch ${i===0?'active':''}" data-name="${escapeHTML(c.name)}" title="${escapeHTML(c.name)}" style="width:26px;height:26px;border-radius:50%;background:${c.hex};cursor:pointer;border:2px solid ${i===0?'var(--gold)':'transparent'};box-shadow:0 0 0 1px var(--line);"></span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${hasVariants ? `
+            <select class="opt" id="pdVariantSelect" style="width:100%;margin-bottom:14px;">
+              ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+            </select>
+          ` : ''}
+          <div id="pdStockBadge" style="margin-bottom:12px;"></div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button class="opt" id="pdQtyMinus" aria-label="نقص الكمية" style="width:38px;padding:8px 0;">−</button>
+              <span id="pdQty" style="min-width:26px;text-align:center;font-weight:700;">1</span>
+              <button class="opt" id="pdQtyPlus" aria-label="زود الكمية" style="width:38px;padding:8px 0;">+</button>
+            </div>
+            <button class="btn-primary" id="pdAddToCart" style="flex:1;">${translations[currentLang].btn_add_to_cart}</button>
           </div>
         </div>
-      ` : ''}
-      ${hasVariants ? `
-        <select class="opt" id="pdVariantSelect" style="width:100%;margin-bottom:14px;">
-          ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
-        </select>
-      ` : ''}
-      <div id="pdStockBadge" style="margin-bottom:12px;"></div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;">
-        <button class="opt" id="pdQtyMinus" aria-label="نقص الكمية" style="width:34px;padding:6px 0;">−</button>
-        <span id="pdQty" style="min-width:24px;text-align:center;">1</span>
-        <button class="opt" id="pdQtyPlus" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
       </div>
-      <button class="btn-primary" id="pdAddToCart" style="width:100%;">${translations[currentLang].btn_add_to_cart}</button>
     </div>
 
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;margin-top:20px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
-      <div style="font-size:0.8rem;">
-        <p style="color:var(--cream);margin-bottom:6px;" data-i18n="pd_share">شارك المنتج ده</p>
-        <button id="pdCopyLink" class="btn-ghost" style="padding:6px 14px;font-size:0.78rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
+    <details style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px;">
+      <summary style="cursor:pointer;color:var(--gold);font-weight:700;">تفاصيل المنتج</summary>
+      <p style="color:var(--smoke);line-height:1.8;margin-top:12px;">${localizedField(p,'description') || localizedField(p,'notes') || ''}</p>
+      <div id="pdFragranceProfile" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;font-size:0.82rem;"></div>
+    </details>
+
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer;color:var(--gold);font-weight:700;" data-i18n="pd_share">شارك المنتج ده</summary>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
+        <button id="pdCopyLink" class="btn-ghost" style="padding:8px 16px;font-size:0.85rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
       </div>
-    </div>
-    <div id="pdReviewsSummary" style="margin-bottom:16px;"></div>
-    <div id="pdReviewsList" style="margin-bottom:20px;"></div>
-        <div id="pdFragranceProfile" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px;font-size:0.82rem;"></div>
-    <div id="pdRelatedWrap" style="display:none;margin-bottom:20px;">
+    </details>
+
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer;color:var(--gold);font-weight:700;">المراجعات</summary>
+      <div style="margin-top:14px;">
+        <div id="pdReviewsSummary" style="margin-bottom:16px;"></div>
+        <div id="pdReviewsList" style="margin-bottom:20px;"></div>
+      </div>
+    </details>
+
+    <div id="pdRelatedWrap" style="display:none;margin-top:20px;">
       <h4 style="margin-bottom:10px;color:var(--gold);" data-i18n="pd_related">منتجات مشابهة</h4>
       <div id="pdRelatedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
     </div>
-    <details style="margin-bottom:10px;">
+    <details style="margin-top:14px;">
       <summary style="cursor:pointer;color:var(--gold);" data-i18n="pd_write_review">اكتب مراجعة</summary>
       <div style="margin-top:12px;">
         <input type="text" id="pdReviewName" data-i18n-ph="ph_your_name" placeholder="اسمك" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
@@ -2068,8 +2086,9 @@ function calcOrderTotals(){
     discount = appliedCoupon.type === 'percentage' ? subtotal * (appliedCoupon.value/100) : appliedCoupon.value;
     discount = Math.min(discount, subtotal);
   }
-  const zoneId = document.getElementById('checkoutZone').value;
-  const zone = deliveryZones.find(z => z.id === zoneId);
+  const zoneEl = document.getElementById('checkoutZone');
+  const zoneId = zoneEl ? zoneEl.value : '';
+  const zone = Array.isArray(deliveryZones) ? deliveryZones.find(z => z.id === zoneId) : null;
   const deliveryFee = zone ? zone.fee : 0;
   const total = subtotal - discount + deliveryFee;
   return { subtotal, discount, deliveryFee, total, zone };
@@ -2202,22 +2221,19 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   btn.disabled = true;
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري تأكيد الطلب...';
 
-  let paymentProofPath = null;
-  if (paymentProofFile) {
-    statusEl.textContent = 'جاري رفع إثبات الدفع...';
-    const origExt = (paymentProofFile.name && paymentProofFile.name.includes('.')) ? paymentProofFile.name.split('.').pop().slice(0,5) : 'jpg';
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${origExt}`;
-    const { error: uploadError } = await sb.storage.from('payment-proofs').upload(path, paymentProofFile, { contentType: paymentProofFile.type || 'application/octet-stream' });
-    if (uploadError) {
-      console.error('Payment proof upload failed:', uploadError);
-      btn.disabled = false;
-      statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = 'حصلت مشكلة في رفع صورة الدفع: ' + (uploadError.message || uploadError.error || JSON.stringify(uploadError));
-      return;
+  try {
+    let paymentProofPath = null;
+    if (paymentProofFile) {
+      statusEl.textContent = 'جاري رفع إثبات الدفع...';
+      const origExt = (paymentProofFile.name && paymentProofFile.name.includes('.')) ? paymentProofFile.name.split('.').pop().slice(0,5) : 'jpg';
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${origExt}`;
+      const { error: uploadError } = await sb.storage.from('payment-proofs').upload(path, paymentProofFile, { contentType: paymentProofFile.type || 'application/octet-stream' });
+      if (uploadError) {
+        throw new Error('upload_failed: ' + (uploadError.message || uploadError.error || JSON.stringify(uploadError)));
+      }
+      paymentProofPath = path;
     }
-    paymentProofPath = path;
-  }
-  statusEl.textContent = 'جاري تأكيد الطلب...';
+    statusEl.textContent = 'جاري تأكيد الطلب...';
 
   const { data: insertedOrder, error } = await sb.from('store_orders').insert({
     customer_name: name,
@@ -2295,6 +2311,19 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     ? 'تم استلام إثبات الدفع، وهيتراجع من فريقنا قبل ما نبدأ تجهيز طلبك.\n'
     : '';
   alert(`✓ تم تأكيد طلبك!\n${orderNum}${paymentText}${etaText}\n⚠️ احتفظ برقم الطلب ده - هتحتاجه عشان تتابع الطلب من "تتبع طلبك".`);
+
+  } catch (unexpectedError) {
+    console.error('Checkout error:', unexpectedError);
+    btn.disabled = false;
+    const msg = unexpectedError.message || '';
+    if (msg.startsWith('upload_failed:')) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'حصلت مشكلة في رفع صورة الدفع. تأكد من اتصالك بالإنترنت وحاول تاني.';
+    } else {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'حصلت مشكلة غير متوقعة، حاول تاني أو تواصل معنا.';
+    }
+  }
 });
 
 renderCartUI();

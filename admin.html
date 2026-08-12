@@ -116,10 +116,6 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <label>اسم البرفان</label>
       <input type="text" id="pName" placeholder="مثال: عود ملكي">
       <div class="row">
-        <div><label>القسم الرئيسي (مثال: عطور، مجوهرات، ساعات، اقلام)</label><input type="text" id="pDepartment" placeholder="عطور" value="عطور"></div>
-        <div><label>البراند (اختياري)</label><input type="text" id="pBrand" placeholder="مثال: Ibrahim Al Qurashi"></div>
-      </div>
-      <div class="row">
         <div>
           <label>السعر (جنيه)</label>
           <input type="number" id="pPrice" placeholder="450">
@@ -134,48 +130,51 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
           <label>الكمية المتاحة (المخزون)</label>
           <input type="number" id="pStock" placeholder="10" value="0">
         </div>
-        <div>
-          <label>قسم الفلترة (اختياري)</label>
-          <input type="text" id="pCategory" placeholder="مثال: عطور رجالي">
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label>تصنيف قصير (بادج على الكارت)</label>
-          <input type="text" id="pTag" placeholder="مثال: شرقي">
-        </div>
         <div></div>
       </div>
-      <label>النوتات / الوصف القصير (ظاهر تحت الاسم في الموقع)</label>
+      <label>وصف قصير (ظاهر تحت الاسم في الموقع)</label>
       <textarea id="pNotes" placeholder="مثال: عود، عنبر، خشب صندل — دافئ وثقيل"></textarea>
-      <label>وصف تفصيلي (اختياري، مش ظاهر في الكارت)</label>
-      <textarea id="pDescription"></textarea>
 
-      <label style="margin-top:6px;">النسخة الإنجليزية (اختياري - يظهر لو العميل بدّل للإنجليزي، وإلا هيفضل يشوف العربي)</label>
-      <input type="text" id="pNameEn" placeholder="Product name in English">
-      <textarea id="pDescriptionEn" placeholder="Description in English"></textarea>
+      <details style="margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;">
+        <summary style="cursor:pointer;font-weight:700;color:var(--gold);">+ تفاصيل تانية (اختياري)</summary>
+        <div class="row" style="margin-top:14px;">
+          <div><label>القسم الرئيسي</label><input type="text" id="pDepartmentVisible" placeholder="عطور" value="عطور"></div>
+          <div><label>البراند</label><input type="text" id="pBrand" placeholder="مثال: Ibrahim Al Qurashi"></div>
+        </div>
+        <div class="row">
+          <div><label>قسم الفلترة</label><input type="text" id="pCategory" placeholder="مثال: عطور رجالي"></div>
+          <div><label>تصنيف قصير (بادج على الكارت)</label><input type="text" id="pTag" placeholder="مثال: شرقي"></div>
+        </div>
+        <label>وصف تفصيلي (مش ظاهر في الكارت)</label>
+        <textarea id="pDescription"></textarea>
+        <label style="margin-top:6px;">النسخة الإنجليزية</label>
+        <input type="text" id="pNameEn" placeholder="Product name in English">
+        <textarea id="pDescriptionEn" placeholder="Description in English"></textarea>
+      </details>
 
-      <label style="margin-top:6px;">هرم النوتات والملف الكامل (اختياري - يظهر في صفحة تفاصيل المنتج)</label>
-      <div class="row">
-        <div><label>نوتة علوية</label><input type="text" id="pTopNotes" placeholder="برغموت، ليمون"></div>
-        <div><label>نوتة قلب</label><input type="text" id="pHeartNotes" placeholder="ياسمين، ورد"></div>
-      </div>
-      <div class="row">
-        <div><label>نوتة قاعدية</label><input type="text" id="pBaseNotes" placeholder="عود، مسك"></div>
-        <div><label>عائلة العطر</label><input type="text" id="pFragranceFamily" placeholder="شرقي / زهري / خشبي"></div>
-      </div>
-      <div class="row">
-        <div><label>الثبات (Longevity)</label><input type="text" id="pLongevity" placeholder="6-8 ساعات"></div>
-        <div><label>الانتشار (Projection)</label><input type="text" id="pProjection" placeholder="متوسط إلى قوي"></div>
-      </div>
-      <div class="row">
-        <div><label>الموسم المناسب</label><input type="text" id="pSeason" placeholder="شتوي / صيفي / كل المواسم"></div>
-        <div><label>المناسبة</label><input type="text" id="pOccasion" placeholder="سهرة / يومي"></div>
-      </div>
-      <div class="row">
-        <div><label>التركيز</label><input type="text" id="pConcentration" placeholder="Eau de Parfum"></div>
-        <div><label>بلد المنشأ</label><input type="text" id="pOriginCountry" placeholder="فرنسا"></div>
-      </div>
+      <details style="margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;">
+        <summary style="cursor:pointer;font-weight:700;color:var(--gold);">+ تفاصيل متقدمة (اختياري - سيبها فاضية لو مش عايز تضيعك وقت)</summary>
+        <div class="row" style="margin-top:14px;">
+          <div><label>نوتة علوية</label><input type="text" id="pTopNotes" placeholder="برغموت، ليمون"></div>
+          <div><label>نوتة قلب</label><input type="text" id="pHeartNotes" placeholder="ياسمين، ورد"></div>
+        </div>
+        <div class="row">
+          <div><label>نوتة قاعدية</label><input type="text" id="pBaseNotes" placeholder="عود، مسك"></div>
+          <div><label>عائلة العطر</label><input type="text" id="pFragranceFamily" placeholder="شرقي / زهري / خشبي"></div>
+        </div>
+        <div class="row">
+          <div><label>الثبات (Longevity)</label><input type="text" id="pLongevity" placeholder="6-8 ساعات"></div>
+          <div><label>الانتشار (Projection)</label><input type="text" id="pProjection" placeholder="متوسط إلى قوي"></div>
+        </div>
+        <div class="row">
+          <div><label>الموسم المناسب</label><input type="text" id="pSeason" placeholder="شتوي / صيفي / كل المواسم"></div>
+          <div><label>المناسبة</label><input type="text" id="pOccasion" placeholder="سهرة / يومي"></div>
+        </div>
+        <div class="row">
+          <div><label>التركيز</label><input type="text" id="pConcentration" placeholder="Eau de Parfum"></div>
+          <div><label>بلد المنشأ</label><input type="text" id="pOriginCountry" placeholder="فرنسا"></div>
+        </div>
+      </details>
       <label>صورة المنتج (أول صورة هتبقى الغلاف، والباقي معرض صور إضافي)</label>
       <input type="file" id="pImage" accept="image/*" multiple>
       <div id="currentImagePreview" style="margin-bottom:14px;"></div>
@@ -966,7 +965,7 @@ function resetForm(){
   document.getElementById('pPrice').value = '';
   document.getElementById('pOriginalPrice').value = '';
   document.getElementById('pTag').value = '';
-  document.getElementById('pDepartment').value = 'عطور';
+  document.getElementById('pDepartmentVisible').value = 'عطور';
   document.getElementById('pBrand').value = '';
   document.getElementById('pStock').value = '0';
   document.getElementById('pCategory').value = '';
@@ -1062,7 +1061,7 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     price: document.getElementById('pPrice').value ? Number(document.getElementById('pPrice').value) : null,
     original_price: document.getElementById('pOriginalPrice').value ? Number(document.getElementById('pOriginalPrice').value) : null,
     tag: document.getElementById('pTag').value.trim() || null,
-    department: document.getElementById('pDepartment').value.trim() || 'عطور',
+    department: document.getElementById('pDepartmentVisible').value.trim() || 'عطور',
     brand: document.getElementById('pBrand').value.trim() || null,
     stock: document.getElementById('pStock').value ? Number(document.getElementById('pStock').value) : 0,
     category: document.getElementById('pCategory').value.trim() || null,
@@ -1200,7 +1199,7 @@ function editProduct(p){
   document.getElementById('pPrice').value = p.price || '';
   document.getElementById('pOriginalPrice').value = p.original_price || '';
   document.getElementById('pTag').value = p.tag || '';
-  document.getElementById('pDepartment').value = p.department || 'عطور';
+  document.getElementById('pDepartmentVisible').value = p.department || 'عطور';
   document.getElementById('pBrand').value = p.brand || '';
   document.getElementById('pStock').value = p.stock ?? 0;
   document.getElementById('pCategory').value = p.category || '';
