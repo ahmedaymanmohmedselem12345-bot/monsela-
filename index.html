@@ -322,6 +322,15 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   #about > .container > div:last-child{grid-template-columns:1fr 1fr !important;}
   nav .container{padding:0 18px;}
   .logo{font-size:1.5rem;}
+  #trackOrderBtn span, #accountBtn span{display:none;}
+  #trackOrderBtn, #accountBtn{padding:9px 12px !important;}
+  .nav-cta{padding:9px 16px !important;font-size:0.82rem !important;}
+  #langSwitchBtn{padding:9px 10px !important;}
+}
+@media(max-width:640px){
+  #pdPurchaseBox #pdAddToCart{
+    position:sticky;bottom:-1px;z-index:5;
+  }
 }
 
 </style>
@@ -579,12 +588,12 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <header class="hero container" id="main-content">
   <div>
-    <div class="eyebrow" data-i18n="hero_eyebrow">Monsela — برفاناتك المفضلة</div>
-    <h1 data-i18n="hero_heading">عطور أصلية،<br>بلمستك الخاصة</h1>
-    <p class="lead" data-i18n="hero_lead">تسوق مجموعتنا من البرفانات الأصلية، واختار لون الزجاجة اللي يعجبك.</p>
+    <div class="eyebrow" data-i18n="hero_eyebrow">Monsela — عطورك المفضلة</div>
+    <h1 data-i18n="hero_heading">عطرك اللي<br>يشبهك</h1>
+    <p class="lead" data-i18n="hero_lead">اكتشف عطورًا مختارة بعناية، واختار الرائحة اللي تناسب ذوقك وشخصيتك.</p>
     <div class="hero-ctas">
-      <a href="#gallery" class="btn-primary" data-i18n="nav_shop_now">تسوق دلوقتي</a>
-      <a href="#whyMonsela" class="btn-ghost" data-i18n="hero_why">ليه Monsela؟</a>
+      <a href="#gallery" class="btn-primary" data-i18n="nav_shop_now">اكتشف المجموعة</a>
+      <a href="#scentFinder" class="btn-ghost" data-i18n="hero_why">اكتشف عطرك</a>
     </div>
   </div>
   <div class="hero-visual" id="heroVisual" aria-hidden="true">
@@ -962,10 +971,10 @@ const translations = {
   ar: {
     nav_shop: 'مجموعتنا', nav_finder: 'لاقي عطرك', nav_contact: 'تواصل معنا',
     nav_track: 'تتبع طلبك', nav_account: 'حسابي', nav_shop_now: 'تسوق دلوقتي',
-    hero_eyebrow: 'Monsela — برفاناتك المفضلة',
-    hero_heading: 'عطور أصلية،<br>بلمستك الخاصة',
-    hero_lead: 'تسوق مجموعتنا من البرفانات الأصلية، واختار لون الزجاجة اللي يعجبك.',
-    hero_why: 'ليه Monsela؟',
+    hero_eyebrow: 'Monsela — عطورك المفضلة',
+    hero_heading: 'عطرك اللي<br>يشبهك',
+    hero_lead: 'اكتشف عطورًا مختارة بعناية، واختار الرائحة اللي تناسب ذوقك وشخصيتك.',
+    hero_why: 'اكتشف عطرك',
     shop_eyebrow: 'المتجر', shop_heading: 'تسوق مجموعتنا',
     shop_sub: 'اختار المنتجات اللي عايزها، وضيفها للسلة، وكمّل طلبك دفعة واحدة.',
     search_ph: 'ابحث بالاسم، النوتات، الموسم، المناسبة...',
@@ -999,9 +1008,9 @@ const translations = {
     nav_shop: 'Shop', nav_finder: 'Find Your Scent', nav_contact: 'Contact Us',
     nav_track: 'Track Order', nav_account: 'My Account', nav_shop_now: 'Shop Now',
     hero_eyebrow: 'Monsela — Your Signature Fragrance',
-    hero_heading: 'Authentic Perfumes,<br>Your Own Touch',
-    hero_lead: 'Shop our collection of authentic perfumes, and choose the bottle color you love.',
-    hero_why: 'Why Monsela?',
+    hero_heading: 'A Scent That<br>Feels Like You',
+    hero_lead: 'Discover a carefully curated collection, and find the fragrance that matches your taste and personality.',
+    hero_why: 'Find Your Scent',
     shop_eyebrow: 'The Shop', shop_heading: 'Shop Our Collection',
     shop_sub: 'Choose the products you love, add them to your cart, and check out in one go.',
     search_ph: 'Search by name, notes, season, occasion...',
@@ -1289,7 +1298,10 @@ function renderProducts(){
   document.getElementById('resultsCount').textContent = `${list.length} منتج`;
 
   if (list.length === 0) {
-    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">لسه مفيش منتجات في القسم ده.</p>';
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--smoke)" stroke-width="1.5" style="margin:0 auto 16px;opacity:0.5;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <p style="color:var(--smoke);font-size:var(--text-base);">لسه مفيش منتجات في القسم ده.</p>
+    </div>`;
     document.getElementById('loadMoreWrap').innerHTML = '';
     return;
   }
@@ -1314,61 +1326,85 @@ function renderProducts(){
     const hasDiscount = p.original_price && p.original_price > price;
     const discountPct = hasDiscount ? Math.round((1 - price / p.original_price) * 100) : 0;
     const isNew = p.created_at && (Date.now() - new Date(p.created_at).getTime()) < 14 * 24 * 60 * 60 * 1000;
+    const inWishlist = wishlist.includes(p.id);
+    const displayPrice = hasVariants ? Math.min(...p.variants.map(v=>v.price)) : p.price;
 
     return `
-    <div class="perfume-card" style="position:relative;">
-      <div style="position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:2;">
-        ${hasDiscount ? `<span style="background:var(--rose);color:var(--cream);font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:999px;">-${discountPct}%</span>` : ''}
-        ${isNew ? `<span style="background:var(--gold);color:var(--cream);font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:999px;">جديد</span>` : ''}
+    <div class="perfume-card" style="position:relative;display:flex;flex-direction:column;">
+      <!-- Badges -->
+      <div style="position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:5px;z-index:2;">
+        ${hasDiscount ? `<span style="background:var(--rose);color:white;font-size:var(--text-xs);font-weight:700;padding:3px 9px;border-radius:var(--r-pill);">-${discountPct}%</span>` : ''}
+        ${isNew && !hasDiscount ? `<span style="background:var(--gold);color:white;font-size:var(--text-xs);font-weight:700;padding:3px 9px;border-radius:var(--r-pill);">جديد</span>` : ''}
+        ${outOfStock ? `<span style="background:var(--smoke);color:white;font-size:var(--text-xs);font-weight:700;padding:3px 9px;border-radius:var(--r-pill);">نفذت الكمية</span>` : ''}
       </div>
+      <!-- Wishlist + Compare -->
+      <div style="position:absolute;top:12px;left:12px;z-index:2;display:flex;flex-direction:column;gap:8px;">
+        <button class="wishlist-toggle" data-id="${p.id}" aria-label="${inWishlist ? 'شيل من المفضلة' : 'أضف للمفضلة'}"
+          style="width:36px;height:36px;border-radius:50%;background:rgba(255,253,249,0.85);backdrop-filter:blur(6px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-sm);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="${inWishlist ? 'var(--rose)' : 'none'}" stroke="var(--rose)" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        </button>
+        <button class="compare-toggle" data-id="${p.id}" aria-label="${compareList.includes(p.id) ? 'شيل من المقارنة' : 'أضف للمقارنة'}"
+          style="width:36px;height:36px;border-radius:50%;background:${compareList.includes(p.id) ? 'var(--gold)' : 'rgba(255,253,249,0.85)'};backdrop-filter:blur(6px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow-sm);color:${compareList.includes(p.id) ? 'white' : 'var(--cream)'};">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 16v3a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3"/></svg>
+        </button>
+      </div>
+      <!-- Product image -->
       ${p.image_url
-        ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">`
-        : `<div class="glass"></div>`}
-      <h3>${localizedField(p,'name')} ${p.featured ? '<span style="color:var(--gold);font-size:0.8rem;">⭐ مميز</span>' : ''}</h3>
-      <p>${p.notes || p.description || ''}</p>
-      ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
-        <div style="margin:8px 0;">
-          <p style="font-size:0.75rem;color:var(--smoke);margin-bottom:6px;">لون الزجاجة:</p>
-          <div class="bottle-color-picker" data-id="${p.id}" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-            ${p.bottle_colors.map((c,i) => `<span class="bottle-color-swatch ${i===0?'active':''}" data-name="${escapeHTML(c.name)}" title="${escapeHTML(c.name)}" style="width:26px;height:26px;border-radius:50%;background:${c.hex};cursor:pointer;border:2px solid ${i===0?'var(--gold)':'transparent'};box-shadow:0 0 0 1px var(--line);"></span>`).join('')}
-          </div>
+        ? `<div style="overflow:hidden;border-radius:var(--r-lg);margin-bottom:16px;aspect-ratio:1/1;background:var(--ink-3);">
+            <img src="${p.image_url}" alt="${escapeHTML(localizedField(p,'name'))}" loading="lazy" decoding="async"
+              style="width:100%;height:100%;object-fit:cover;transition:transform .4s ease;"
+              onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+           </div>`
+        : `<div class="glass" style="border-radius:var(--r-lg);margin-bottom:16px;"></div>`}
+      <!-- Content -->
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <h3 style="font-size:var(--text-md);margin-bottom:4px;line-height:1.4;">${escapeHTML(localizedField(p,'name'))}</h3>
+        ${p.notes ? `<p style="font-size:var(--text-sm);color:var(--smoke);margin-bottom:10px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHTML(p.notes)}</p>` : ''}
+        <!-- Bottle colors -->
+        ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
+          <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
+            ${p.bottle_colors.map((c,i) => `<span class="bottle-color-swatch ${i===0?'active':''}" data-name="${escapeHTML(c.name)}" title="${escapeHTML(c.name)}"
+              style="width:20px;height:20px;border-radius:50%;background:${c.hex};cursor:pointer;flex-shrink:0;
+              border:2px solid ${i===0?'var(--gold)':'transparent'};box-shadow:0 0 0 1px var(--line);transition:border-color .2s;"></span>`).join('')}
+            <span style="font-size:var(--text-xs);color:var(--smoke);">${p.bottle_colors.length} لون</span>
+          </div>` : ''}
+        <!-- Price -->
+        <div style="margin-bottom:12px;">
+          ${hasVariants
+            ? `<span style="font-size:var(--text-lg);font-weight:700;color:var(--gold);">من ${displayPrice} جنيه</span>`
+            : p.price
+              ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:var(--text-lg);font-weight:700;color:var(--gold);">${p.price} جنيه</span>
+                  ${hasDiscount ? `<span style="font-size:var(--text-sm);color:var(--smoke);text-decoration:line-through;">${p.original_price} جنيه</span>` : ''}
+                 </div>`
+              : ''}
         </div>
-      ` : ''}
-      ${hasVariants ? `
-        <p style="color:var(--gold);font-weight:700;margin:6px 0 2px;">ابتداءً من ${Math.min(...p.variants.map(v=>v.price))} جنيه</p>
-        <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin:8px 0;">
-          ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
-        </select>
-      ` : (p.price ? `
-        <p style="margin:8px 0;">
-          <span style="color:var(--gold);font-weight:700;">${p.price} جنيه</span>
-          ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.85rem;margin-right:8px;">${p.original_price} جنيه</span>` : ''}
-        </p>
-      ` : '')}
-      ${stockBadgeHTML(stock, p.id)}
-      ${!outOfStock ? `
-        <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;">
-          <button class="opt qty-minus" data-id="${p.id}" aria-label="نقص الكمية" style="width:34px;padding:6px 0;">−</button>
-          <span id="qty-${p.id}" style="min-width:24px;text-align:center;">1</span>
-          <button class="opt qty-plus" data-id="${p.id}" aria-label="زود الكمية" style="width:34px;padding:6px 0;">+</button>
+        <!-- Variant select -->
+        ${hasVariants ? `
+          <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin-bottom:10px;font-size:var(--text-sm);">
+            ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+          </select>` : ''}
+        <!-- Stock badge -->
+        ${stockBadgeHTML(stock, p.id)}
+        <!-- Actions -->
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:auto;">
+          ${!outOfStock
+            ? `<div style="display:flex;gap:8px;">
+                <div style="display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;">
+                  <button class="opt qty-minus" data-id="${p.id}" aria-label="نقص الكمية" style="width:34px;border:none;border-radius:0;padding:8px 0;">−</button>
+                  <span id="qty-${p.id}" style="min-width:28px;text-align:center;font-size:var(--text-sm);">1</span>
+                  <button class="opt qty-plus" data-id="${p.id}" aria-label="زود الكمية" style="width:34px;border:none;border-radius:0;padding:8px 0;">+</button>
+                </div>
+                <button class="btn-primary add-to-cart" data-id="${p.id}" style="flex:1;padding:10px;">${translations[currentLang].btn_add_to_cart}</button>
+               </div>`
+            : `<div>
+                <input type="email" class="notify-email" data-id="${p.id}" placeholder="إيميلك للإشعار"
+                  style="width:100%;margin-bottom:6px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:9px 12px;border-radius:var(--r-md);font-family:'Cairo';font-size:var(--text-sm);">
+                <button class="btn-ghost notify-btn" data-id="${p.id}" style="width:100%;font-size:var(--text-sm);padding:9px;">${translations[currentLang].btn_notify_stock}</button>
+               </div>`}
+          <button class="btn-ghost view-details" data-id="${p.id}" style="width:100%;padding:9px;font-size:var(--text-sm);">${translations[currentLang].btn_view_details}</button>
         </div>
-        <button class="btn-primary add-to-cart" data-id="${p.id}" style="width:100%;margin-bottom:8px;">${translations[currentLang].btn_add_to_cart}</button>
-      ` : `
-        <div style="margin-bottom:8px;">
-          <input type="email" class="notify-email" data-id="${p.id}" placeholder="إيميلك للإشعار" style="width:100%;margin-bottom:6px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:8px 10px;border-radius:8px;font-size:0.8rem;">
-          <button class="btn-ghost notify-btn" data-id="${p.id}" style="width:100%;font-size:0.85rem;">${translations[currentLang].btn_notify_stock}</button>
-        </div>
-      `}
-      <div style="display:flex;gap:8px;">
-        <button class="btn-ghost view-details" data-id="${p.id}" style="flex:1;">${translations[currentLang].btn_view_details}</button>
-        <button class="wishlist-toggle" data-id="${p.id}" aria-label="${wishlist.includes(p.id) ? 'شيل من المفضلة' : 'أضف للمفضلة'}" style="width:44px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--line);border-radius:10px;color:var(--rose);cursor:pointer;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="${wishlist.includes(p.id) ? 'var(--rose)' : 'none'}" stroke="var(--rose)" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
-        </button>
-        <button class="compare-toggle opt ${compareList.includes(p.id) ? 'active' : ''}" data-id="${p.id}" aria-label="${compareList.includes(p.id) ? 'شيل من المقارنة' : 'أضف للمقارنة'}" style="width:44px;padding:0;display:flex;align-items:center;justify-content:center;">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><path d="M8 16v3a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-3"/></svg>
-        </button>
       </div>
-      ${!hasDiscount ? `<button class="price-alert-btn" data-id="${p.id}" style="display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:none;color:var(--smoke);font-size:0.75rem;cursor:pointer;margin-top:8px;width:100%;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> ${translations[currentLang].btn_price_alert}</button>` : ''}
     </div>`;
   }).join('');
 
@@ -1933,9 +1969,14 @@ function renderWishlistInAccount(){
   const el = document.getElementById('wishlistInAccount');
   const actionsEl = document.getElementById('wishlistActions');
   if (!el) return;
-  if (wishlist.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش منتجات في المفضلة.</p>'; actionsEl.style.display = 'none'; return; }
+  const emptyHTML = `<div style="text-align:center;padding:30px 10px;">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--smoke)" stroke-width="1.5" style="margin:0 auto 12px;opacity:0.5;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+    <p style="color:var(--smoke);font-size:var(--text-sm);margin-bottom:14px;">لسه مفيش منتجات في المفضلة.</p>
+    <a href="#gallery" class="btn-ghost" style="padding:8px 20px;font-size:var(--text-sm);">تسوق دلوقتي</a>
+  </div>`;
+  if (wishlist.length === 0) { el.innerHTML = emptyHTML; actionsEl.style.display = 'none'; return; }
   const items = wishlist.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
-  if (items.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش منتجات في المفضلة.</p>'; actionsEl.style.display = 'none'; return; }
+  if (items.length === 0) { el.innerHTML = emptyHTML; actionsEl.style.display = 'none'; return; }
   actionsEl.style.display = 'flex';
   el.innerHTML = items.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:10px 0;font-size:0.85rem;">
