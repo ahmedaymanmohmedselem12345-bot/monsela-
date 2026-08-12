@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monsela | برفانات مصممة خصيصًا ليك</title>
-<meta name="description" content="Monsela - متجر برفانات أصلية أونلاين في مصر. تسوق مجموعتنا، وكميزة إضافية، صمم قزازتك الخاصة واحط اسمك عليها.">
-<meta property="og:title" content="Monsela | برفانات أصلية">
-<meta property="og:description" content="تسوق برفانات أصلية، وصمم قزازتك الخاصة كميزة إضافية.">
+<title>Monsela | عطور أصلية فاخرة</title>
+<meta name="description" content="Monsela — متجر عطور أصلية فاخرة أونلاين في مصر. اكتشف مجموعتنا المختارة من أجود العطور، مع توصيل لجميع المحافظات.">
+<meta property="og:title" content="Monsela | عطور أصلية فاخرة">
+<meta property="og:description" content="اكتشف مجموعة Monsela من أجود العطور الأصلية — توصيل لجميع محافظات مصر.">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="ar_EG">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Monsela | برفانات أصلية">
-<meta name="twitter:description" content="تسوق برفانات أصلية، وصمم قزازتك الخاصة كميزة إضافية.">
+<meta name="twitter:title" content="Monsela | عطور أصلية فاخرة">
+<meta name="twitter:description" content="اكتشف مجموعة Monsela من أجود العطور الأصلية.">
 <meta name="theme-color" content="#faf6ee">
 <!-- Content-Security-Policy: restricts which domains can load scripts/styles/images/API calls.
      Note: 'unsafe-inline' for scripts is required because this site is intentionally a single
@@ -36,9 +37,10 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {"@type":"Question","name":"هيوصلني التصميم امتى بعد ما أطلب؟","acceptedAnswer":{"@type":"Answer","text":"بعد ما تحفظ طلبك، فريقنا هيتواصل معاك على الواتساب خلال 24 ساعة لتأكيد الطلب وميعاد التسليم."}},
+    {"@type":"Question","name":"هيوصلني الطلب امتى؟","acceptedAnswer":{"@type":"Answer","text":"مدة التوصيل بتختلف حسب المحافظة. بعد تأكيد الطلب، فريقنا هيتواصل معاك خلال 24 ساعة بالمواعيد الدقيقة."}},
     {"@type":"Question","name":"أقدر أغيّر طلبي بعد ما أبعته؟","acceptedAnswer":{"@type":"Answer","text":"أيوه، لحد ما نبدأ التجهيز الفعلي، تقدر تكلمنا على الواتساب وتعدّل أي تفصيلة."}},
-    {"@type":"Question","name":"التوصيل بيغطي مصر كلها؟","acceptedAnswer":{"@type":"Answer","text":"أيوه، بنوصل لكل المحافظات، وسعر التوصيل بيتحدد حسب منطقتك عند إتمام الطلب."}}
+    {"@type":"Question","name":"التوصيل بيغطي مصر كلها؟","acceptedAnswer":{"@type":"Answer","text":"أيوه، بنوصل لكل المحافظات، وسعر التوصيل بيتحدد حسب منطقتك عند إتمام الطلب."}},
+    {"@type":"Question","name":"إيه طرق الدفع المتاحة؟","acceptedAnswer":{"@type":"Answer","text":"بنقبل الدفع كاش عند الاستلام، فودافون كاش، وInstaPay."}}
   ]
 }
 </script>
@@ -56,6 +58,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
+  /* ── Brand colours ── */
   --ink:#faf6ee;
   --ink-2:#fffdf9;
   --ink-3:#f2ead9;
@@ -71,6 +74,34 @@
   --line:rgba(43,38,32,0.12);
   --success:#5f7d52;
   --danger:#a8524a;
+
+  /* ── Typography scale (consistent across the whole site) ── */
+  --text-xs:0.72rem;   /* badges, fine print          */
+  --text-sm:0.82rem;   /* captions, labels             */
+  --text-base:0.95rem; /* body copy                    */
+  --text-md:1.05rem;   /* slightly prominent body      */
+  --text-lg:1.25rem;   /* sub-headings                 */
+  --text-xl:1.5rem;    /* modal / card headings        */
+  --text-2xl:1.8rem;   /* section headings             */
+  --text-hero:clamp(1.9rem, 5vw, 3.2rem);
+
+  /* ── Spacing ── */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px;
+  --sp-12:48px; --sp-16:64px;
+
+  /* ── Border radius tokens ── */
+  --r-sm:8px;
+  --r-md:12px;
+  --r-lg:16px;
+  --r-xl:24px;
+  --r-pill:999px;
+
+  /* ── Shadow tokens ── */
+  --shadow-sm:0 2px 8px rgba(43,38,32,0.06);
+  --shadow-md:0 6px 18px rgba(43,38,32,0.08);
+  --shadow-lg:0 16px 40px rgba(43,38,32,0.12);
+  --shadow-gold:0 8px 24px rgba(163,129,74,0.22);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -224,7 +255,30 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
   border:1px solid var(--gold);padding:4px 12px;border-radius:999px;
 }
 
-/* SHARED FILTER/OPTION BUTTONS (used by shop filters, compare, etc.) */
+/* ── Toast notification system ── */
+#toast-container{
+  position:fixed;bottom:var(--sp-6);left:50%;transform:translateX(-50%);
+  z-index:9999;display:flex;flex-direction:column;gap:var(--sp-2);
+  align-items:center;pointer-events:none;width:min(380px,90vw);
+}
+.toast{
+  background:var(--ink-2);border:1px solid var(--line);
+  color:var(--cream);padding:var(--sp-4) var(--sp-5);
+  border-radius:var(--r-lg);font-size:var(--text-sm);
+  box-shadow:var(--shadow-lg);pointer-events:all;
+  display:flex;align-items:center;gap:var(--sp-3);
+  animation:toastIn .3s cubic-bezier(.2,.8,.2,1) forwards;
+  width:100%;
+}
+.toast.success{border-color:var(--success);}
+.toast.error{border-color:var(--danger);}
+.toast.info{border-color:var(--gold);}
+.toast-icon{font-size:1.1rem;flex-shrink:0;}
+.toast.out{animation:toastOut .25s ease forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes toastOut{to{opacity:0;transform:translateY(12px);}}
+
+
 .option-row{display:flex;gap:14px;flex-wrap:wrap;}
 .opt{
   border:1px solid var(--line);background:transparent;color:var(--cream);
@@ -276,6 +330,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <body>
 <a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--cream);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
 <style>a[href="#main-content"]:focus{right:0;}</style>
+
+<div id="toast-container" aria-live="polite"></div>
 
 <nav>
   <div class="container">
@@ -743,20 +799,98 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <footer id="contact">
   <div class="container">
-    <div class="logo">Mon<span>sela</span></div>
-    <p data-i18n="footer_tagline">صُنع بحب في مصر — كل قزازة ليها حكاية</p>
-    <p style="margin-top:14px;">تواصل معانا: <a href="#" id="footerWhatsapp" style="color:var(--gold);" target="_blank">واتساب</a> &nbsp;|&nbsp; <a href="https://www.instagram.com/monsela_luxuryperfumes/" style="color:var(--gold);" target="_blank">Instagram</a> &nbsp;|&nbsp; <a href="https://www.facebook.com/profile.php?id=61583522579606" style="color:var(--gold);" target="_blank">Facebook</a></p>
-    <p style="margin-top:16px;font-size:0.85rem;">
-      <a href="about.html" style="color:var(--smoke);">قصتنا</a> &nbsp;|&nbsp;
-      <a href="contact.html" style="color:var(--smoke);">تواصل معنا</a> &nbsp;|&nbsp;
-      <a href="faq.html" style="color:var(--smoke);">الأسئلة الشائعة</a> &nbsp;|&nbsp;
-      <a href="shipping.html" style="color:var(--smoke);">الشحن والتوصيل</a> &nbsp;|&nbsp;
-      <a href="returns.html" style="color:var(--smoke);">الإرجاع والاستبدال</a> &nbsp;|&nbsp;
-      <a href="privacy.html" style="color:var(--smoke);">سياسة الخصوصية</a> &nbsp;|&nbsp;
-      <a href="terms.html" style="color:var(--smoke);">شروط الخدمة</a>
-    </p>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid var(--line);text-align:right;">
+
+      <!-- Brand column -->
+      <div>
+        <div class="logo" style="margin-bottom:14px;">Mon<span>sela</span></div>
+        <p data-i18n="footer_tagline" style="color:var(--smoke);font-size:var(--text-sm);line-height:1.8;margin-bottom:20px;">صُنع بحب في مصر — كل قزازة ليها حكاية</p>
+        <div style="display:flex;gap:12px;">
+          <a href="https://www.instagram.com/monsela_luxuryperfumes/" target="_blank" rel="noopener" aria-label="Instagram"
+             style="width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:var(--smoke);text-decoration:none;font-size:var(--text-sm);transition:border-color .2s,color .2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61583522579606" target="_blank" rel="noopener" aria-label="Facebook"
+             style="width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:var(--smoke);text-decoration:none;font-size:var(--text-sm);transition:border-color .2s,color .2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </a>
+          <a id="footerWhatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp"
+             style="width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:var(--smoke);text-decoration:none;transition:border-color .2s,color .2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Shop column -->
+      <div>
+        <h4 style="font-size:var(--text-sm);font-weight:700;margin-bottom:16px;color:var(--cream);">المتجر</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li><a href="#gallery" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">كل المنتجات</a></li>
+          <li><a href="#bestSellers" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">الأكثر مبيعًا</a></li>
+          <li><a href="#newArrivals" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">وصل حديثًا</a></li>
+          <li><a href="#scentFinder" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">لاقي عطرك</a></li>
+        </ul>
+      </div>
+
+      <!-- Help column -->
+      <div>
+        <h4 style="font-size:var(--text-sm);font-weight:700;margin-bottom:16px;color:var(--cream);">المساعدة</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li><a href="faq.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">الأسئلة الشائعة</a></li>
+          <li><a href="shipping.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">الشحن والتوصيل</a></li>
+          <li><a href="returns.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">الإرجاع والاستبدال</a></li>
+          <li><a href="contact.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">تواصل معنا</a></li>
+        </ul>
+      </div>
+
+      <!-- Trust column -->
+      <div>
+        <h4 style="font-size:var(--text-sm);font-weight:700;margin-bottom:16px;color:var(--cream);">الشركة</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li><a href="about.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">قصتنا</a></li>
+          <li><a href="privacy.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">سياسة الخصوصية</a></li>
+          <li><a href="terms.html" style="color:var(--smoke);text-decoration:none;font-size:var(--text-sm);">شروط الخدمة</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Trust badges row -->
+    <div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center;padding:28px 0;border-bottom:1px solid var(--line);">
+      <div style="display:flex;align-items:center;gap:8px;color:var(--smoke);font-size:var(--text-xs);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        دفع آمن ومشفر
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;color:var(--smoke);font-size:var(--text-xs);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="2"/></svg>
+        كاش عند الاستلام
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;color:var(--smoke);font-size:var(--text-xs);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        عطور أصلية 100٪
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;color:var(--smoke);font-size:var(--text-xs);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        توصيل لجميع المحافظات
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div style="padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <p style="color:var(--smoke);font-size:var(--text-xs);">© 2026 Monsela. جميع الحقوق محفوظة.</p>
+      <p style="color:var(--smoke);font-size:var(--text-xs);">مصنوع بحب في مصر 🇪🇬</p>
+    </div>
   </div>
 </footer>
+<style>
+footer a:hover { color:var(--gold) !important; }
+footer .logo span { color:var(--gold); }
+@media(max-width:768px){
+  footer .container > div:first-child { grid-template-columns:1fr 1fr !important; }
+}
+@media(max-width:480px){
+  footer .container > div:first-child { grid-template-columns:1fr !important; }
+}
+</style>
 
 <script>
 const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
@@ -774,6 +908,50 @@ function escapeHTML(str){
   const div = document.createElement('div');
   div.textContent = str ?? '';
   return div.innerHTML;
+}
+
+// ===== Toast notifications (replaces all browser alert/prompt dialogs) =====
+function toast(msg, type = 'info', duration = 4000){
+  const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type] || 'ℹ'}</span><span>${escapeHTML(msg)}</span>`;
+  const container = document.getElementById('toast-container');
+  container.appendChild(el);
+  const remove = () => {
+    el.classList.add('out');
+    el.addEventListener('animationend', ()=> el.remove(), { once: true });
+  };
+  const timer = setTimeout(remove, duration);
+  el.addEventListener('click', ()=>{ clearTimeout(timer); remove(); });
+}
+// Inline price-alert toast replacement — needs an inline input instead of prompt()
+function showPriceAlertModal(productId){
+  const existing = document.getElementById('priceAlertModal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'priceAlertModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:28px;max-width:360px;width:100%;box-shadow:var(--shadow-lg);">
+      <h3 style="font-family:'Aref Ruqaa',serif;font-size:var(--text-xl);margin-bottom:12px;">تنبيه انخفاض السعر</h3>
+      <p style="color:var(--smoke);font-size:var(--text-sm);margin-bottom:16px;">هنبعتلك إيميل لما السعر ينزل.</p>
+      <input type="email" id="priceAlertEmail" placeholder="إيميلك" style="width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:var(--r-md);font-family:'Cairo';margin-bottom:12px;">
+      <div style="display:flex;gap:10px;">
+        <button id="priceAlertSubmit" class="btn-primary" style="flex:1;padding:12px;">تأكيد</button>
+        <button id="priceAlertCancel" class="btn-ghost" style="flex:0;padding:12px 18px;">إلغاء</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  document.getElementById('priceAlertCancel').addEventListener('click', ()=> modal.remove());
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.getElementById('priceAlertSubmit').addEventListener('click', async ()=>{
+    const email = document.getElementById('priceAlertEmail').value.trim();
+    if (!email || !email.includes('@')) { toast('اكتب إيميل صحيح.', 'error'); return; }
+    const { error } = await sb.from('price_alerts').insert({ product_id: productId, email });
+    modal.remove();
+    toast(error ? 'حصلت مشكلة، حاول تاني.' : 'هنبلغك لو السعر قلّ ✓', error ? 'error' : 'success');
+  });
 }
 
 // ===== Bilingual system (Arabic / English) =====
@@ -1198,9 +1376,9 @@ function renderProducts(){
     btn.addEventListener('click', async ()=>{
       const emailInput = grid.querySelector(`.notify-email[data-id="${btn.dataset.id}"]`);
       const email = emailInput.value.trim();
-      if (!email || !email.includes('@')) { alert('اكتب إيميل صحيح.'); return; }
+      if (!email || !email.includes('@')) { toast('اكتب إيميل صحيح.','error'); return; }
       const { error } = await sb.from('stock_notifications').insert({ product_id: btn.dataset.id, email });
-      if (error) { alert('حصلت مشكلة، حاول تاني.'); return; }
+      if (error) { toast('حصلت مشكلة، حاول تاني.','error'); return; }
       btn.textContent = '✓ هنبلغك أول ما يتوفر';
       btn.disabled = true;
       emailInput.style.display = 'none';
@@ -1208,12 +1386,7 @@ function renderProducts(){
   });
 
   grid.querySelectorAll('.price-alert-btn').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const email = prompt('اكتب إيميلك وهنبلغك أول ما السعر ينزل:');
-      if (!email || !email.includes('@')) return;
-      const { error } = await sb.from('price_alerts').insert({ product_id: btn.dataset.id, email });
-      btn.textContent = error ? 'حصلت مشكلة، حاول تاني' : '✓ هنبلغك لو السعر قلّ';
-    });
+    btn.addEventListener('click', ()=> showPriceAlertModal(btn.dataset.id));
   });
 
   grid.querySelectorAll('.wishlist-toggle').forEach(btn=>{
@@ -1499,7 +1672,7 @@ async function openProductDetail(productId){
       const original = btn.textContent;
       btn.textContent = '✓ اتنسخ!';
       setTimeout(()=> btn.textContent = original, 2000);
-    } catch(e) { alert(url); }
+    } catch(e) { toast(url, 'info', 8000); }
   });
 
   document.getElementById('pdSubmitReview').addEventListener('click', async ()=>{
@@ -1782,7 +1955,7 @@ function toggleCompare(productId){
   if (compareList.includes(productId)) {
     compareList = compareList.filter(id => id !== productId);
   } else {
-    if (compareList.length >= 3) { alert('تقدر تقارن لحد 3 منتجات مرة واحدة بس.'); return; }
+    if (compareList.length >= 3) { toast('تقدر تقارن لحد 3 منتجات مرة واحدة بس.','info'); return; }
     compareList.push(productId);
   }
   try { localStorage.setItem('monsela_compare', JSON.stringify(compareList)); } catch(e) {}
@@ -1799,7 +1972,7 @@ function renderCompareBar(){
 }
 document.getElementById('compareNowBtn').addEventListener('click', ()=>{
   const products = compareList.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
-  if (products.length < 2) { alert('اختار منتجين على الأقل عشان تقارن.'); return; }
+  if (products.length < 2) { toast('اختار منتجين على الأقل عشان تقارن.','info'); return; }
   const rows = [
     ['', ...products.map(p => p.name)],
     ['السعر', ...products.map(p => p.price ? p.price + ' جنيه' : '—')],
@@ -1880,6 +2053,7 @@ function addToCart(product, qty, variant, bottleColor){
   const existing = cart.find(i => i.cartKey === cartKey);
   if (existing) { existing.qty += qty; }
   else { cart.push({ id: product.id, cartKey, variantLabel: variant ? variant.label : null, bottleColor: bottleColor || null, name: displayName, price, qty }); }
+  toast(`${escapeHTML(product.name)} اتضاف للسلة ✓`, 'success', 2500);
   saveCart();
   openCart();
 }
@@ -2334,7 +2508,26 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   const paymentText = (insertedOrder && insertedOrder.payment_method !== 'cod')
     ? 'تم استلام إثبات الدفع، وهيتراجع من فريقنا قبل ما نبدأ تجهيز طلبك.\n'
     : '';
-  alert(`✓ تم تأكيد طلبك!\n${orderNum}${paymentText}${etaText}\n⚠️ احتفظ برقم الطلب ده - هتحتاجه عشان تتابع الطلب من "تتبع طلبك".`);
+  // Show premium order confirmation instead of a browser alert
+  const confirmOverlay = document.createElement('div');
+  confirmOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
+  const orderNumDisplay = insertedOrder?.order_number || '';
+  const etaDisplay = insertedOrder?.estimated_delivery_date
+    ? new Date(insertedOrder.estimated_delivery_date).toLocaleDateString('ar-EG', { weekday:'long', day:'numeric', month:'long' })
+    : '';
+  const isPendingPayment = insertedOrder?.payment_method !== 'cod';
+  confirmOverlay.innerHTML = `
+    <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:36px;max-width:420px;width:100%;box-shadow:var(--shadow-lg);text-align:center;">
+      <div style="font-size:2.5rem;margin-bottom:16px;">✓</div>
+      <h2 style="font-family:'Aref Ruqaa',serif;font-size:var(--text-2xl);margin-bottom:8px;">تم تأكيد طلبك</h2>
+      ${orderNumDisplay ? `<p style="color:var(--gold);font-weight:700;font-size:var(--text-md);margin-bottom:8px;">${orderNumDisplay}</p>` : ''}
+      ${etaDisplay ? `<p style="color:var(--smoke);font-size:var(--text-sm);margin-bottom:8px;">📦 متوقع يوصلك ${etaDisplay}</p>` : ''}
+      ${isPendingPayment ? `<p style="background:var(--ink);border:1px solid var(--line);border-radius:var(--r-md);padding:12px;font-size:var(--text-sm);color:var(--smoke);margin:14px 0;">إثبات الدفع استلمناه، وهيتراجع من فريقنا قبل ما نبدأ التجهيز.</p>` : ''}
+      ${orderNumDisplay ? `<p style="color:var(--smoke);font-size:var(--text-xs);margin-bottom:20px;">⚠ احتفظ برقم الطلب عشان تتابعه.</p>` : ''}
+      <button id="confirmOverlayClose" class="btn-primary" style="width:100%;">متابعة التسوق</button>
+    </div>`;
+  document.body.appendChild(confirmOverlay);
+  document.getElementById('confirmOverlayClose').addEventListener('click', ()=> confirmOverlay.remove());
 
   } catch (unexpectedError) {
     console.error('Checkout error:', unexpectedError);
@@ -2419,8 +2612,8 @@ document.getElementById('custSignupBtn').addEventListener('click', async ()=>{
 
 document.getElementById('wishlistShareBtn').addEventListener('click', async ()=>{
   const url = `${location.origin}${location.pathname}?wishlist=${wishlist.join(',')}`;
-  try { await navigator.clipboard.writeText(url); alert('اتنسخ الرابط! ' + url); }
-  catch(e) { alert(url); }
+  try { await navigator.clipboard.writeText(url); toast('اتنسخ الرابط ✓','success'); }
+  catch(e) { toast(url,'info',8000); }
 });
 document.getElementById('wishlistPrintBtn').addEventListener('click', ()=>{
   const items = wishlist.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
