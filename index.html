@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Monsela | عطور أصلية فاخرة</title>
 <meta name="description" content="Monsela — متجر عطور أصلية فاخرة أونلاين في مصر. اكتشف مجموعتنا المختارة من أجود العطور، مع توصيل لجميع المحافظات.">
 <meta property="og:title" content="Monsela | عطور أصلية فاخرة">
@@ -54,6 +54,10 @@
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://oujdveezelfokelyptza.supabase.co">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://api.qrserver.com">
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
@@ -106,6 +110,64 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 
+/* ── iOS Safari & Mobile fixes ── */
+/* Prevent input auto-zoom on iOS (triggers at < 16px) */
+input, select, textarea{
+  font-size:16px !important;
+  font-family:'Cairo', sans-serif;
+}
+/* But keep visual size by scaling with em inside */
+@media(min-width:641px){
+  input, select, textarea{font-size:1rem !important;}
+}
+
+/* iOS safe-area padding for fixed bottom elements */
+#cartFab{
+  bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+}
+#backToTop{
+  bottom:calc(24px + env(safe-area-inset-bottom, 0px));
+}
+#compareBar{
+  padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+}
+#toast-container{
+  bottom:calc(var(--sp-6) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Use dvh instead of vh for iOS Safari (avoids toolbar height bug) */
+#cartDrawer, #filterPanel, #accountOverlay > *, #trackOrderOverlay > *,
+#productDetailOverlay > *, #checkoutOverlay > *{
+  max-height:calc(100dvh - 24px);
+}
+
+/* Minimum touch target size (Apple HIG: 44×44pt) */
+button, a, [role="button"]{
+  min-height:44px;
+}
+/* Exceptions for purely decorative or structural elements */
+.bottle-color-swatch{min-height:unset;}
+
+/* Prevent horizontal overflow on any screen */
+body{overflow-x:hidden;}
+
+/* Improve tap highlight on mobile */
+*{-webkit-tap-highlight-color:rgba(163,129,74,0.1);}
+
+/* ── Keyboard accessibility: visible focus ring ── */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--gold);
+  outline-offset:2px;
+  border-radius:var(--r-sm);
+}
+/* Remove default outline only when focus-visible is supported and not active */
+a:focus:not(:focus-visible), button:focus:not(:focus-visible){
+  outline:none;
+}
+
+
+
 /* ===== LTR (English) mode ===== */
 html[dir="ltr"] body{direction:ltr;text-align:left;font-family:'Cairo',sans-serif;}
 html[dir="ltr"] .eyebrow, html[dir="ltr"] h1, html[dir="ltr"] h2, html[dir="ltr"] h3, html[dir="ltr"] h4{font-family:'Playfair Display', Georgia, serif;}
@@ -113,6 +175,7 @@ html[dir="ltr"] .perfume-card, html[dir="ltr"] .section-head{text-align:center;}
 html[dir="ltr"] #cartFab{left:auto;right:24px;}
 html[dir="ltr"] #backToTop{right:auto;left:24px;}
 html[dir="ltr"] #filterPanel{right:auto;left:0;box-shadow:20px 0 60px rgba(43,38,32,0.12);}
+html[dir="ltr"] #cartDrawer{left:auto;right:0;box-shadow:-20px 0 60px rgba(43,38,32,0.12);}
 html[dir="ltr"] #compareBar, html[dir="ltr"] #flashSaleBanner{direction:ltr;}
 html[dir="ltr"] .nav-links{direction:ltr;}
 [data-i18n], [data-i18n-ph]{transition:none;}
@@ -222,9 +285,14 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
 
 /* SECTION LABELS */
-.section{padding:clamp(50px, 8vw, 90px) 0;}
-.section-head{text-align:center;max-width:640px;margin:0 auto 56px;}
-.section-head h2{font-size:clamp(1.6rem, 4.5vw, 2.3rem);margin:10px 0 16px;}
+.section{padding:clamp(36px, 8vw, 90px) 0;}
+/* Defer rendering of off-screen sections for faster initial paint */
+#whyMonsela, #about, #faq, #scentFinder, #recentlyViewed, #bestSellers{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 500px;
+}
+.section-head{text-align:center;max-width:640px;margin:0 auto 40px;}
+.section-head h2{font-size:clamp(1.4rem, 4.5vw, 2.3rem);margin:10px 0 14px;}
 .section-head p{color:var(--smoke);font-size:clamp(0.9rem, 2vw, 1.05rem);line-height:1.8;}
 
 /* GALLERY */
@@ -296,7 +364,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .hero{grid-template-columns:1fr;text-align:center;padding-top:40px;}
   .hero p.lead{margin:0 auto 32px;}
   .hero-ctas{justify-content:center;flex-wrap:wrap;}
-  .gallery-grid{grid-template-columns:1fr 1fr;}
+  .gallery-grid{grid-template-columns:1fr 1fr;gap:12px;}
   .nav-links{
     display:none;position:absolute;top:76px;right:0;left:0;
     background:var(--ink-2);flex-direction:column;gap:0;
@@ -314,8 +382,9 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .hero-ctas{flex-direction:column;width:100%;}
   .hero-ctas a{width:100%;text-align:center;}
   .btn-primary, .btn-ghost{padding:14px 20px;font-size:0.95rem;}
-  .gallery-grid{grid-template-columns:1fr;gap:16px;}
-  .perfume-card{padding:22px;}
+  .gallery-grid{grid-template-columns:1fr;gap:14px;}
+  .perfume-card{padding:18px;}
+  .hero{padding:20px 0 28px;}
   .option-row{gap:10px;}
   .opt{padding:9px 14px;font-size:0.85rem;flex:1 1 auto;text-align:center;}
   #about .container{grid-template-columns:1fr !important;text-align:center;}
@@ -426,7 +495,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Cart drawer -->
 <div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:70;"></div>
-<div id="cartDrawer" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
+<div id="cartDrawer" role="dialog" aria-modal="true" aria-label="سلة التسوق" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;" data-i18n="cart_title">سلة التسوق</h3>
     <button id="closeCart" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
@@ -453,8 +522,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Checkout modal -->
 <!-- Product detail modal -->
-<div id="productDetailOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:95;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;">
+<div id="productDetailOverlay" role="dialog" aria-modal="true" aria-label="تفاصيل المنتج" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:95;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:600px;width:100%;max-height:90dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:flex-end;">
       <button id="closeProductDetail" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
     </div>
@@ -462,8 +531,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<div id="checkoutOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
+<div id="checkoutOverlay" role="dialog" aria-modal="true" aria-label="إتمام الطلب" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90dvh;overflow-y:auto;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:14px;" data-i18n="checkout_title">بيانات التوصيل</h3>
 
     <!-- Order review — shown FIRST so the customer confirms what they're buying before entering personal data -->
@@ -528,7 +597,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <!-- Customer account modal -->
 <!-- Track order by phone (no account needed) -->
 <div id="trackOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;" data-i18n="track_title">تتبع طلبك</h3>
       <button id="closeTrackOrder" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
@@ -545,8 +614,8 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<div id="accountOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
+<div id="accountOverlay" role="dialog" aria-modal="true" aria-label="حسابي" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;" data-i18n="nav_account">حسابي</h3>
       <button id="closeAccount" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
@@ -1146,6 +1215,8 @@ function updateHeroVisual(){
   const img = document.createElement('img');
   img.src = candidate.image_url;
   img.alt = candidate.name;
+  img.fetchPriority = 'high';
+  img.loading = 'eager';
   wrap.appendChild(img);
 }
 
@@ -1312,9 +1383,11 @@ function renderProducts(){
   document.getElementById('resultsCount').textContent = `${list.length} منتج`;
 
   if (list.length === 0) {
+    const query = document.getElementById('productSearch')?.value?.trim();
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--smoke)" stroke-width="1.5" style="margin:0 auto 16px;opacity:0.5;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <p style="color:var(--smoke);font-size:var(--text-base);">لسه مفيش منتجات في القسم ده.</p>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--smoke)" stroke-width="1.5" style="margin:0 auto 16px;opacity:0.5;display:block;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <p style="color:var(--smoke);font-size:var(--text-base);margin-bottom:6px;">${query ? `مفيش نتايج لـ "${escapeHTML(query)}"` : 'لسه مفيش منتجات في القسم ده.'}</p>
+      ${query ? `<button onclick="document.getElementById('productSearch').value='';renderProducts();" class="btn-ghost" style="margin-top:14px;padding:10px 20px;">مسح البحث</button>` : ''}
     </div>`;
     document.getElementById('loadMoreWrap').innerHTML = '';
     return;
@@ -1561,10 +1634,10 @@ async function openProductDetail(productId){
   content.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr;gap:20px;">
       <div style="text-align:center;">
-        <img id="pdMainImage" src="${allImages[0] || ''}" style="width:100%;max-width:280px;aspect-ratio:1/1;object-fit:cover;border-radius:14px;">
+        <img id="pdMainImage" src="${allImages[0] || ''}" alt="${escapeHTML(localizedField(p,'name'))}" style="width:100%;max-width:280px;aspect-ratio:1/1;object-fit:cover;border-radius:14px;">
         ${allImages.length > 1 ? `
           <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-            ${allImages.map(url => `<img src="${url}" class="pd-thumb" style="width:50px;height:50px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);">`).join('')}
+            ${allImages.map((url,i) => `<img src="${url}" alt="${escapeHTML(localizedField(p,'name'))} - صورة ${i+1}" class="pd-thumb" style="width:50px;height:50px;object-fit:cover;border-radius:8px;cursor:pointer;border:1px solid var(--line);">`).join('')}
           </div>` : ''}
       </div>
       <div>
@@ -2228,6 +2301,9 @@ function renderCartUI(){
   itemsEl.querySelectorAll('.cart-save-later').forEach(b=>b.addEventListener('click', ()=>{ moveToSavedForLater(b.dataset.key); renderSavedForLater(); }));
 }
 
+function lockBodyScroll(){ document.body.style.overflow='hidden'; document.body.style.position='fixed'; document.body.style.width='100%'; }
+function unlockBodyScroll(){ document.body.style.overflow=''; document.body.style.position=''; document.body.style.width=''; }
+
 function openCart(){
   // Auto-clean cart items whose product no longer exists in the catalog
   // (prevents "منتج غير موجود" error at checkout after products are deleted/re-added)
@@ -2242,10 +2318,12 @@ function openCart(){
   }
   document.getElementById('cartOverlay').style.display = 'block';
   document.getElementById('cartDrawer').style.display = 'block';
+  lockBodyScroll();
 }
 function closeCartUI(){
   document.getElementById('cartOverlay').style.display = 'none';
   document.getElementById('cartDrawer').style.display = 'none';
+  unlockBodyScroll();
 }
 document.getElementById('cartFab').addEventListener('click', openCart);
 document.getElementById('closeCart').addEventListener('click', closeCartUI);
@@ -2289,43 +2367,19 @@ document.getElementById('applyCouponBtn').addEventListener('click', async ()=>{
   if (!code) { appliedCoupon = null; statusEl.textContent=''; updateCheckoutSummary(); return; }
 
   const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const { data, error } = await sb.from('coupons').select('*').eq('code', code).eq('active', true).maybeSingle();
-  if (error || !data) {
+  // Secure server-side validation — the client can no longer read the coupons table directly,
+  // so secret codes are never exposed. The function only confirms/denies the one code provided.
+  const { data: rows, error } = await sb.rpc('validate_coupon', { p_code: code, p_subtotal: subtotal });
+  const result = Array.isArray(rows) ? rows[0] : rows;
+  if (error || !result || !result.valid) {
     appliedCoupon = null;
-    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده مش موجود أو مش شغال.';
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = (result && result.message) ? result.message : 'الكود ده مش موجود أو مش شغال.';
     updateCheckoutSummary();
     return;
   }
-  if (subtotal < data.min_order) {
-    appliedCoupon = null;
-    statusEl.style.color = 'var(--danger)'; statusEl.textContent = `الكود ده يشتغل بس فوق ${data.min_order} جنيه.`;
-    updateCheckoutSummary();
-    return;
-  }
-  if (data.max_uses != null && (data.used_count || 0) >= data.max_uses) {
-    appliedCoupon = null;
-    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده خلص عدد مرات استخدامه.';
-    updateCheckoutSummary();
-    return;
-  }
-  if (data.per_customer) {
-    const phone = document.getElementById('checkoutPhone').value.trim();
-    if (!phone) {
-      statusEl.style.color = 'var(--danger)';
-      statusEl.textContent = 'الكود ده مرة واحدة للعميل — اكتب رقم موبايلك فوق الأول عشان نتأكد.';
-      updateCheckoutSummary();
-      return;
-    }
-    const { data: usedBefore } = await sb.rpc('coupon_already_used_by_phone', { p_code: code, p_phone: phone });
-    if (usedBefore) {
-      appliedCoupon = null;
-      statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الكود ده مستخدم قبل كده برقمك.';
-      updateCheckoutSummary();
-      return;
-    }
-  }
-  appliedCoupon = data;
-  statusEl.style.color = 'var(--success)'; statusEl.textContent = `✓ ${data.label || 'الكود اتفعل'}`;
+  appliedCoupon = { code, type: result.discount_type, value: Number(result.discount_value), min_order: subtotal };
+  statusEl.style.color = 'var(--success)'; statusEl.textContent = '✓ الكود اتفعل';
   updateCheckoutSummary();
 });
 
@@ -2413,7 +2467,7 @@ document.getElementById('paymentProofFile').addEventListener('change', (e)=>{
   const preview = document.getElementById('paymentProofPreview');
   if (!file) { preview.innerHTML = ''; return; }
   const url = URL.createObjectURL(file);
-  preview.innerHTML = `<img src="${url}" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
+  preview.innerHTML = `<img src="${url}" alt="معاينة إثبات الدفع" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
 });
 
 document.getElementById('checkoutBtn').addEventListener('click', async ()=>{
@@ -2939,6 +2993,56 @@ if ('IntersectionObserver' in window) {
   document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
 }
 
+</script>
+
+<!-- Mobile Bottom Navigation -->
+<nav id="bottomNav" aria-label="التنقل السريع" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:68;background:rgba(255,253,249,0.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));justify-content:space-around;align-items:center;">
+  <a href="#main-content" class="bottom-nav-item" aria-label="الرئيسية">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span>الرئيسية</span>
+  </a>
+  <a href="#gallery" class="bottom-nav-item" aria-label="المتجر">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span>المتجر</span>
+  </a>
+  <button class="bottom-nav-item" id="bottomNavCart" aria-label="السلة" style="background:none;border:none;position:relative;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    <span id="bottomNavCartBadge" style="display:none;position:absolute;top:2px;left:50%;transform:translateX(4px);background:var(--gold);color:white;font-size:9px;font-weight:700;min-width:15px;height:15px;border-radius:999px;align-items:center;justify-content:center;padding:0 3px;line-height:1;"></span>
+    <span>السلة</span>
+  </button>
+  <button class="bottom-nav-item" id="bottomNavAccount" aria-label="حسابي" style="background:none;border:none;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>حسابي</span>
+  </button>
+</nav>
+<style>
+@media(max-width:768px){
+  #bottomNav{display:flex;}
+  .bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--smoke);text-decoration:none;font-size:10px;font-weight:600;font-family:'Cairo',sans-serif;padding:4px 12px;min-height:unset;transition:color .2s;cursor:pointer;}
+  .bottom-nav-item:hover,.bottom-nav-item:active{color:var(--gold);}
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px));}
+  #cartFab{bottom:calc(74px + env(safe-area-inset-bottom,0px)) !important;display:none;}
+  #backToTop{bottom:calc(74px + env(safe-area-inset-bottom,0px)) !important;}
+  #toast-container{bottom:calc(78px + env(safe-area-inset-bottom,0px)) !important;}
+}
+</style>
+<script>
+document.getElementById('bottomNavCart').addEventListener('click', openCart);
+document.getElementById('bottomNavAccount').addEventListener('click', ()=>{
+  document.getElementById('accountOverlay').style.display='flex';
+  refreshAccountView();
+});
+function syncBottomNavCart(){
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  const badge = document.getElementById('bottomNavCartBadge');
+  if(!badge) return;
+  badge.textContent = count;
+  badge.style.display = count>0?'flex':'none';
+}
+// Hook into save cart
+const _origSaveCart2 = saveCart;
+saveCart = function(){ _origSaveCart2(); syncBottomNavCart(); };
+syncBottomNavCart();
 </script>
 
 </body>
