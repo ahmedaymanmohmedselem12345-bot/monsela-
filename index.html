@@ -1990,6 +1990,17 @@ function renderCartUI(){
 }
 
 function openCart(){
+  // Auto-clean cart items whose product no longer exists in the catalog
+  // (prevents "منتج غير موجود" error at checkout after products are deleted/re-added)
+  if (allProducts && allProducts.length > 0) {
+    const validIds = new Set(allProducts.map(p => p.id));
+    const before = cart.length;
+    cart = cart.filter(item => validIds.has(item.id));
+    if (cart.length < before) {
+      saveCart();
+      renderCartUI();
+    }
+  }
   document.getElementById('cartOverlay').style.display = 'block';
   document.getElementById('cartDrawer').style.display = 'block';
 }
@@ -2262,9 +2273,22 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
 
   btn.disabled = false;
   if (error) {
-    statusEl.style.color = 'var(--danger)';
-    statusEl.textContent = 'حصلت مشكلة، حاول تاني.';
-    console.error(error);
+    console.error('Order insert error:', error);
+    const msg = error.message || '';
+    if (msg.includes('منتج غير موجود')) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'في منتج في سلتك مش متاح دلوقتي. امسح السلة وأضف المنتجات تاني من المتجر.';
+      // clear stale cart so user can start fresh
+      cart = [];
+      saveCart();
+      renderCartUI();
+    } else if (msg.includes('الكمية المطلوبة')) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'الكمية اللي طلبتها أكبر من المتاح. راجع سلتك وقلل الكمية.';
+    } else {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = 'حصلت مشكلة في تأكيد الطلب، حاول تاني أو تواصل معنا.';
+    }
     return;
   }
 
