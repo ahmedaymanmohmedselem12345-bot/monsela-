@@ -464,7 +464,15 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <div id="checkoutOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;">
-    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:18px;" data-i18n="checkout_title">بيانات التوصيل</h3>
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:14px;" data-i18n="checkout_title">بيانات التوصيل</h3>
+
+    <!-- Order review — shown FIRST so the customer confirms what they're buying before entering personal data -->
+    <div style="background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:20px;">
+      <p style="font-size:0.8rem;font-weight:700;color:var(--gold-dark);margin-bottom:10px;">مراجعة طلبك</p>
+      <div id="checkoutItemsReview" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
+      <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);line-height:1.9;border-top:1px solid var(--line);padding-top:10px;"></div>
+    </div>
+
     <!-- honeypot field: invisible to humans, bots tend to fill every field -->
     <input type="text" id="hpField" name="website" autocomplete="off" tabindex="-1" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
     <label for="checkoutName" style="display:block;font-weight:700;margin-bottom:8px;"><span data-i18n="field_name">الاسم</span> <span style="color:var(--rose);">*</span></label>
@@ -483,11 +491,11 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;" data-i18n="btn_apply">تطبيق</button>
     </div>
     <div id="couponStatus" style="font-size:0.8rem;margin-bottom:14px;"></div>
-    <label for="checkoutNotes" style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_notes">عندك ملاحظة على طلبك؟</label>
     <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
       <input type="checkbox" id="checkoutGift" style="width:auto;margin:0;"> <span data-i18n="field_gift">ده هدية؟ (تغليف خاص + رسالة)</span>
     </label>
     <textarea id="checkoutGiftMessage" placeholder="اكتب رسالة الإهداء هنا..." style="display:none;width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+    <label for="checkoutNotes" style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_notes">عندك ملاحظة على طلبك؟</label>
     <textarea id="checkoutNotes" placeholder="مثال: يريت التغليف يبقى هدية" style="width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
 
     <label style="display:block;font-weight:700;margin-bottom:8px;"><span data-i18n="field_payment_method">طريقة الدفع</span> <span style="color:var(--rose);">*</span></label>
@@ -509,7 +517,6 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <p style="font-size:0.72rem;color:var(--smoke);margin-top:8px;">✓ الطلب مش هيتأكد إلا بعد ما فريقنا يراجع إثبات الدفع.</p>
     </div>
 
-    <div id="checkoutSummary" style="font-size:0.85rem;color:var(--smoke);margin-bottom:16px;line-height:1.9;"></div>
     <div style="display:flex;gap:10px;">
       <button id="confirmOrderBtn" class="btn-primary" style="flex:1;">تأكيد الطلب</button>
       <button id="cancelCheckout" class="btn-ghost" style="flex:0;" data-i18n="btn_cancel">إلغاء</button>
@@ -1106,6 +1113,7 @@ function canSubmitAgain(key, cooldownMs = 15000){
 // ===== Load real products (added via the admin panel) into the gallery =====
 // ===== Shop: products, categories, cart, checkout =====
 let allProducts = [];
+let productRatings = {}; // { productId: { avg, count } } — real approved reviews only
 let activeDepartment = 'الكل';
 let activeCategory = 'الكل';
 let selectedBrands = new Set();
@@ -1162,6 +1170,12 @@ async function loadProducts(){
   renderProducts();
   updateHeroVisual();
   renderScentFinderFamilyOptions();
+  sb.rpc('get_product_ratings').then(({ data }) => {
+    if (!data) return;
+    productRatings = {};
+    data.forEach(r => { productRatings[r.product_id] = { avg: Number(r.avg_rating), count: Number(r.review_count) }; });
+    renderProducts();
+  });
 
   const sharedProductId = new URLSearchParams(location.search).get('product');
   if (sharedProductId && allProducts.some(p => p.id === sharedProductId)) {
@@ -1359,6 +1373,11 @@ function renderProducts(){
       <!-- Content -->
       <div style="flex:1;display:flex;flex-direction:column;">
         <h3 style="font-size:var(--text-md);margin-bottom:4px;line-height:1.4;">${escapeHTML(localizedField(p,'name'))}</h3>
+        ${productRatings[p.id] ? `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="color:var(--gold);font-size:var(--text-sm);">${'★'.repeat(Math.round(productRatings[p.id].avg))}${'☆'.repeat(5 - Math.round(productRatings[p.id].avg))}</span>
+            <span style="color:var(--smoke);font-size:var(--text-xs);">(${productRatings[p.id].count})</span>
+          </div>` : ''}
         ${p.notes ? `<p style="font-size:var(--text-sm);color:var(--smoke);margin-bottom:10px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHTML(p.notes)}</p>` : ''}
         <!-- Bottle colors -->
         ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
@@ -1549,7 +1568,12 @@ async function openProductDetail(productId){
           </div>` : ''}
       </div>
       <div>
-        <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;margin-bottom:10px;">${localizedField(p,'name')}</h3>
+        <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;margin-bottom:6px;">${localizedField(p,'name')}</h3>
+        ${productRatings[p.id] ? `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="color:var(--gold);">${'★'.repeat(Math.round(productRatings[p.id].avg))}${'☆'.repeat(5 - Math.round(productRatings[p.id].avg))}</span>
+            <span style="color:var(--smoke);font-size:0.8rem;">${productRatings[p.id].avg} (${productRatings[p.id].count} تقييم)</span>
+          </div>` : ''}
         <p style="margin-bottom:14px;">
           ${hasDiscount ? `<span style="background:var(--rose);color:var(--cream);font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-left:8px;">-${Math.round((1 - p.price / p.original_price) * 100)}%</span>` : ''}
           <span style="color:var(--gold);font-weight:700;font-size:1.3rem;">${p.price ? p.price + ' جنيه' : ''}</span>
@@ -2322,6 +2346,24 @@ function calcOrderTotals(){
 
 function updateCheckoutSummary(){
   const { subtotal, discount, deliveryFee, total } = calcOrderTotals();
+
+  const itemsEl = document.getElementById('checkoutItemsReview');
+  itemsEl.innerHTML = cart.map(item => {
+    const product = allProducts.find(p => p.id === item.id);
+    const img = product && product.image_url;
+    return `
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${img
+          ? `<img src="${img}" alt="${escapeHTML(item.name)}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
+          : `<div style="width:40px;height:40px;border-radius:8px;background:var(--ink-3);flex-shrink:0;"></div>`}
+        <div style="flex:1;min-width:0;">
+          <p style="font-size:0.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHTML(item.name)}</p>
+          <p style="font-size:0.72rem;color:var(--smoke);">الكمية: ${item.qty}</p>
+        </div>
+        <span style="font-size:0.82rem;color:var(--gold);flex-shrink:0;">${item.price * item.qty} جنيه</span>
+      </div>`;
+  }).join('');
+
   document.getElementById('checkoutSummary').innerHTML =
     `المنتجات: ${subtotal} جنيه` +
     (discount > 0 ? `<br>الخصم: -${discount.toFixed(0)} جنيه` : '') +
