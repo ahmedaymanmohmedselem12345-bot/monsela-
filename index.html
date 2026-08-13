@@ -63,50 +63,56 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
-  /* ── Brand colours ── */
-  --ink:#faf6ee;
-  --ink-2:#fffdf9;
-  --ink-3:#f2ead9;
+  /* ── Brand colours — refined luxury palette ── */
+  --ink:#faf7f2;
+  --ink-2:#ffffff;
+  --ink-3:#f4ede1;
   --amber:#b8985e;
   --amber-light:#d4bd8e;
-  --gold:#a3814a;
-  --gold-light:#c4a572;
-  --gold-dark:#7d6238;
-  --cream:#2b2620;
+  --gold:#9a7739;
+  --gold-light:#c0a061;
+  --gold-dark:#6e5528;
+  --cream:#241f1a;
   --rose:#a8776b;
   --rose-light:#c29a90;
-  --smoke:#5f584d;
-  --line:rgba(43,38,32,0.12);
+  --smoke:#6b6358;
+  --line:rgba(36,31,26,0.10);
+  --line-soft:rgba(36,31,26,0.06);
   --success:#5f7d52;
   --danger:#a8524a;
 
-  /* ── Typography scale (consistent across the whole site) ── */
-  --text-xs:0.72rem;   /* badges, fine print          */
-  --text-sm:0.82rem;   /* captions, labels             */
-  --text-base:0.95rem; /* body copy                    */
-  --text-md:1.05rem;   /* slightly prominent body      */
-  --text-lg:1.25rem;   /* sub-headings                 */
-  --text-xl:1.5rem;    /* modal / card headings        */
-  --text-2xl:1.8rem;   /* section headings             */
-  --text-hero:clamp(1.9rem, 5vw, 3.2rem);
+  /* ── Typography scale ── */
+  --text-xs:0.72rem;
+  --text-sm:0.82rem;
+  --text-base:0.95rem;
+  --text-md:1.05rem;
+  --text-lg:1.25rem;
+  --text-xl:1.5rem;
+  --text-2xl:1.8rem;
+  --text-hero:clamp(2rem, 5vw, 3.4rem);
 
-  /* ── Spacing ── */
+  /* ── Spacing — more generous for a premium feel ── */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px;
-  --sp-12:48px; --sp-16:64px;
+  --sp-12:48px; --sp-16:64px; --sp-20:80px; --sp-24:96px;
 
   /* ── Border radius tokens ── */
   --r-sm:8px;
   --r-md:12px;
-  --r-lg:16px;
-  --r-xl:24px;
+  --r-lg:18px;
+  --r-xl:26px;
   --r-pill:999px;
 
-  /* ── Shadow tokens ── */
-  --shadow-sm:0 2px 8px rgba(43,38,32,0.06);
-  --shadow-md:0 6px 18px rgba(43,38,32,0.08);
-  --shadow-lg:0 16px 40px rgba(43,38,32,0.12);
-  --shadow-gold:0 8px 24px rgba(163,129,74,0.22);
+  /* ── Shadow tokens — softer, more layered ── */
+  --shadow-sm:0 1px 3px rgba(36,31,26,0.04), 0 2px 8px rgba(36,31,26,0.04);
+  --shadow-md:0 4px 12px rgba(36,31,26,0.05), 0 8px 24px rgba(36,31,26,0.05);
+  --shadow-lg:0 12px 28px rgba(36,31,26,0.08), 0 24px 56px rgba(36,31,26,0.08);
+  --shadow-gold:0 8px 28px rgba(154,119,57,0.20);
+
+  /* ── Letter spacing for elegant headings ── */
+  --ls-tight:-0.02em;
+  --ls-wide:0.08em;
+  --ls-wider:0.18em;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
@@ -116,6 +122,11 @@ html{scroll-behavior:smooth;}
 input, select, textarea{
   font-size:16px !important;
   font-family:'Cairo', sans-serif;
+  transition:border-color .3s ease, box-shadow .3s ease, background .3s ease;
+}
+input:focus, select:focus, textarea:focus{
+  border-color:var(--gold) !important;
+  box-shadow:0 0 0 3px rgba(154,119,57,0.1) !important;
 }
 /* But keep visual size by scaling with em inside */
 @media(min-width:641px){
@@ -181,22 +192,30 @@ html[dir="ltr"] #compareBar, html[dir="ltr"] #flashSaleBanner{direction:ltr;}
 html[dir="ltr"] .nav-links{direction:ltr;}
 [data-i18n], [data-i18n-ph]{transition:none;}
 body{
-  background: radial-gradient(ellipse at top, var(--ink-2) 0%, var(--ink) 45%, var(--ink-3) 100%) fixed;
+  background: radial-gradient(ellipse 1200px 800px at 50% -5%, var(--ink-2) 0%, var(--ink) 50%, var(--ink-3) 100%) fixed;
   color:var(--cream);
   font-family:'Cairo',sans-serif;
   overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.7;
+  letter-spacing:0.005em;
 }
 h1,h2,h3,.display{
   font-family:'Aref Ruqaa',serif;
   font-weight:700;
+  letter-spacing:var(--ls-tight);
+  line-height:1.3;
 }
 .eyebrow{
   font-family:'Markazi Text',serif;
-  letter-spacing:2px;
-  color:var(--gold-dark);
-  font-size:1.1rem;
+  letter-spacing:var(--ls-wider);
+  color:var(--gold);
+  font-size:0.95rem;
   font-weight:600;
   text-transform:uppercase;
+  display:inline-block;
+  position:relative;
 }
 a{color:inherit;text-decoration:none;}
 .container{max-width:1180px;margin:0 auto;padding:0 28px;}
@@ -204,21 +223,22 @@ a{color:inherit;text-decoration:none;}
 /* NAV */
 nav{
   position:sticky;top:0;z-index:50;
-  background:rgba(255,253,249,0.75);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line);
-  transition:box-shadow .3s ease, background .3s ease;
+  background:rgba(255,255,255,0.72);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border-bottom:1px solid var(--line-soft);
+  transition:box-shadow .4s ease, background .4s ease, border-color .4s ease;
 }
 nav.scrolled{
-  background:rgba(255,253,249,0.94);
-  box-shadow:0 10px 30px rgba(43,38,32,0.08);
+  background:rgba(255,255,255,0.9);
+  box-shadow:0 8px 32px rgba(36,31,26,0.07);
+  border-bottom-color:var(--line);
 }
 nav .container{
   display:flex;align-items:center;justify-content:space-between;
-  height:76px;
+  height:80px;
 }
-.logo{font-family:'Aref Ruqaa',serif;font-size:1.8rem;color:var(--cream);}
+.logo{font-family:'Aref Ruqaa',serif;font-size:1.85rem;color:var(--cream);letter-spacing:var(--ls-tight);}
 .logo span{color:var(--gold);}
 .nav-links{display:flex;gap:32px;font-size:0.95rem;}
 .nav-links a{opacity:0.85;transition:opacity .2s;}
@@ -231,8 +251,8 @@ nav .container{
 /* HERO */
 .hero{
   position:relative;
-  padding:50px 0 40px;
-  display:grid;grid-template-columns:1.1fr 0.9fr;gap:40px;align-items:center;
+  padding:70px 0 56px;
+  display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center;
 }
 .hero::before{
   content:'';position:absolute;inset:0;
@@ -268,12 +288,20 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 }
 .hero-ctas{display:flex;gap:16px;}
 .btn-primary{
-  background:linear-gradient(135deg, #8f6d3d, var(--gold-dark) 70%);color:#fff;padding:16px 32px;border-radius:999px;
-  font-weight:700;font-size:1rem;border:none;cursor:pointer;
-  box-shadow:0 4px 16px rgba(184,152,94,0.18);
-  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
+  background:linear-gradient(135deg, #a07d3f, var(--gold-dark) 75%);color:#fff;padding:16px 34px;border-radius:var(--r-pill);
+  font-weight:700;font-size:0.98rem;border:none;cursor:pointer;letter-spacing:0.02em;
+  box-shadow:var(--shadow-gold);
+  position:relative;overflow:hidden;
+  transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
 }
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(184,152,94,0.28);}
+.btn-primary::after{
+  content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transition:left .6s ease;
+}
+.btn-primary:hover::after{left:100%;}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(154,119,57,0.32);}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(154,119,57,0.05);transform:translateY(-2px);}
 .btn-ghost{
   border:1px solid var(--line);padding:16px 32px;border-radius:12px;
   font-weight:600;color:var(--cream);background:rgba(43,38,32,0.03);
@@ -292,22 +320,26 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
   content-visibility:auto;
   contain-intrinsic-size:auto 500px;
 }
-.section-head{text-align:center;max-width:640px;margin:0 auto 40px;}
-.section-head h2{font-size:clamp(1.4rem, 4.5vw, 2.3rem);margin:10px 0 14px;}
-.section-head p{color:var(--smoke);font-size:clamp(0.9rem, 2vw, 1.05rem);line-height:1.8;}
+.section-head{text-align:center;max-width:640px;margin:0 auto 52px;}
+.section-head h2{font-size:clamp(1.5rem, 4.5vw, 2.4rem);margin:12px 0 18px;}
+.section-head h2::after{
+  content:'';display:block;width:48px;height:2px;margin:18px auto 0;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.section-head p{color:var(--smoke);font-size:clamp(0.9rem, 2vw, 1.05rem);line-height:1.85;}
 
 /* GALLERY */
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 300px));gap:24px;justify-content:center;}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(270px, 320px));gap:28px;justify-content:center;}
 .perfume-card{
-  background:rgba(255,253,249,0.7);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  border:1px solid var(--line);border-radius:18px;
-  padding:28px;text-align:center;
-  box-shadow:0 6px 18px rgba(43,38,32,0.06);
-  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s ease, box-shadow .3s ease;
+  background:rgba(255,255,255,0.82);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--line-soft);border-radius:var(--r-lg);
+  padding:26px;text-align:center;
+  box-shadow:var(--shadow-sm);
+  transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .45s ease, box-shadow .45s ease;
 }
-.perfume-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 16px 32px rgba(43,38,32,0.1), 0 0 0 1px rgba(184,152,94,0.18);}
+.perfume-card:hover{transform:translateY(-8px);border-color:rgba(154,119,57,0.3);box-shadow:var(--shadow-lg), 0 0 0 1px rgba(154,119,57,0.12);}
 .perfume-card .glass{
   width:70px;height:100px;margin:0 auto 20px;border-radius:10px 10px 22px 22px;
   background:linear-gradient(180deg, var(--amber-light), var(--amber));
@@ -357,7 +389,8 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 .opt.active, .opt:hover{border-color:var(--gold);background:rgba(184,152,94,0.1);}
 
 footer{
-  border-top:1px solid var(--line);padding:50px 0;text-align:center;color:var(--smoke);font-size:0.9rem;
+  border-top:1px solid var(--line);padding:64px 0 40px;text-align:center;color:var(--smoke);font-size:0.9rem;
+  background:linear-gradient(180deg, transparent, rgba(244,237,225,0.5));
 }
 footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
@@ -458,7 +491,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Compare modal -->
 <!-- Filter panel -->
-<div id="filterOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:97;"></div>
+<div id="filterOverlay" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.5);z-index:97;"></div>
 <div id="filterPanel" style="display:none;position:fixed;top:0;bottom:0;right:0;width:min(360px,90vw);background:var(--ink-2);z-index:98;box-shadow:-20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;">تصفية</h3>
@@ -484,7 +517,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<div id="compareOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:96;align-items:center;justify-content:center;padding:20px;">
+<div id="compareOverlay" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.6);z-index:96;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:28px;max-width:600px;width:100%;max-height:85vh;overflow:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <h3 style="font-family:'Aref Ruqaa',serif;" data-i18n="compare_title">مقارنة المنتجات</h3>
@@ -495,7 +528,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </div>
 
 <!-- Cart drawer -->
-<div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:70;"></div>
+<div id="cartOverlay" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.5);z-index:70;"></div>
 <div id="cartDrawer" role="dialog" aria-modal="true" aria-label="سلة التسوق" style="display:none;position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--ink-2);z-index:71;box-shadow:20px 0 60px rgba(43,38,32,0.12);padding:26px;overflow-y:auto;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.5rem;" data-i18n="cart_title">سلة التسوق</h3>
@@ -523,7 +556,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Checkout modal -->
 <!-- Product detail modal -->
-<div id="productDetailOverlay" role="dialog" aria-modal="true" aria-label="تفاصيل المنتج" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:95;align-items:center;justify-content:center;padding:20px;">
+<div id="productDetailOverlay" role="dialog" aria-modal="true" aria-label="تفاصيل المنتج" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.6);z-index:95;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:600px;width:100%;max-height:90dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:flex-end;">
       <button id="closeProductDetail" style="background:none;border:none;color:var(--cream);font-size:1.4rem;cursor:pointer;">×</button>
@@ -532,7 +565,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<div id="checkoutOverlay" role="dialog" aria-modal="true" aria-label="إتمام الطلب" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:80;align-items:center;justify-content:center;padding:20px;">
+<div id="checkoutOverlay" role="dialog" aria-modal="true" aria-label="إتمام الطلب" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.55);z-index:80;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90dvh;overflow-y:auto;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:14px;" data-i18n="checkout_title">بيانات التوصيل</h3>
 
@@ -597,7 +630,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 <!-- Customer account modal -->
 <!-- Track order by phone (no account needed) -->
-<div id="trackOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
+<div id="trackOrderOverlay" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.55);z-index:90;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;" data-i18n="track_title">تتبع طلبك</h3>
@@ -615,7 +648,7 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<div id="accountOverlay" role="dialog" aria-modal="true" aria-label="حسابي" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:90;align-items:center;justify-content:center;padding:20px;">
+<div id="accountOverlay" role="dialog" aria-modal="true" aria-label="حسابي" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.55);z-index:90;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:32px;max-width:420px;width:100%;max-height:90dvh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;" data-i18n="nav_account">حسابي</h3>
@@ -1017,7 +1050,7 @@ function showPriceAlertModal(productId){
   if (existing) existing.remove();
   const modal = document.createElement('div');
   modal.id = 'priceAlertModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(36,31,26,0.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
   modal.innerHTML = `
     <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:28px;max-width:360px;width:100%;box-shadow:var(--shadow-lg);">
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:var(--text-xl);margin-bottom:12px;">تنبيه انخفاض السعر</h3>
@@ -2666,7 +2699,7 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     : '';
   // Show premium order confirmation instead of a browser alert
   const confirmOverlay = document.createElement('div');
-  confirmOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
+  confirmOverlay.style.cssText = 'position:fixed;inset:0;background:rgba(36,31,26,0.55);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;';
   const orderNumDisplay = insertedOrder?.order_number || '';
   const etaDisplay = insertedOrder?.estimated_delivery_date
     ? new Date(insertedOrder.estimated_delivery_date).toLocaleDateString('ar-EG', { weekday:'long', day:'numeric', month:'long' })
