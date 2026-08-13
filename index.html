@@ -280,36 +280,47 @@ nav .container{
   pointer-events:none;
 }
 
-/* ── Full-width banner hero (reference style) ── */
-.hero-banner{
-  position:relative;
-  min-height:clamp(420px, 60vh, 620px);
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
+/* ── Split hero (image left, text right) ── */
+.hero-split{
+  display:grid;grid-template-columns:1fr 1fr;gap:0;
+  align-items:stretch;min-height:clamp(440px, 62vh, 640px);
   margin-bottom:20px;
 }
-.hero-banner-bg{
+.hero-split-image{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg, #ede4d3, #e0d0b4);
+}
+.hero-product-img{
   position:absolute;inset:0;
-  background:linear-gradient(135deg, #e8dcc8, #d4bd8e 50%, #c9a876);
+  background-image:linear-gradient(135deg, #ede4d3, #ddd0b8);
   background-size:cover;background-position:center;
 }
-.hero-banner-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(90deg, rgba(245,240,230,0.55), rgba(245,240,230,0.15) 50%, rgba(245,240,230,0.55));
+.hero-split-text{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(32px, 6vw, 80px);
+  text-align:right;
 }
-.hero-banner-content{
-  position:relative;z-index:2;text-align:center;max-width:680px;padding:0 24px;
-}
-.hero-banner-content .eyebrow{margin-bottom:10px;}
-.hero-banner-content h1{
-  font-size:clamp(2.2rem, 6vw, 4rem);line-height:1.15;margin:12px 0 18px;font-weight:600;
+.hero-split-text .eyebrow{margin-bottom:12px;}
+.hero-split-text h1{
+  font-size:clamp(2.2rem, 5.5vw, 4rem);line-height:1.15;margin:12px 0 20px;font-weight:600;
   color:var(--cream);
 }
-.hero-banner-content p.lead{
-  color:var(--cream);opacity:0.85;font-size:clamp(0.95rem, 2.5vw, 1.15rem);
-  max-width:520px;margin:0 auto 30px;line-height:1.9;
+.hero-split-text p.lead{
+  color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);
+  max-width:460px;margin-bottom:30px;line-height:1.9;
 }
-.hero-banner-content .hero-ctas{justify-content:center;}
+.hero-split-text .hero-ctas{display:flex;gap:16px;}
+
+/* LTR: flip so image stays visually on the left */
+html[dir="ltr"] .hero-split-text{text-align:left;}
+
+@media(max-width:768px){
+  .hero-split{grid-template-columns:1fr;min-height:auto;}
+  .hero-split-image{min-height:300px;order:-1;}
+  .hero-split-text{padding:36px 24px;text-align:center;}
+  .hero-split-text p.lead{margin-left:auto;margin-right:auto;}
+  .hero-split-text .hero-ctas{justify-content:center;flex-wrap:wrap;}
+}
 .hero h1{font-size:clamp(2.4rem, 7vw, 4.2rem);line-height:1.15;margin:16px 0 22px;font-weight:600;}
 .hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
 
@@ -793,10 +804,11 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<header class="hero-banner" id="main-content">
-  <div class="hero-banner-bg" id="heroVisual"></div>
-  <div class="hero-banner-overlay"></div>
-  <div class="hero-banner-content">
+<header class="hero-split" id="main-content">
+  <div class="hero-split-image">
+    <div class="hero-product-img" id="heroVisual"></div>
+  </div>
+  <div class="hero-split-text">
     <div class="eyebrow" data-i18n="hero_eyebrow">Monsela — عطورك المفضلة</div>
     <h1 data-i18n="hero_heading">عطرك اللي يشبهك</h1>
     <p class="lead" data-i18n="hero_lead">اكتشف عطورًا مختارة بعناية، واختار الرائحة اللي تناسب ذوقك وشخصيتك.</p>
