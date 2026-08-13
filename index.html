@@ -8,6 +8,7 @@
 <meta property="og:title" content="Monsela | عطور أصلية فاخرة">
 <meta property="og:description" content="اكتشف مجموعة Monsela من أجود العطور الأصلية — توصيل لجميع محافظات مصر.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://monsela-xi.vercel.app/">
 <meta property="og:locale" content="ar_EG">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Monsela | عطور أصلية فاخرة">
@@ -21,14 +22,14 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https://oujdveezelfokelyptza.supabase.co https://api.qrserver.com; frame-ancestors 'self'; base-uri 'self';">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="canonical" href="https://monsela-selim-s-projects2.vercel.app/">
+<link rel="canonical" href="https://monsela-xi.vercel.app/">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    {"@type":"ListItem","position":1,"name":"الرئيسية","item":"https://monsela-selim-s-projects2.vercel.app/"},
-    {"@type":"ListItem","position":2,"name":"المتجر","item":"https://monsela-selim-s-projects2.vercel.app/#gallery"}
+    {"@type":"ListItem","position":1,"name":"الرئيسية","item":"https://monsela-xi.vercel.app/"},
+    {"@type":"ListItem","position":2,"name":"المتجر","item":"https://monsela-xi.vercel.app/#gallery"}
   ]
 }
 </script>
@@ -267,7 +268,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 }
 .hero-ctas{display:flex;gap:16px;}
 .btn-primary{
-  background:linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-dark));color:var(--cream);padding:16px 32px;border-radius:999px;
+  background:linear-gradient(135deg, #8f6d3d, var(--gold-dark) 70%);color:#fff;padding:16px 32px;border-radius:999px;
   font-weight:700;font-size:1rem;border:none;cursor:pointer;
   box-shadow:0 4px 16px rgba(184,152,94,0.18);
   transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease;
@@ -2557,26 +2558,30 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     }
     statusEl.textContent = 'جاري تأكيد الطلب...';
 
-  const { data: insertedOrder, error } = await sb.from('store_orders').insert({
-    customer_name: name,
-    customer_phone: phone,
-    customer_address: address || null,
-    customer_id: currentCustomer ? currentCustomer.id : null,
-    notes: document.getElementById('checkoutNotes').value.trim() || null,
-    items: cart,
-    total,
-    coupon_code: appliedCoupon ? appliedCoupon.code : null,
-    discount,
-    delivery_zone: zone ? zone.name : null,
-    delivery_fee: deliveryFee,
-    is_gift: document.getElementById('checkoutGift').checked,
-    gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null,
-    payment_method: selectedPaymentMethod,
-    payment_status: selectedPaymentMethod === 'cod' ? 'cod' : 'pending_verification',
-    payment_transaction_id: selectedPaymentMethod !== 'cod' ? document.getElementById('paymentTransactionId').value.trim() : null,
-    payment_amount: selectedPaymentMethod !== 'cod' ? Number(document.getElementById('paymentAmountPaid').value) : null,
-    payment_proof_url: paymentProofPath
-  }).select().single();
+  // Use the place_order function (SECURITY DEFINER) so guests — who have INSERT but no
+  // SELECT permission on store_orders — can still receive their order number back.
+  // A plain .insert().select() fails the SELECT step for logged-out visitors.
+  const { data: orderResult, error } = await sb.rpc('place_order', {
+    p_customer_name: name,
+    p_customer_phone: phone,
+    p_customer_address: address || null,
+    p_customer_id: currentCustomer ? currentCustomer.id : null,
+    p_notes: document.getElementById('checkoutNotes').value.trim() || null,
+    p_items: cart,
+    p_total: total,
+    p_coupon_code: appliedCoupon ? appliedCoupon.code : null,
+    p_discount: discount,
+    p_delivery_zone: zone ? zone.name : null,
+    p_delivery_fee: deliveryFee,
+    p_is_gift: document.getElementById('checkoutGift').checked,
+    p_gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null,
+    p_payment_method: selectedPaymentMethod,
+    p_payment_status: selectedPaymentMethod === 'cod' ? 'cod' : 'pending_verification',
+    p_payment_transaction_id: selectedPaymentMethod !== 'cod' ? document.getElementById('paymentTransactionId').value.trim() : null,
+    p_payment_amount: selectedPaymentMethod !== 'cod' ? Number(document.getElementById('paymentAmountPaid').value) : null,
+    p_payment_proof_url: paymentProofPath
+  });
+  const insertedOrder = Array.isArray(orderResult) ? orderResult[0] : orderResult;
 
   if (currentCustomer) {
     await sb.from('customer_profiles').upsert({ id: currentCustomer.id, name, phone, address: address || null });
