@@ -186,7 +186,8 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
           <div><label>بلد المنشأ</label><input type="text" id="pOriginCountry" placeholder="فرنسا"></div>
         </div>
       </details>
-      <label>صورة المنتج (أول صورة هتبقى الغلاف، والباقي معرض صور إضافي)</label>
+      <label>صور المنتج 📸</label>
+      <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:8px;line-height:1.6;">تقدر تختار <b>أكتر من صورة مرة واحدة</b> (امسك Ctrl وإنت بتدوس على الصور، أو حدّدهم كلهم). أول صورة هتبقى الغلاف، والباقي هيظهروا كمعرض لما العميل يفتح المنتج.</p>
       <input type="file" id="pImage" accept="image/*" multiple>
       <div id="currentImagePreview" style="margin-bottom:14px;"></div>
       <label style="display:flex;align-items:center;gap:8px;">
@@ -257,6 +258,17 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <input type="number" id="freeShippingThreshold" placeholder="1500">
       <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
       <div class="status" id="settingsStatus"></div>
+    </div>
+
+    <div class="card" data-tab="settings">
+      <h2>🖼️ صورة البانر الرئيسي (الهيرو)</h2>
+      <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:14px;">دي الصورة الكبيرة اللي بتظهر أول ما العميل يفتح الموقع (جنب اسم المتجر). <b>مش لازم تكون منتج</b> — ممكن تكون أي صورة إعلانية أو مشهد جميل. غيّرها وقت ما تحب.</p>
+      <div id="currentHeroPreview" style="margin-bottom:14px;"></div>
+      <label>ارفع صورة البانر</label>
+      <input type="file" id="heroImageInput" accept="image/*">
+      <button class="btn" id="saveHeroImageBtn">حفظ صورة البانر</button>
+      <button class="btn" id="removeHeroImageBtn" style="background:transparent;color:var(--danger);border:1px solid var(--danger);box-shadow:none;margin-right:8px;">إزالة الصورة</button>
+      <div class="status" id="heroImageStatus"></div>
     </div>
 
     <div class="card" data-tab="settings">
@@ -509,10 +521,13 @@ async function loadViewCounter(){
 async function loadShopSettings(){
   const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
   if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
-}
-async function loadShopSettings(){
-  const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
-  if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
+  // Show current hero banner preview
+  const heroPrev = document.getElementById('currentHeroPreview');
+  if (heroPrev) {
+    heroPrev.innerHTML = (data && data.hero_image_url)
+      ? `<img src="${data.hero_image_url}" style="width:100%;max-width:320px;border-radius:12px;border:1px solid var(--line);box-shadow:var(--shadow-sm);"><div style="font-size:0.75rem;color:var(--smoke);margin-top:6px;">الصورة الحالية — ارفع صورة جديدة عشان تغيّرها</div>`
+      : `<div style="font-size:0.8rem;color:var(--smoke);padding:20px;background:var(--ink-3);border-radius:12px;text-align:center;">مفيش صورة بانر لسه — الموقع بيعرض خلفية متدرّجة أنيقة. ارفع صورة عشان تظهر.</div>`;
+  }
 }
 
 // ===== Payment settings (admin-editable, no code changes needed) =====
@@ -604,6 +619,47 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
   const { error } = await sb.from('shop_settings').update({ free_shipping_threshold: value }).eq('id', 1);
   statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
   statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
+});
+
+// ===== Hero banner image upload =====
+document.getElementById('saveHeroImageBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('heroImageStatus');
+  const fileInput = document.getElementById('heroImageInput');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اختار صورة الأول.';
+    return;
+  }
+  const file = fileInput.files[0];
+  if (!file.type.startsWith('image/')) {
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الملف لازم يكون صورة.';
+    return;
+  }
+  const btn = document.getElementById('saveHeroImageBtn');
+  btn.disabled = true; statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الرفع...';
+  try {
+    const path = `hero-${Date.now()}.jpg`;
+    const compressed = await compressImage(file, 1600, 0.85); // larger for a banner
+    const { error: upErr } = await sb.storage.from('product-images').upload(path, compressed, { contentType: 'image/jpeg' });
+    if (upErr) throw upErr;
+    const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
+    const { error: updErr } = await sb.from('shop_settings').update({ hero_image_url: urlData.publicUrl }).eq('id', 1);
+    if (updErr) throw updErr;
+    statusEl.style.color = 'var(--success)'; statusEl.textContent = 'اتحفظت صورة البانر ✓ (هتظهر في الموقع فورًا)';
+    fileInput.value = '';
+    loadShopSettings();
+  } catch (e) {
+    statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'حصلت مشكلة: ' + (e.message || e);
+  }
+  btn.disabled = false;
+});
+
+document.getElementById('removeHeroImageBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('heroImageStatus');
+  if (!confirm('متأكد إنك عايز تشيل صورة البانر؟ الموقع هيرجع يعرض الخلفية المتدرّجة.')) return;
+  const { error } = await sb.from('shop_settings').update({ hero_image_url: null }).eq('id', 1);
+  statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
+  statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتشالت الصورة ✓';
+  loadShopSettings();
 });
 
 // ===== About stats (real trust numbers, editable) =====
