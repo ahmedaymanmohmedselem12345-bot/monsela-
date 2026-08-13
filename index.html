@@ -63,23 +63,24 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
-  /* ── Pure white luxury palette (Byredo / Le Labo style) ── */
-  --ink:#ffffff;
-  --ink-2:#ffffff;
-  --ink-3:#fafafa;
+  /* ── Warm beige luxury palette (reference match) ── */
+  --ink:#f5f0e6;
+  --ink-2:#faf6ee;
+  --ink-3:#efe8d8;
   --amber:#b8985e;
   --amber-light:#d4bd8e;
-  --gold:#8a6d3b;
-  --gold-light:#a88a52;
-  --gold-dark:#6e5528;
-  --cream:#1a1a1a;
+  --gold:#9a7b42;
+  --gold-light:#bda36a;
+  --gold-dark:#7a5f30;
+  --cream:#2e2820;
   --rose:#a8776b;
   --rose-light:#c29a90;
-  --smoke:#6e6e6e;
-  --line:rgba(26,26,26,0.12);
-  --line-soft:rgba(26,26,26,0.07);
+  --smoke:#7a7062;
+  --line:rgba(46,40,32,0.14);
+  --line-soft:rgba(46,40,32,0.08);
   --success:#5f7d52;
   --danger:#a8524a;
+  --charcoal:#211d18;
 
   /* ── Typography scale ── */
   --text-xs:0.72rem;
@@ -193,7 +194,7 @@ html[dir="ltr"] .nav-links{direction:ltr;}
 html[dir="ltr"] .nav-links a::after{right:auto;left:0;}
 [data-i18n], [data-i18n-ph]{transition:none;}
 body{
-  background: #ffffff;
+  background: var(--ink);
   color:var(--cream);
   font-family:'Cairo',sans-serif;
   overflow-x:hidden;
@@ -278,6 +279,37 @@ nav .container{
   background:radial-gradient(ellipse at 75% 30%, rgba(192,133,82,0.18), transparent 60%);
   pointer-events:none;
 }
+
+/* ── Full-width banner hero (reference style) ── */
+.hero-banner{
+  position:relative;
+  min-height:clamp(420px, 60vh, 620px);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  margin-bottom:20px;
+}
+.hero-banner-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg, #e8dcc8, #d4bd8e 50%, #c9a876);
+  background-size:cover;background-position:center;
+}
+.hero-banner-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(90deg, rgba(245,240,230,0.55), rgba(245,240,230,0.15) 50%, rgba(245,240,230,0.55));
+}
+.hero-banner-content{
+  position:relative;z-index:2;text-align:center;max-width:680px;padding:0 24px;
+}
+.hero-banner-content .eyebrow{margin-bottom:10px;}
+.hero-banner-content h1{
+  font-size:clamp(2.2rem, 6vw, 4rem);line-height:1.15;margin:12px 0 18px;font-weight:600;
+  color:var(--cream);
+}
+.hero-banner-content p.lead{
+  color:var(--cream);opacity:0.85;font-size:clamp(0.95rem, 2.5vw, 1.15rem);
+  max-width:520px;margin:0 auto 30px;line-height:1.9;
+}
+.hero-banner-content .hero-ctas{justify-content:center;}
 .hero h1{font-size:clamp(2.4rem, 7vw, 4.2rem);line-height:1.15;margin:16px 0 22px;font-weight:600;}
 .hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
 
@@ -350,13 +382,13 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 /* GALLERY */
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(270px, 320px));gap:28px;justify-content:center;}
 .perfume-card{
-  background:#ffffff;
-  border:1px solid var(--line-soft);border-radius:var(--r-md);
-  padding:16px;text-align:right;
+  background:transparent;
+  border:1px solid transparent;border-radius:var(--r-md);
+  padding:12px;text-align:right;
   box-shadow:none;
-  transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .45s ease, box-shadow .45s ease;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1), border-color .45s ease, box-shadow .45s ease, background .3s ease;
 }
-.perfume-card:hover{transform:translateY(-4px);border-color:var(--line);box-shadow:0 12px 32px rgba(26,26,26,0.08);}
+.perfume-card:hover{transform:translateY(-4px);background:var(--ink-2);border-color:var(--line-soft);box-shadow:0 12px 32px rgba(46,40,32,0.1);}
 
 /* Reference-style "ADD TO BAG" button — bordered, fills charcoal on hover */
 .perfume-card .add-to-cart{
@@ -425,9 +457,17 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
 .opt.active, .opt:hover{border-color:var(--gold);background:rgba(184,152,94,0.1);}
 
 footer{
-  border-top:1px solid var(--line);padding:64px 0 40px;text-align:center;color:var(--smoke);font-size:0.9rem;
-  background:var(--ink-3);
+  border-top:1px solid rgba(255,255,255,0.08);padding:64px 0 40px;text-align:center;color:rgba(255,255,255,0.65);font-size:0.9rem;
+  background:var(--charcoal);
 }
+footer h4{color:#fff !important;}
+footer a{color:rgba(255,255,255,0.7) !important;}
+footer .logo{color:#fff !important;}
+footer p, footer span{color:rgba(255,255,255,0.6) !important;}
+footer [style*="var(--smoke)"]{color:rgba(255,255,255,0.65) !important;}
+footer [style*="var(--cream)"]{color:#fff !important;}
+footer [style*="border"]{border-color:rgba(255,255,255,0.15) !important;}
+footer a:hover, footer [style*="var(--smoke)"]:hover{color:var(--gold-light) !important;border-color:var(--gold-light) !important;}
 footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 @media(max-width:900px){
@@ -753,30 +793,17 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
-<header class="hero container" id="main-content">
-  <div>
+<header class="hero-banner" id="main-content">
+  <div class="hero-banner-bg" id="heroVisual"></div>
+  <div class="hero-banner-overlay"></div>
+  <div class="hero-banner-content">
     <div class="eyebrow" data-i18n="hero_eyebrow">Monsela — عطورك المفضلة</div>
-    <h1 data-i18n="hero_heading">عطرك اللي<br>يشبهك</h1>
+    <h1 data-i18n="hero_heading">عطرك اللي يشبهك</h1>
     <p class="lead" data-i18n="hero_lead">اكتشف عطورًا مختارة بعناية، واختار الرائحة اللي تناسب ذوقك وشخصيتك.</p>
     <div class="hero-ctas">
       <a href="#gallery" class="btn-primary" data-i18n="nav_shop_now">اكتشف المجموعة</a>
       <a href="#scentFinder" class="btn-ghost" data-i18n="hero_why">اكتشف عطرك</a>
     </div>
-  </div>
-  <div class="hero-visual" id="heroVisual" aria-hidden="true">
-    <svg width="220" height="340" viewBox="0 0 220 340" xmlns="http://www.w3.org/2000/svg" id="heroVisualFallback">
-      <rect x="90" y="10" width="40" height="26" rx="4" fill="#b8985e"/>
-      <rect x="95" y="0" width="30" height="14" rx="3" fill="#a8776b"/>
-      <path d="M70 36 Q70 30 80 30 L140 30 Q150 30 150 36 L150 70 Q170 90 170 130 L170 300 Q170 330 140 330 L80 330 Q50 330 50 300 L50 130 Q50 90 70 70 Z"
-        fill="url(#g1)" stroke="#b8985e" stroke-width="1.5" opacity="0.95"/>
-      <defs>
-        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f2ead9"/>
-          <stop offset="100%" stop-color="#d4bd8e"/>
-        </linearGradient>
-      </defs>
-      <text x="110" y="220" text-anchor="middle" font-family="Aref Ruqaa, serif" font-size="26" fill="#2b2620">Monsela</text>
-    </svg>
   </div>
 </header>
 
@@ -1299,18 +1326,17 @@ renderSkeletonCards();
 
 function updateHeroVisual(){
   const wrap = document.getElementById('heroVisual');
-  if (wrap.querySelector('img')) return; // already swapped in, don't duplicate
+  if (!wrap || wrap.dataset.hasPhoto === '1') return; // already set
   // products are already fetched ordered featured-first, then newest — pick the best real photo
   const candidate = allProducts.find(p => p.image_url);
-  if (!candidate) return; // keep the illustrated placeholder until a real photo exists
-  const fallback = document.getElementById('heroVisualFallback');
-  if (fallback) fallback.remove();
-  const img = document.createElement('img');
-  img.src = candidate.image_url;
-  img.alt = candidate.name;
-  img.fetchPriority = 'high';
-  img.loading = 'eager';
-  wrap.appendChild(img);
+  if (!candidate) return; // keep the elegant gradient placeholder until a real photo exists
+  // Use the product photo as the banner background (cover)
+  wrap.style.backgroundImage = `url("${candidate.image_url}")`;
+  wrap.dataset.hasPhoto = '1';
+  // Preload for faster paint
+  const pre = new Image();
+  pre.fetchPriority = 'high';
+  pre.src = candidate.image_url;
 }
 
 async function loadProducts(){
@@ -1530,12 +1556,12 @@ function renderProducts(){
       </div>
       <!-- Product image -->
       ${p.image_url
-        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:#fafafa;">
+        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);">
             <img src="${p.image_url}" alt="${escapeHTML(localizedField(p,'name'))}" loading="lazy" decoding="async"
               style="width:100%;height:100%;object-fit:cover;transition:transform .5s ease;"
               onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
            </div>`
-        : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:#fafafa;"></div>`}
+        : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"></div>`}
       <!-- Content -->
       <div style="flex:1;display:flex;flex-direction:column;">
         <h3 style="font-size:var(--text-md);margin-bottom:3px;line-height:1.4;font-family:'Aref Ruqaa',serif;">${escapeHTML(localizedField(p,'name'))}</h3>
