@@ -1677,6 +1677,20 @@ async function openProductDetail(productId){
             </div>
             <button class="btn-primary" id="pdAddToCart" style="flex:1;">${translations[currentLang].btn_add_to_cart}</button>
           </div>
+          <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
+            <div style="display:flex;align-items:center;gap:6px;color:var(--smoke);font-size:0.75rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>${currentLang === 'en' ? '100% Authentic' : 'أصلي 100%'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;color:var(--smoke);font-size:0.75rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>${currentLang === 'en' ? 'Secure Payment' : 'دفع آمن'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;color:var(--smoke);font-size:0.75rem;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span>${currentLang === 'en' ? 'Nationwide Delivery' : 'توصيل لكل مصر'}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
