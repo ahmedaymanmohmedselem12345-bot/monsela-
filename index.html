@@ -243,6 +243,22 @@ nav .container{
 .nav-links{display:flex;gap:32px;font-size:0.95rem;}
 .nav-links a{opacity:0.85;transition:opacity .2s;}
 .nav-links a:hover{opacity:1;color:var(--gold);}
+
+/* ── Reference-style navbar ── */
+.nav-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:88px;gap:20px;}
+.nav-links{justify-content:flex-start;gap:26px;font-size:0.82rem;letter-spacing:0.08em;font-weight:500;text-transform:uppercase;}
+.nav-links a{opacity:0.75;color:var(--cream);}
+.nav-links a:hover{opacity:1;color:var(--gold);}
+.logo-link{text-align:center;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.logo{font-family:'Playfair Display','Aref Ruqaa',serif;font-size:2rem;color:var(--cream);letter-spacing:0.02em;line-height:1;font-weight:600;}
+.logo span{color:var(--gold);}
+.logo-sub{font-size:0.6rem;letter-spacing:0.35em;color:var(--smoke);text-transform:uppercase;font-weight:500;}
+.nav-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+.nav-icon-btn{background:none;border:none;color:var(--cream);width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s;position:relative;text-decoration:none;}
+.nav-icon-btn:hover{background:var(--ink-3);color:var(--gold);}
+.nav-lang{font-family:'Cairo';font-size:0.72rem;font-weight:700;letter-spacing:0.05em;width:auto;padding:0 10px;}
+.nav-cart-badge{position:absolute;top:2px;right:2px;background:var(--gold);color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:0.62rem;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:1;}
+.nav-cart-badge.show{display:flex;}
 .nav-cta{
   background:var(--gold);color:var(--cream);
   padding:10px 22px;border-radius:999px;font-weight:700;font-size:0.9rem;
@@ -259,7 +275,7 @@ nav .container{
   background:radial-gradient(ellipse at 75% 30%, rgba(192,133,82,0.18), transparent 60%);
   pointer-events:none;
 }
-.hero h1{font-size:clamp(1.9rem, 6vw, 3.4rem);line-height:1.25;margin:14px 0 20px;}
+.hero h1{font-size:clamp(2.4rem, 7vw, 4.2rem);line-height:1.15;margin:16px 0 22px;font-weight:600;}
 .hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
 
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
@@ -321,7 +337,7 @@ button:active, .btn-primary:active, .btn-ghost:active, .opt:active{transform:sca
   contain-intrinsic-size:auto 500px;
 }
 .section-head{text-align:center;max-width:640px;margin:0 auto 52px;}
-.section-head h2{font-size:clamp(1.5rem, 4.5vw, 2.4rem);margin:12px 0 18px;}
+.section-head h2{font-size:clamp(1.7rem, 4.5vw, 2.6rem);margin:12px 0 18px;letter-spacing:0.03em;font-weight:600;}
 .section-head h2::after{
   content:'';display:block;width:48px;height:2px;margin:18px auto 0;
   background:linear-gradient(90deg, transparent, var(--gold), transparent);
@@ -416,15 +432,19 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   .hero p.lead{margin:0 auto 32px;}
   .hero-ctas{justify-content:center;flex-wrap:wrap;}
   .gallery-grid{grid-template-columns:1fr 1fr;gap:12px;}
+  .nav-inner{grid-template-columns:auto auto auto;height:70px;}
   .nav-links{
-    display:none;position:absolute;top:76px;right:0;left:0;
+    display:none;position:absolute;top:70px;right:0;left:0;
     background:var(--ink-2);flex-direction:column;gap:0;
-    border-bottom:1px solid var(--line);padding:8px 0;
+    border-bottom:1px solid var(--line);padding:8px 0;z-index:60;box-shadow:var(--shadow-md);
   }
   .nav-links.open{display:flex;}
-  .nav-links a{padding:14px 28px;border-bottom:1px solid var(--line);opacity:1;}
-  .nav-cta{display:none;}
+  .nav-links a{padding:14px 28px;border-bottom:1px solid var(--line-soft);opacity:1;}
+  .logo{font-size:1.6rem;}
+  .logo-sub{font-size:0.5rem;}
   #menuToggle{display:flex !important;}
+  /* Hide some icons on mobile to save space (keep cart + menu) */
+  .nav-lang, #trackOrderBtn, #wishlistNavBtn{display:none;}
 }
 
 @media(max-width:640px){
@@ -463,28 +483,45 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <div id="toast-container" aria-live="polite"></div>
 
 <nav>
-  <div class="container">
-    <div class="logo">Mon<span>sela</span></div>
+  <div class="container nav-inner">
+    <!-- Nav links (right side in RTL) -->
     <div class="nav-links" id="navLinks">
-      <a href="#gallery" data-i18n="nav_shop">مجموعتنا</a>
-      <a href="#scentFinder" data-i18n="nav_finder">لاقي عطرك</a>
+      <a href="#gallery" data-i18n="nav_shop">المتجر</a>
+      <a href="#newArrivals" data-i18n="nav_new">وصل حديثًا</a>
+      <a href="#bestSellers" data-i18n="nav_best">الأكثر مبيعًا</a>
+      <a href="#about" data-i18n="nav_about">قصتنا</a>
       <a href="contact.html" data-i18n="nav_contact">تواصل معنا</a>
     </div>
-    <button id="trackOrderBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span data-i18n="nav_track">تتبع طلبك</span>
-    </button>
-    <button id="accountBtn" style="display:flex;align-items:center;gap:6px;background:none;border:1px solid var(--line);color:var(--cream);padding:9px 16px;border-radius:999px;font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin-left:10px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span data-i18n="nav_account">حسابي</span>
-    </button>
-    <a href="#gallery" class="nav-cta" data-i18n="nav_shop_now">تسوق دلوقتي</a>
-    <button id="langSwitchBtn" style="background:none;border:1px solid var(--line);color:var(--cream);padding:9px 14px;border-radius:999px;font-family:'Cairo';font-size:0.8rem;cursor:pointer;margin-left:10px;font-weight:700;">EN</button>
-    <button id="menuToggle" aria-label="القائمة" style="display:none;background:none;border:1px solid var(--line);color:var(--cream);width:42px;height:42px;border-radius:10px;cursor:pointer;align-items:center;justify-content:center;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
+
+    <!-- Centered brand logo -->
+    <a href="#main-content" class="logo-link">
+      <div class="logo">Mon<span>Sela</span></div>
+      <div class="logo-sub" data-i18n="logo_tagline">عطور فاخرة</div>
+    </a>
+
+    <!-- Minimal action icons (left side in RTL) -->
+    <div class="nav-actions">
+      <button id="langSwitchBtn" class="nav-icon-btn nav-lang" aria-label="Language">EN</button>
+      <button id="trackOrderBtn" class="nav-icon-btn" aria-label="تتبع طلبك" title="تتبع طلبك">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+      <button id="accountBtn" class="nav-icon-btn" aria-label="حسابي" title="حسابي">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <a href="#gallery" class="nav-icon-btn" id="wishlistNavBtn" aria-label="المفضلة" title="المفضلة">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+      </a>
+      <button id="navCartBtn" class="nav-icon-btn nav-cart" aria-label="السلة" title="السلة">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <span id="navCartCount" class="nav-cart-badge">0</span>
+      </button>
+      <button id="menuToggle" class="nav-icon-btn" aria-label="القائمة">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
   </div>
 </nav>
+<a href="#gallery" class="nav-cta-hidden" data-i18n="nav_shop_now" style="display:none;">تسوق دلوقتي</a>
 
 <!-- Floating cart button -->
 <button id="cartFab" aria-label="السلة" style="position:fixed;bottom:24px;left:24px;z-index:60;width:58px;height:58px;border-radius:50%;background:var(--gold);color:var(--cream);border:none;box-shadow:0 8px 20px rgba(184,152,94,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;">
@@ -1096,7 +1133,8 @@ function showPriceAlertModal(productId){
 // and will be translated in a follow-up pass — this is a large, ongoing effort by design.
 const translations = {
   ar: {
-    nav_shop: 'مجموعتنا', nav_finder: 'لاقي عطرك', nav_contact: 'تواصل معنا',
+    nav_shop: 'المتجر', nav_finder: 'لاقي عطرك', nav_contact: 'تواصل معنا',
+    nav_new: 'وصل حديثًا', nav_best: 'الأكثر مبيعًا', nav_about: 'قصتنا', logo_tagline: 'عطور فاخرة',
     nav_track: 'تتبع طلبك', nav_account: 'حسابي', nav_shop_now: 'تسوق دلوقتي',
     hero_eyebrow: 'Monsela — عطورك المفضلة',
     hero_heading: 'عطرك اللي<br>يشبهك',
@@ -1133,6 +1171,7 @@ const translations = {
   },
   en: {
     nav_shop: 'Shop', nav_finder: 'Find Your Scent', nav_contact: 'Contact Us',
+    nav_new: 'New Arrivals', nav_best: 'Best Sellers', nav_about: 'Our Story', logo_tagline: 'Luxury Perfumes',
     nav_track: 'Track Order', nav_account: 'My Account', nav_shop_now: 'Shop Now',
     hero_eyebrow: 'Monsela — Your Signature Fragrance',
     hero_heading: 'A Scent That<br>Feels Like You',
@@ -2392,6 +2431,19 @@ function closeCartUI(){
   unlockBodyScroll();
 }
 document.getElementById('cartFab').addEventListener('click', openCart);
+// New navbar cart button
+document.getElementById('navCartBtn').addEventListener('click', openCart);
+// Keep the navbar cart badge in sync
+function syncNavCart(){
+  const count = cart.reduce((s,i)=>s+i.qty,0);
+  const badge = document.getElementById('navCartCount');
+  if (!badge) return;
+  badge.textContent = count;
+  badge.classList.toggle('show', count > 0);
+}
+const _origSaveCartNav = saveCart;
+saveCart = function(){ _origSaveCartNav(); syncNavCart(); };
+syncNavCart();
 document.getElementById('closeCart').addEventListener('click', closeCartUI);
 document.getElementById('cartOverlay').addEventListener('click', closeCartUI);
 document.getElementById('cartEmptyShopBtn').addEventListener('click', closeCartUI);
