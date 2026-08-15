@@ -282,6 +282,39 @@ nav .container{
   pointer-events:none;
 }
 
+/* ── Full-width banner slider ── */
+.hero-slider{position:relative;width:100%;overflow:hidden;margin-bottom:20px;background:var(--ink-3);}
+.hero-slides{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);}
+.hero-slide{min-width:100%;position:relative;}
+.hero-slide-img{width:100%;height:clamp(320px, 46vw, 560px);object-fit:cover;display:block;}
+.hero-slide-caption{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:24px;
+  background:linear-gradient(0deg, rgba(0,0,0,0.25), rgba(0,0,0,0.05));
+}
+.hero-slide-caption h2{color:#fff;font-size:clamp(1.8rem,4vw,3rem);margin-bottom:12px;text-shadow:0 2px 20px rgba(0,0,0,0.4);}
+.hero-slide-caption p{color:rgba(255,255,255,0.95);font-size:clamp(1rem,2vw,1.2rem);margin-bottom:20px;text-shadow:0 2px 12px rgba(0,0,0,0.4);max-width:600px;}
+.hero-slide-caption .btn-primary{background:#fff;color:var(--charcoal);}
+.hero-slide-caption .btn-primary:hover{background:var(--gold);color:#fff;}
+.hero-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:5;
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,0.85);color:var(--charcoal);font-size:1.6rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;transition:background .2s;
+}
+.hero-arrow:hover{background:#fff;}
+.hero-arrow-prev{right:16px;}
+.hero-arrow-next{left:16px;}
+html[dir="ltr"] .hero-arrow-prev{left:16px;right:auto;}
+html[dir="ltr"] .hero-arrow-next{right:16px;left:auto;}
+.hero-dots{position:absolute;bottom:16px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:5;}
+.hero-dots button{width:9px;height:9px;border-radius:50%;border:none;cursor:pointer;background:rgba(255,255,255,0.5);transition:background .2s, width .2s;padding:0;}
+.hero-dots button.active{background:#fff;width:24px;border-radius:5px;}
+@media(max-width:640px){
+  .hero-arrow{width:36px;height:36px;font-size:1.3rem;}
+  .hero-slide-img{height:clamp(240px, 60vw, 360px);}
+}
+
 /* ── Split hero (image left, text right) ── */
 .hero-split{
   display:grid;grid-template-columns:1fr 1fr;gap:0;
@@ -830,6 +863,13 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </div>
 
+<!-- Hero: shows a banner slider if banners exist, otherwise the default split hero -->
+<div id="heroSlider" class="hero-slider" style="display:none;" aria-label="بانرات">
+  <div class="hero-slides" id="heroSlides"></div>
+  <button class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="السابق">‹</button>
+  <button class="hero-arrow hero-arrow-next" id="heroNext" aria-label="التالي">›</button>
+  <div class="hero-dots" id="heroDots"></div>
+</div>
 <header class="hero-split" id="main-content">
   <div class="hero-split-image">
     <div class="hero-product-img" id="heroVisual"></div>
@@ -1385,18 +1425,85 @@ function renderSkeletonCards(count = 8){
 renderSkeletonCards();
 
 async function updateHeroVisual(){
-  const wrap = document.getElementById('heroVisual');
-  if (!wrap || wrap.dataset.hasPhoto === '1') return; // already set
-  // Use the DEDICATED hero banner image from shop settings (NOT a product photo)
-  const { data } = await sb.from('shop_settings').select('hero_image_url').eq('id', 1).maybeSingle();
-  const bannerUrl = data && data.hero_image_url;
-  if (!bannerUrl) return; // keep the elegant gradient placeholder until the owner uploads a banner
-  wrap.style.backgroundImage = `url("${bannerUrl}")`;
-  wrap.dataset.hasPhoto = '1';
-  // Preload for faster paint
-  const pre = new Image();
-  pre.fetchPriority = 'high';
-  pre.src = bannerUrl;
+  // Load active banners; if any exist, show the slider and hide the default split hero
+  const { data: banners } = await sb.from('hero_banners')
+    .select('*').eq('is_active', true).order('sort_order', { ascending: true });
+
+  if (banners && banners.length > 0) {
+    buildHeroSlider(banners);
+    return;
+  }
+  // No banners → keep the default split hero with its gradient placeholder
+}
+
+function buildHeroSlider(banners){
+  const slider = document.getElementById('heroSlider');
+  const splitHero = document.getElementById('main-content');
+  const slidesWrap = document.getElementById('heroSlides');
+  const dotsWrap = document.getElementById('heroDots');
+  if (!slider || !slidesWrap) return;
+
+  // Hide the default split hero, show the slider
+  if (splitHero) splitHero.style.display = 'none';
+  slider.style.display = 'block';
+
+  // Build slides
+  slidesWrap.innerHTML = banners.map(b => {
+    const hasCaption = b.title || b.subtitle || b.button_text;
+    const caption = hasCaption ? `
+      <div class="hero-slide-caption">
+        ${b.title ? `<h2>${escapeHTML(b.title)}</h2>` : ''}
+        ${b.subtitle ? `<p>${escapeHTML(b.subtitle)}</p>` : ''}
+        ${b.button_text ? `<a href="${escapeHTML(b.button_link || '#gallery')}" class="btn-primary">${escapeHTML(b.button_text)}</a>` : ''}
+      </div>` : '';
+    return `<div class="hero-slide"><img src="${b.image_url}" alt="${escapeHTML(b.title || 'Monsela')}" class="hero-slide-img" loading="eager"><a href="${escapeHTML(b.button_link || '#gallery')}" style="position:absolute;inset:0;${hasCaption ? 'z-index:1;' : ''}" aria-label="${escapeHTML(b.title || 'banner')}"></a>${caption}</div>`;
+  }).join('');
+
+  // Dots
+  if (banners.length > 1) {
+    dotsWrap.innerHTML = banners.map((_, i) => `<button class="${i===0?'active':''}" data-idx="${i}" aria-label="صورة ${i+1}"></button>`).join('');
+  } else {
+    dotsWrap.innerHTML = '';
+    document.getElementById('heroPrev').style.display = 'none';
+    document.getElementById('heroNext').style.display = 'none';
+  }
+
+  let current = 0;
+  const total = banners.length;
+  const goTo = (idx) => {
+    current = (idx + total) % total;
+    slidesWrap.style.transform = `translateX(${current * (document.dir === 'rtl' || document.documentElement.dir === 'rtl' ? '' : '-')}${current * 100}%)`;
+    // RTL-aware transform
+    slidesWrap.style.transform = `translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * current * 100}%)`;
+    dotsWrap.querySelectorAll('button').forEach((d, i) => d.classList.toggle('active', i === current));
+  };
+
+  document.getElementById('heroNext').addEventListener('click', () => { goTo(current + 1); resetAuto(); });
+  document.getElementById('heroPrev').addEventListener('click', () => { goTo(current - 1); resetAuto(); });
+  dotsWrap.querySelectorAll('button').forEach(d => d.addEventListener('click', () => { goTo(Number(d.dataset.idx)); resetAuto(); }));
+
+  // Auto-advance
+  let autoTimer = total > 1 ? setInterval(() => goTo(current + 1), 5000) : null;
+  function resetAuto(){ if (autoTimer) { clearInterval(autoTimer); autoTimer = setInterval(() => goTo(current + 1), 5000); } }
+
+  // Touch swipe
+  let startX = 0, startY = 0, swiping = false;
+  slider.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; swiping = true; }, { passive: true });
+  slider.addEventListener('touchend', (e) => {
+    if (!swiping) return;
+    swiping = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      // In RTL, swipe direction is inverted
+      const rtl = document.documentElement.dir === 'rtl';
+      if (dx < 0) goTo(current + (rtl ? -1 : 1));
+      else goTo(current + (rtl ? 1 : -1));
+      resetAuto();
+    }
+  }, { passive: true });
+
+  goTo(0);
 }
 
 async function loadProducts(){
