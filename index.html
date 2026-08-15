@@ -1191,6 +1191,14 @@ function escapeHTML(str){
   return div.innerHTML;
 }
 
+// Format prices with thousands separators (e.g. 199999 -> 199,999)
+function formatPrice(value){
+  if (value === null || value === undefined || value === '') return '';
+  const num = Number(value);
+  if (isNaN(num)) return value;
+  return num.toLocaleString('en-US');
+}
+
 // ===== Toast notifications (replaces all browser alert/prompt dialogs) =====
 function toast(msg, type = 'info', duration = 4000){
   const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
@@ -1696,8 +1704,9 @@ function renderProducts(){
     const price = hasVariants ? firstVariant.price : p.price;
     const stock = hasVariants ? firstVariant.stock : (p.stock ?? 0);
     const outOfStock = (stock ?? 0) <= 0;
-    const hasDiscount = p.original_price && p.original_price > price;
-    const discountPct = hasDiscount ? Math.round((1 - price / p.original_price) * 100) : 0;
+    const rawHasDiscount = p.original_price && p.original_price > price;
+    const discountPct = rawHasDiscount ? Math.round((1 - price / p.original_price) * 100) : 0;
+    const hasDiscount = rawHasDiscount && discountPct >= 1;
     const isNew = p.created_at && (Date.now() - new Date(p.created_at).getTime()) < 14 * 24 * 60 * 60 * 1000;
     const inWishlist = wishlist.includes(p.id);
     const displayPrice = hasVariants ? Math.min(...p.variants.map(v=>v.price)) : p.price;
@@ -1738,7 +1747,7 @@ function renderProducts(){
             <span style="color:var(--gold);font-size:var(--text-sm);letter-spacing:1px;">${'★'.repeat(Math.round(productRatings[p.id].avg))}${'☆'.repeat(5 - Math.round(productRatings[p.id].avg))}</span>
             <span style="color:var(--smoke);font-size:var(--text-xs);">${productRatings[p.id].avg.toFixed(1)} (${productRatings[p.id].count})</span>
           </div>` : ''}
-        ${p.notes ? `<p style="font-size:var(--text-sm);color:var(--smoke);margin-bottom:10px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHTML(p.notes)}</p>` : ''}
+        ${p.notes ? `<p style="font-size:var(--text-sm);color:var(--smoke);margin-bottom:10px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHTML(p.notes).replace(/[،,]/g, ' • ')}</p>` : ''}
         <!-- Bottle colors -->
         ${Array.isArray(p.bottle_colors) && p.bottle_colors.length ? `
           <div style="display:flex;gap:6px;margin-bottom:10px;align-items:center;">
@@ -1750,18 +1759,18 @@ function renderProducts(){
         <!-- Price -->
         <div style="margin-bottom:12px;">
           ${hasVariants
-            ? `<span style="font-size:var(--text-lg);font-weight:700;color:var(--gold);">من ${displayPrice} جنيه</span>`
+            ? `<span style="font-size:var(--text-lg);font-weight:700;color:var(--gold);">من ${formatPrice(displayPrice)} جنيه</span>`
             : p.price
               ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                  <span style="font-size:var(--text-lg);font-weight:700;color:var(--gold);">${p.price} جنيه</span>
-                  ${hasDiscount ? `<span style="font-size:var(--text-sm);color:var(--smoke);text-decoration:line-through;">${p.original_price} جنيه</span>` : ''}
+                  <span style="font-size:var(--text-lg);font-weight:700;color:var(--gold);">${formatPrice(p.price)} جنيه</span>
+                  ${hasDiscount ? `<span style="font-size:var(--text-sm);color:var(--smoke);text-decoration:line-through;">${formatPrice(p.original_price)} جنيه</span>` : ''}
                  </div>`
               : ''}
         </div>
         <!-- Variant select -->
         ${hasVariants ? `
           <select class="opt variant-select" data-id="${p.id}" style="width:100%;margin-bottom:10px;font-size:var(--text-sm);">
-            ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+            ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${formatPrice(v.price)} جنيه</option>`).join('')}
           </select>` : ''}
         <!-- Stock badge -->
         ${stockBadgeHTML(stock, p.id)}
@@ -1936,8 +1945,8 @@ async function openProductDetail(productId){
           </div>` : ''}
         <p style="margin-bottom:14px;">
           ${hasDiscount ? `<span style="background:var(--rose);color:var(--cream);font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;margin-left:8px;">-${Math.round((1 - p.price / p.original_price) * 100)}%</span>` : ''}
-          <span style="color:var(--gold);font-weight:700;font-size:1.3rem;">${p.price ? p.price + ' جنيه' : ''}</span>
-          ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.9rem;margin-right:8px;">${p.original_price} جنيه</span>` : ''}
+          <span style="color:var(--gold);font-weight:700;font-size:1.3rem;">${p.price ? formatPrice(p.price) + ' جنيه' : ''}</span>
+          ${hasDiscount ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.9rem;margin-right:8px;">${formatPrice(p.original_price)} جنيه</span>` : ''}
         </p>
 
         <div id="pdPurchaseBox">
@@ -1951,7 +1960,7 @@ async function openProductDetail(productId){
           ` : ''}
           ${hasVariants ? `
             <select class="opt" id="pdVariantSelect" style="width:100%;margin-bottom:14px;">
-              ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${v.price} جنيه</option>`).join('')}
+              ${p.variants.map((v,i) => `<option value="${i}">${v.label} — ${formatPrice(v.price)} جنيه</option>`).join('')}
             </select>
           ` : ''}
           <div id="pdStockBadge" style="margin-bottom:12px;"></div>
@@ -2207,7 +2216,7 @@ async function loadBestSellers(){
       ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
       <h3>${localizedField(p,'name')}</h3>
       <p>${p.notes || ''}</p>
-      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
+      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${formatPrice(p.price)} جنيه</p>` : ''}
       <button class="btn-ghost view-details-bs" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
     </div>
   `).join('');
@@ -2273,7 +2282,7 @@ async function loadNewArrivals(){
     <div class="perfume-card">
       ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
       <h3>${localizedField(p,'name')}</h3>
-      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
+      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${formatPrice(p.price)} جنيه</p>` : ''}
       <button class="btn-ghost view-details-new" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
     </div>
   `).join('');
@@ -2334,7 +2343,7 @@ document.getElementById('sfSubmit').addEventListener('click', ()=>{
         <div class="perfume-card">
           ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
           <h3>${localizedField(p,'name')}</h3>
-          ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
+          ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${formatPrice(p.price)} جنيه</p>` : ''}
           <button class="btn-ghost sf-view-details" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
         </div>
       `).join('')}
@@ -2378,7 +2387,7 @@ function renderWishlistInAccount(){
   actionsEl.style.display = 'flex';
   el.innerHTML = items.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:10px 0;font-size:0.85rem;">
-      <span>${p.name} ${p.price ? '— ' + p.price + ' جنيه' : ''}</span>
+      <span>${p.name} ${p.price ? '— ' + formatPrice(p.price) + ' جنيه' : ''}</span>
       <button class="btn-ghost wishlist-view" data-id="${p.id}" style="padding:6px 12px;font-size:0.8rem;">شوف المنتج</button>
     </div>
   `).join('');
@@ -2414,7 +2423,7 @@ document.getElementById('compareNowBtn').addEventListener('click', ()=>{
   if (products.length < 2) { toast('اختار منتجين على الأقل عشان تقارن.','info'); return; }
   const rows = [
     ['', ...products.map(p => p.name)],
-    ['السعر', ...products.map(p => p.price ? p.price + ' جنيه' : '—')],
+    ['السعر', ...products.map(p => p.price ? formatPrice(p.price) + ' جنيه' : '—')],
     ['التصنيف', ...products.map(p => p.tag || '—')],
     ['النوتات', ...products.map(p => p.notes || '—')],
     ['المخزون', ...products.map(p => (p.stock ?? 0) > 0 ? 'متوفر' : 'خلص')]
@@ -2459,7 +2468,7 @@ async function loadRecentlyViewed(){
     <div class="perfume-card">
       ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
       <h3>${localizedField(p,'name')}</h3>
-      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${p.price} جنيه</p>` : ''}
+      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${formatPrice(p.price)} جنيه</p>` : ''}
       <button class="btn-ghost view-details-rv" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
     </div>
   `).join('');
@@ -2594,7 +2603,7 @@ function renderCartUI(){
     </div>
   `).join('');
 
-  document.getElementById('cartTotal').textContent = cart.reduce((s,i)=>s+i.price*i.qty,0) + ' جنيه';
+  document.getElementById('cartTotal').textContent = formatPrice(cart.reduce((s,i)=>s+i.price*i.qty,0)) + ' جنيه';
 
   itemsEl.querySelectorAll('.cart-minus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,-1)));
   itemsEl.querySelectorAll('.cart-plus').forEach(b=>b.addEventListener('click', ()=>changeCartQty(b.dataset.key,1)));
@@ -3077,7 +3086,7 @@ document.getElementById('wishlistPrintBtn').addEventListener('click', ()=>{
     <html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>قائمة أمنياتي - Monsela</title>
     <style>body{font-family:Arial;padding:40px;} h1{color:#8f7240;} li{margin-bottom:10px;font-size:16px;}</style></head>
     <body><h1>قائمة أمنياتي - Monsela</h1><ul>
-    ${items.map(p => `<li>${p.name} ${p.price ? '— ' + p.price + ' جنيه' : ''}</li>`).join('')}
+    ${items.map(p => `<li>${p.name} ${p.price ? '— ' + formatPrice(p.price) + ' جنيه' : ''}</li>`).join('')}
     </ul></body></html>
   `);
   win.document.close();
