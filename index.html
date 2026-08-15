@@ -787,12 +787,17 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <button id="applyCouponBtn" class="btn-ghost" type="button" style="padding:0 18px;" data-i18n="btn_apply">تطبيق</button>
     </div>
     <div id="couponStatus" style="font-size:0.8rem;margin-bottom:14px;"></div>
-    <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <input type="checkbox" id="checkoutGift" style="width:auto;margin:0;"> <span data-i18n="field_gift">ده هدية؟ (تغليف خاص + رسالة)</span>
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <input type="checkbox" id="checkoutGift" style="width:auto;margin:0;"> <span data-i18n="field_gift">🎁 ده هدية؟ (تغليف خاص + رسالة)</span>
     </label>
-    <textarea id="checkoutGiftMessage" placeholder="اكتب رسالة الإهداء هنا..." style="display:none;width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+    <div id="giftBox" style="display:none;background:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;">
+      <label style="display:block;font-weight:600;margin-bottom:6px;font-size:0.88rem;">اسم اللي هيستلم الهدية (اختياري)</label>
+      <input type="text" id="checkoutGiftRecipient" placeholder="مثال: أحمد" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:11px 14px;border-radius:8px;font-family:'Cairo';">
+      <label style="display:block;font-weight:600;margin-bottom:6px;font-size:0.88rem;">رسالة الإهداء (هتتكتب في الكارت)</label>
+      <textarea id="checkoutGiftMessage" placeholder="اكتب رسالة الإهداء هنا..." style="width:100%;min-height:60px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:11px 14px;border-radius:8px;font-family:'Cairo';resize:vertical;"></textarea>
+    </div>
     <label for="checkoutNotes" style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_notes">عندك ملاحظة على طلبك؟</label>
-    <textarea id="checkoutNotes" placeholder="مثال: يريت التغليف يبقى هدية" style="width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
+    <textarea id="checkoutNotes" placeholder="مثال: يريت التوصيل بعد الظهر" style="width:100%;min-height:50px;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
 
     <label style="display:block;font-weight:700;margin-bottom:8px;"><span data-i18n="field_payment_method">طريقة الدفع</span> <span style="color:var(--rose);">*</span></label>
     <div class="option-row" id="paymentMethodOptions" style="margin-bottom:16px;">
@@ -2841,7 +2846,7 @@ document.getElementById('checkoutBtn').addEventListener('click', async ()=>{
   updatePaymentDetailsText();
 });
 document.getElementById('checkoutGift').addEventListener('change', (e)=>{
-  document.getElementById('checkoutGiftMessage').style.display = e.target.checked ? 'block' : 'none';
+  document.getElementById('giftBox').style.display = e.target.checked ? 'block' : 'none';
 });
 document.getElementById('cancelCheckout').addEventListener('click', ()=>{
   document.getElementById('checkoutOverlay').style.display = 'none';
@@ -2937,7 +2942,13 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     p_delivery_zone: zone ? zone.name : null,
     p_delivery_fee: deliveryFee,
     p_is_gift: document.getElementById('checkoutGift').checked,
-    p_gift_message: document.getElementById('checkoutGift').checked ? (document.getElementById('checkoutGiftMessage').value.trim() || null) : null,
+    p_gift_message: (function(){
+      if (!document.getElementById('checkoutGift').checked) return null;
+      const recipient = document.getElementById('checkoutGiftRecipient').value.trim();
+      const msg = document.getElementById('checkoutGiftMessage').value.trim();
+      if (!recipient && !msg) return null;
+      return (recipient ? 'إلى: ' + recipient : '') + (recipient && msg ? ' — ' : '') + (msg || '');
+    })(),
     p_payment_method: selectedPaymentMethod,
     p_payment_status: selectedPaymentMethod === 'cod' ? 'cod' : 'pending_verification',
     p_payment_transaction_id: selectedPaymentMethod !== 'cod' ? document.getElementById('paymentTransactionId').value.trim() : null,
@@ -2971,9 +2982,11 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     return;
   }
 
-  const itemsList = cart.map(i => `- ${i.name} × ${i.qty} (${i.price * i.qty} جنيه)`).join('%0a');
+  const itemsList = cart.map(i => `- ${i.name} × ${i.qty} (${formatPrice(i.price * i.qty)} جنيه)`).join('%0a');
   const isGift = document.getElementById('checkoutGift').checked;
-  const giftMsg = document.getElementById('checkoutGiftMessage').value.trim();
+  const giftRecipient = document.getElementById('checkoutGiftRecipient').value.trim();
+  const giftMsgRaw = document.getElementById('checkoutGiftMessage').value.trim();
+  const giftMsg = (giftRecipient ? 'إلى ' + giftRecipient : '') + (giftRecipient && giftMsgRaw ? ' — ' : '') + (giftMsgRaw || '');
   const payMethodLabel = selectedPaymentMethod === 'vodafone_cash' ? 'فودافون كاش' : selectedPaymentMethod === 'instapay' ? 'InstaPay' : 'كاش عند الاستلام';
   const orderNumText = insertedOrder && insertedOrder.order_number ? `رقم الطلب: ${insertedOrder.order_number}%0a` : '';
   const msg = `مرحبا Monsela! عايز أأكد طلبي:%0a${orderNumText}${itemsList}%0aالمنتجات: ${subtotal} جنيه` +
@@ -2997,7 +3010,8 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   document.getElementById('checkoutNotes').value = '';
   document.getElementById('checkoutGift').checked = false;
   document.getElementById('checkoutGiftMessage').value = '';
-  document.getElementById('checkoutGiftMessage').style.display = 'none';
+  document.getElementById('checkoutGiftRecipient').value = '';
+  document.getElementById('giftBox').style.display = 'none';
   document.getElementById('paymentTransactionId').value = '';
   document.getElementById('paymentAmountPaid').value = '';
   document.getElementById('paymentProofFile').value = '';
