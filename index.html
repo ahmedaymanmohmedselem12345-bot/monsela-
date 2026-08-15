@@ -806,6 +806,14 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <button type="button" class="opt payment-method-opt" data-method="instapay">InstaPay</button>
     </div>
 
+    <div id="codReassure" style="display:flex;align-items:center;gap:10px;background:rgba(95,125,82,0.1);border:1px solid rgba(95,125,82,0.3);border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <div>
+        <div style="font-weight:700;font-size:0.9rem;color:var(--success);">تدفع بس لما توصلك الطلب في إيدك</div>
+        <div style="font-size:0.78rem;color:var(--smoke);">اطمّن — تشوف طلبك وتستلمه الأول، وبعدين تدفع. مفيش أي مخاطرة.</div>
+      </div>
+    </div>
+
     <div id="manualPaymentBox" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;">
       <p id="paymentDetailsText" style="font-size:0.85rem;color:var(--gold-dark);margin-bottom:12px;"></p>
       <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;" data-i18n="field_transaction_id">رقم العملية / المرجع</label>
@@ -2808,6 +2816,8 @@ async function loadPaymentSettingsForCheckout(){
 function updatePaymentDetailsText(){
   const box = document.getElementById('manualPaymentBox');
   const textEl = document.getElementById('paymentDetailsText');
+  const codReassure = document.getElementById('codReassure');
+  if (codReassure) codReassure.style.display = (selectedPaymentMethod === 'cod') ? 'flex' : 'none';
   if (selectedPaymentMethod === 'cod') { box.style.display = 'none'; return; }
   box.style.display = 'block';
   const s = paymentSettings || {};
