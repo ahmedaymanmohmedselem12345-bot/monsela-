@@ -2073,17 +2073,38 @@ async function openProductDetail(productId){
     </details>
   `;
 
-  const profileRows = [
-    ['نوتة علوية', p.top_notes], ['نوتة قلب', p.heart_notes], ['نوتة قاعدية', p.base_notes],
-    ['العائلة', p.fragrance_family], ['الثبات', p.longevity], ['الانتشار', p.projection],
+  // Fragrance notes (the pyramid) — shown prominently
+  const notesRows = [
+    ['نوتات علوية', p.top_notes], ['نوتات القلب', p.heart_notes], ['نوتات القاعدة', p.base_notes]
+  ].filter(([,v]) => v);
+  // Other attributes
+  const attrRows = [
+    ['العائلة العطرية', p.fragrance_family], ['الثبات', p.longevity], ['الانتشار', p.projection],
     ['الموسم', p.season], ['المناسبة', p.occasion], ['التركيز', p.concentration], ['بلد المنشأ', p.origin_country]
   ].filter(([,v]) => v);
   const profileEl = document.getElementById('pdFragranceProfile');
-  if (profileRows.length > 0) {
+  if (notesRows.length > 0 || attrRows.length > 0) {
     profileEl.style.display = 'block';
-    profileEl.innerHTML = profileRows.map(([label, val]) =>
-      `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);"><span style="color:var(--smoke);">${label}</span><span>${escapeHTML(val)}</span></div>`
-    ).join('');
+    let html = '';
+    if (notesRows.length > 0) {
+      html += `<div style="margin-bottom:${attrRows.length ? '18px' : '0'};">
+        <h4 style="font-family:'Aref Ruqaa',serif;font-size:1.05rem;margin-bottom:10px;color:var(--gold-dark);">🌸 هرم الروائح</h4>
+        ${notesRows.map(([label, val]) => `
+          <div style="margin-bottom:8px;">
+            <span style="font-size:0.75rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.03em;">${label}</span>
+            <div style="font-size:0.92rem;color:var(--cream);margin-top:2px;">${escapeHTML(val).replace(/[،,]/g, ' • ')}</div>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+    if (attrRows.length > 0) {
+      html += `<div style="background:var(--ink-3);border-radius:12px;padding:14px 16px;">
+        ${attrRows.map(([label, val]) =>
+          `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);"><span style="color:var(--smoke);font-size:0.85rem;">${label}</span><span style="font-size:0.88rem;font-weight:600;">${escapeHTML(val)}</span></div>`
+        ).join('')}
+      </div>`;
+    }
+    profileEl.innerHTML = html;
   } else {
     profileEl.style.display = 'none';
   }
