@@ -283,7 +283,7 @@ nav .container{
 }
 
 /* ── Full-width banner slider ── */
-.hero-slider{position:relative;width:100%;overflow:hidden;margin-bottom:20px;background:var(--ink-3);}
+.hero-slider{position:relative;width:100%;overflow:hidden;margin-bottom:20px;background:var(--charcoal);}
 .hero-slides{position:relative;}
 .hero-slide{
   position:absolute;top:0;left:0;width:100%;
@@ -291,7 +291,7 @@ nav .container{
   pointer-events:none;
 }
 .hero-slide.active{opacity:1;pointer-events:auto;position:relative;}
-.hero-slide-img{width:100%;height:50vh;min-height:280px;object-fit:cover;display:block;}
+.hero-slide-img{width:100%;height:auto;max-height:75vh;object-fit:contain;display:block;margin:0 auto;}
 .hero-slide-caption{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:24px;
@@ -315,7 +315,7 @@ html[dir="ltr"] .hero-arrow-next{right:16px;left:auto;}
 .hero-dots{display:none !important;}
 @media(max-width:640px){
   .hero-arrow{width:36px;height:36px;font-size:1.3rem;}
-  .hero-slide-img{height:45vh;min-height:220px;}
+  .hero-slide-img{max-height:60vh;}
 }
 
 /* ── Split hero (image left, text right) ── */
