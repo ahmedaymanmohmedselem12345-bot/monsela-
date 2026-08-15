@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
   --ink:#faf7f2; --ink-2:#ffffff; --ink-3:#f4ede1;
@@ -416,6 +417,20 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     <div class="card" data-tab="customers">
       <h2>مراجعات العملاء (تحتاج موافقتك)</h2>
       <div id="reviewsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- QR Code Modal -->
+<div id="qrModal" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.6);z-index:200;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border-radius:18px;padding:28px;max-width:360px;width:100%;text-align:center;box-shadow:var(--shadow-lg);">
+    <h3 id="qrProductName" style="font-family:'Aref Ruqaa',serif;font-size:1.2rem;margin-bottom:6px;"></h3>
+    <p style="color:var(--smoke);font-size:0.8rem;margin-bottom:18px;">العميل يمسح الكود ده يروح لصفحة المنتج مباشرة</p>
+    <div id="qrCanvas" style="display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px;margin-bottom:20px;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn" id="qrDownloadBtn" style="font-size:0.85rem;">⬇ تحميل</button>
+      <button class="btn" id="qrPrintBtn" style="font-size:0.85rem;">🖨 طباعة</button>
+      <button class="btn btn-ghost" id="qrCloseBtn" style="font-size:0.85rem;">إغلاق</button>
     </div>
   </div>
 </div>
@@ -1291,6 +1306,7 @@ async function loadProductsList(){
       </div>
       <div class="actions">
         <button class="btn btn-ghost" data-edit="${p.id}">تعديل</button>
+        <button class="btn btn-ghost" data-qr="${p.id}" data-name="${escapeHTMLAdmin(p.name)}" style="border-color:var(--gold);color:var(--gold-dark);">QR</button>
         <button class="btn btn-danger" data-delete="${p.id}">حذف</button>
       </div>
     </div>
@@ -1298,6 +1314,9 @@ async function loadProductsList(){
 
   listEl.querySelectorAll('[data-edit]').forEach(btn=>{
     btn.addEventListener('click', ()=> editProduct(data.find(p => p.id === btn.dataset.edit)));
+  });
+  listEl.querySelectorAll('[data-qr]').forEach(btn=>{
+    btn.addEventListener('click', ()=> showProductQR(btn.dataset.qr, btn.dataset.name));
   });
   listEl.querySelectorAll('[data-delete]').forEach(btn=>{
     btn.addEventListener('click', ()=> deleteProduct(btn.dataset.delete));
@@ -1619,6 +1638,82 @@ async function loadZones(){
     });
   });
 }
+
+// ===== QR Code for products =====
+const SITE_URL = 'https://monsela-xi.vercel.app/index.html';
+let currentQRProductName = '';
+
+function showProductQR(productId, productName){
+  if (typeof QRCode === 'undefined') {
+    alert('مكتبة الـ QR لسه بتحمّل أو النت ضعيف. حاول تاني بعد ثانية، أو اعمل تحديث للصفحة.');
+    return;
+  }
+  currentQRProductName = productName || 'منتج';
+  document.getElementById('qrProductName').textContent = productName || '';
+  const container = document.getElementById('qrCanvas');
+  container.innerHTML = ''; // clear previous
+  const productUrl = `${SITE_URL}?product=${productId}`;
+  // Generate QR (qrcodejs renders into the container)
+  new QRCode(container, {
+    text: productUrl,
+    width: 220,
+    height: 220,
+    colorDark: '#241f1a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  document.getElementById('qrModal').style.display = 'flex';
+}
+window.showProductQR = showProductQR;
+
+// Get the QR image as a data URL (qrcodejs makes a <canvas> or <img>)
+function getQRDataUrl(){
+  const container = document.getElementById('qrCanvas');
+  const canvas = container.querySelector('canvas');
+  if (canvas) return canvas.toDataURL('image/png');
+  const img = container.querySelector('img');
+  if (img && img.src) return img.src;
+  return null;
+}
+
+document.getElementById('qrDownloadBtn').addEventListener('click', ()=>{
+  const dataUrl = getQRDataUrl();
+  if (!dataUrl) { alert('استنى الكود يتحمّل الأول.'); return; }
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `QR-${currentQRProductName.replace(/[^\u0600-\u06FF\w]+/g, '-')}.png`;
+  a.click();
+});
+
+document.getElementById('qrPrintBtn').addEventListener('click', ()=>{
+  const dataUrl = getQRDataUrl();
+  if (!dataUrl) { alert('استنى الكود يتحمّل الأول.'); return; }
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>طباعة QR - ${currentQRProductName}</title>
+    <style>
+      body{font-family:Arial;text-align:center;padding:40px;}
+      h2{color:#8f7240;margin-bottom:8px;}
+      p{color:#666;font-size:14px;margin-bottom:20px;}
+      img{width:300px;height:300px;border:1px solid #eee;padding:10px;}
+    </style></head>
+    <body>
+      <h2>Monsela</h2>
+      <p>${currentQRProductName}</p>
+      <img src="${dataUrl}">
+      <p style="margin-top:20px;font-size:12px;">امسح الكود لعرض المنتج</p>
+    </body></html>
+  `);
+  win.document.close();
+  setTimeout(()=>{ win.print(); }, 300);
+});
+
+document.getElementById('qrCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('qrModal').style.display = 'none';
+});
+document.getElementById('qrModal').addEventListener('click', (e)=>{
+  if (e.target.id === 'qrModal') document.getElementById('qrModal').style.display = 'none';
+});
 </script>
 </body>
 </html>
