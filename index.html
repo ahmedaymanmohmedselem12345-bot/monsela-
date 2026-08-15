@@ -286,7 +286,7 @@ nav .container{
 .hero-slider{position:relative;width:100%;overflow:hidden;margin-bottom:20px;background:var(--ink-3);}
 .hero-slides{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);}
 .hero-slide{min-width:100%;position:relative;}
-.hero-slide-img{width:100%;height:clamp(320px, 46vw, 560px);object-fit:cover;display:block;}
+.hero-slide-img{width:100%;height:50vh;min-height:280px;object-fit:cover;display:block;}
 .hero-slide-caption{
   position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:24px;
@@ -312,7 +312,7 @@ html[dir="ltr"] .hero-arrow-next{right:16px;left:auto;}
 .hero-dots button.active{background:#fff;width:24px;border-radius:5px;}
 @media(max-width:640px){
   .hero-arrow{width:36px;height:36px;font-size:1.3rem;}
-  .hero-slide-img{height:clamp(240px, 60vw, 360px);}
+  .hero-slide-img{height:45vh;min-height:220px;}
 }
 
 /* ── Split hero (image left, text right) ── */
@@ -1503,9 +1503,9 @@ function buildHeroSlider(banners){
   const total = banners.length;
   const goTo = (idx) => {
     current = (idx + total) % total;
-    slidesWrap.style.transform = `translateX(${current * (document.dir === 'rtl' || document.documentElement.dir === 'rtl' ? '' : '-')}${current * 100}%)`;
-    // RTL-aware transform
-    slidesWrap.style.transform = `translateX(${(document.documentElement.dir === 'rtl' ? 1 : -1) * current * 100}%)`;
+    // RTL-aware slide transform
+    const rtl = document.documentElement.dir === 'rtl';
+    slidesWrap.style.transform = `translateX(${(rtl ? 1 : -1) * current * 100}%)`;
     dotsWrap.querySelectorAll('button').forEach((d, i) => d.classList.toggle('active', i === current));
   };
 
