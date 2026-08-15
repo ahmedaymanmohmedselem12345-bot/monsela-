@@ -1503,7 +1503,7 @@ function buildHeroSlider(banners){
         ${b.subtitle ? `<p>${escapeHTML(b.subtitle)}</p>` : ''}
         ${b.button_text ? `<a href="${escapeHTML(b.button_link || '#gallery')}" class="btn-primary">${escapeHTML(b.button_text)}</a>` : ''}
       </div>` : '';
-    return `<div class="hero-slide${idx === 0 ? ' active' : ''}"><img src="${b.image_url}" alt="${escapeHTML(b.title || 'Monsela')}" class="hero-slide-img" loading="eager"><a href="${escapeHTML(b.button_link || '#gallery')}" style="position:absolute;inset:0;${hasCaption ? 'z-index:1;' : ''}" aria-label="${escapeHTML(b.title || 'banner')}"></a>${caption}</div>`;
+    return `<div class="hero-slide${idx === 0 ? ' active' : ''}"><img src="${b.image_url}" alt="${escapeHTML(b.title || 'Monsela')}" class="hero-slide-img" loading="eager"${idx === 0 ? ' fetchpriority="high"' : ''}><a href="${escapeHTML(b.button_link || '#gallery')}" style="position:absolute;inset:0;${hasCaption ? 'z-index:1;' : ''}" aria-label="${escapeHTML(b.title || 'banner')}"></a>${caption}</div>`;
   }).join('');
 
   // Dots
