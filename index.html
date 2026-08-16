@@ -59,7 +59,7 @@
 <link rel="preconnect" href="https://oujdveezelfokelyptza.supabase.co">
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://api.qrserver.com">
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&family=Markazi+Text:wght@500;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -210,7 +210,8 @@ h1,h2,h3,.display{
   line-height:1.3;
 }
 .eyebrow{
-  font-family:'Markazi Text',serif;
+  font-family:'Cairo',sans-serif;
+  font-weight:600;
   letter-spacing:var(--ls-wider);
   color:var(--gold);
   font-size:0.95rem;
@@ -656,6 +657,12 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 <style>a[href="#main-content"]:focus{right:0;}</style>
 
 <div id="toast-container" aria-live="polite"></div>
+
+<!-- Announcement bar (admin controlled) -->
+<div id="announcementBar" style="display:none;background:linear-gradient(90deg,var(--gold-dark),var(--gold));color:#fff;text-align:center;padding:9px 40px;font-size:0.85rem;font-weight:600;position:relative;">
+  <span id="announcementText"></span>
+  <button id="announcementClose" aria-label="إغلاق" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;opacity:0.8;">×</button>
+</div>
 
 <nav>
   <div class="container nav-inner">
@@ -1277,6 +1284,20 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   </div>
 </section>
 
+<!-- Welcome offer modal (first visit) -->
+<div id="welcomeOfferModal" style="display:none;position:fixed;inset:0;background:rgba(36,31,26,0.65);z-index:180;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--ink-2);border:1px solid var(--gold);border-radius:20px;padding:36px 28px;max-width:400px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <button id="welcomeOfferClose" aria-label="إغلاق" style="position:absolute;left:16px;top:16px;background:var(--ink-3);border:none;color:var(--cream);width:34px;height:34px;border-radius:50%;font-size:1.1rem;cursor:pointer;">×</button>
+    <div style="font-size:3rem;margin-bottom:12px;">🎁</div>
+    <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.6rem;margin-bottom:10px;">أهلاً بيك في Monsela!</h3>
+    <p style="color:var(--smoke);font-size:0.92rem;margin-bottom:18px;line-height:1.7;">أول طلب ليك معانا، استخدم الكود ده واحصل على خصم:</p>
+    <div style="background:var(--ink-3);border:2px dashed var(--gold);border-radius:12px;padding:14px;margin-bottom:20px;">
+      <span id="welcomeOfferCode" style="font-size:1.4rem;font-weight:800;color:var(--gold);letter-spacing:2px;">WELCOME10</span>
+    </div>
+    <button id="welcomeOfferShop" class="btn-primary" style="width:100%;">ابدأ التسوق</button>
+  </div>
+</div>
+
 <footer id="contact">
   <div class="container">
     <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px;border-bottom:1px solid var(--line);text-align:right;">
@@ -1382,6 +1403,22 @@ function openWhatsAppMessage(message){
 document.getElementById('footerWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}`;
 const floatWa = document.getElementById('floatingWhatsApp');
 if (floatWa) floatWa.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('مرحبا Monsela! 👋 عايز أستفسر عن منتجاتكم')}`;
+
+// Announcement bar
+sb.from('shop_settings').select('announcement_text, announcement_active').eq('id', 1).maybeSingle().then(({ data }) => {
+  if (data && data.announcement_active && data.announcement_text) {
+    // Don't show if user dismissed this exact message
+    const dismissed = localStorage.getItem('monsela_announce_dismissed');
+    if (dismissed === data.announcement_text) return;
+    const bar = document.getElementById('announcementBar');
+    document.getElementById('announcementText').textContent = data.announcement_text;
+    bar.style.display = 'block';
+    document.getElementById('announcementClose').addEventListener('click', ()=>{
+      bar.style.display = 'none';
+      localStorage.setItem('monsela_announce_dismissed', data.announcement_text);
+    });
+  }
+});
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Escape any user-controlled text before putting it into innerHTML, so a customer
@@ -4173,7 +4210,32 @@ sb.auth.getSession().then(({ data }) => {
   if (data.session) {
     refreshAccountView();
   } else {
-    startAccountNudges();
+    // Welcome offer modal on very first visit (once ever)
+    const seenWelcome = localStorage.getItem('monsela_welcome_offer_seen');
+    if (!seenWelcome) {
+      // Try to fetch a real active coupon to show
+      sb.from('coupons').select('code').eq('active', true).limit(1).maybeSingle().then(({ data: coupon }) => {
+        const modal = document.getElementById('welcomeOfferModal');
+        if (!modal) { startAccountNudges(); return; }
+        if (coupon && coupon.code) {
+          document.getElementById('welcomeOfferCode').textContent = coupon.code;
+        }
+        setTimeout(() => {
+          modal.style.display = 'flex';
+          localStorage.setItem('monsela_welcome_offer_seen', '1');
+        }, 2500);
+        const closeModal = () => { modal.style.display = 'none'; startAccountNudges(); };
+        document.getElementById('welcomeOfferClose').addEventListener('click', closeModal);
+        document.getElementById('welcomeOfferShop').addEventListener('click', () => {
+          modal.style.display = 'none';
+          document.getElementById('gallery').scrollIntoView({ behavior: 'smooth' });
+          startAccountNudges();
+        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+      });
+    } else {
+      startAccountNudges();
+    }
   }
 });
 

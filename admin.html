@@ -301,6 +301,16 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <input type="number" id="giftWrapPrice" placeholder="50">
 
       <div style="background:var(--ink-3);border-radius:12px;padding:16px;margin-top:16px;">
+        <h3 style="font-size:1rem;margin-bottom:6px;">📢 شريط الإعلان (أعلى الموقع)</h3>
+        <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:12px;">شريط بيظهر فوق الموقع خالص — مناسب لإعلان عرض أو شحن مجاني.</p>
+        <label>نص الإعلان</label>
+        <input type="text" id="announcementTextInput" placeholder="🚚 شحن مجاني للطلبات فوق 1000 جنيه">
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;">
+          <input type="checkbox" id="announcementActiveInput" style="width:auto;"> فعّل شريط الإعلان
+        </label>
+      </div>
+
+      <div style="background:var(--ink-3);border-radius:12px;padding:16px;margin-top:16px;">
         <h3 style="font-size:1rem;margin-bottom:6px;">🌤️ قسم عروض الموسم</h3>
         <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:12px;">لما تفعّله، بيظهر قسم في الموقع بيعرض المنتجات اللي موسمها زي اللي تختاره. (مثلاً: في الصيف اختار "صيفي" → يعرض كل المنتجات الصيفية).</p>
         <label>عنوان القسم</label>
@@ -666,6 +676,8 @@ async function loadShopSettings(){
     document.getElementById('seasonalTitleInput').value = data.seasonal_title || '';
     document.getElementById('seasonalSeasonInput').value = data.seasonal_season || 'صيفي';
     document.getElementById('seasonalActiveInput').checked = !!data.seasonal_active;
+    document.getElementById('announcementTextInput').value = data.announcement_text || '';
+    document.getElementById('announcementActiveInput').checked = !!data.announcement_active;
   }
 }
 
@@ -761,7 +773,9 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
     gift_wrap_price: giftWrap,
     seasonal_title: document.getElementById('seasonalTitleInput').value.trim() || null,
     seasonal_season: document.getElementById('seasonalSeasonInput').value,
-    seasonal_active: document.getElementById('seasonalActiveInput').checked
+    seasonal_active: document.getElementById('seasonalActiveInput').checked,
+    announcement_text: document.getElementById('announcementTextInput').value.trim() || null,
+    announcement_active: document.getElementById('announcementActiveInput').checked
   }).eq('id', 1);
   statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
   statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
