@@ -756,6 +756,12 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
   <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">تركيز العطر</h4>
   <div id="filterConcentrationList" style="margin-bottom:28px;"></div>
 
+  <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">نوع الرائحة</h4>
+  <div id="filterScentList" style="margin-bottom:28px;"></div>
+
+  <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">الموسم</h4>
+  <div id="filterSeasonList" style="margin-bottom:28px;"></div>
+
   <div style="display:flex;gap:10px;">
     <button id="applyFiltersBtn" class="btn-primary" style="flex:1;">تطبيق</button>
     <button id="clearFiltersBtn" class="btn-ghost" style="flex:1;">مسح الكل</button>
@@ -1103,6 +1109,17 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <p style="color:var(--smoke);">مجموعات مختارة بعناية — جاهزة كهدية أو لنفسك.</p>
     </div>
     <div class="gallery-grid reveal" id="featuredCollectionsGrid"></div>
+  </div>
+</section>
+
+<!-- Seasonal Offers (admin-controlled by current season) -->
+<section class="section" id="seasonalOffers" style="display:none;background:var(--ink-3);">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">🌤️ عروض الموسم</div>
+      <h2 id="seasonalTitle">عروض الموسم</h2>
+    </div>
+    <div class="gallery-grid reveal" id="seasonalGrid"></div>
   </div>
 </section>
 
@@ -1592,6 +1609,8 @@ let activeDepartment = 'الكل';
 let activeCategory = 'الكل';
 let selectedBrands = new Set();
 let selectedConcentrations = new Set();
+let selectedScents = new Set();
+let selectedSeasons = new Set();
 let filterPriceMin = null;
 let filterPriceMax = null;
 let visibleCount = 12;
@@ -1767,12 +1786,46 @@ function renderFilterPanelOptions(){
       </label>`;
     }).join('');
   }
+
+  // Scent type filter (from scent_tags, which may hold several comma-separated values)
+  const scentWrap = document.getElementById('filterScentList');
+  if (scentWrap) {
+    const allScents = new Set();
+    scoped.forEach(p => { if (p.scent_tags) p.scent_tags.split(/[،,]/).forEach(s => { const t = s.trim(); if (t) allScents.add(t); }); });
+    if (allScents.size === 0) {
+      scentWrap.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش بيانات (حدد نوع الرائحة للمنتجات من لوحة التحكم).</p>';
+    } else {
+      scentWrap.innerHTML = [...allScents].map(s => {
+        const checked = selectedScents.has(s) ? 'checked' : '';
+        return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85rem;cursor:pointer;">
+          <input type="checkbox" class="filter-scent-cb" value="${escapeHTML(s)}" ${checked} style="width:auto;"> ${escapeHTML(s)}
+        </label>`;
+      }).join('');
+    }
+  }
+
+  // Season filter
+  const seasonWrap = document.getElementById('filterSeasonList');
+  if (seasonWrap) {
+    const seasonIcons = { 'صيفي': '☀️', 'شتوي': '❄️', 'كل الفصول': '🍃', 'كل المواسم': '🍃' };
+    const allSeasons = [...new Set(scoped.map(p => p.season).filter(Boolean))];
+    if (allSeasons.length === 0) {
+      seasonWrap.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش بيانات (حدد الموسم للمنتجات من لوحة التحكم).</p>';
+    } else {
+      seasonWrap.innerHTML = allSeasons.map(s => {
+        const checked = selectedSeasons.has(s) ? 'checked' : '';
+        return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85rem;cursor:pointer;">
+          <input type="checkbox" class="filter-season-cb" value="${escapeHTML(s)}" ${checked} style="width:auto;"> ${seasonIcons[s] || '🌸'} ${escapeHTML(s)}
+        </label>`;
+      }).join('');
+    }
+  }
 }
 
 // Icons per department (emoji-based, elegant)
 const departmentIcons = {
   'عطور': '🌸', 'ساعات': '⌚', 'دهب': '💛', 'سلاسل': '📿', 'مكياج': '💄',
-  'إكسسوارات': '👓', 'بخور': '🕯️', 'عطور منزلية': '🏠', 'هدايا': '🎁', 'بوكسات': '📦'
+  'إكسسوارات': '👜', 'نظارات': '🕶️', 'بخور': '🕯️', 'عطور منزلية': '🏠', 'هدايا': '🎁', 'بوكسات': '📦'
 };
 
 function renderCategoryStrip(){
@@ -1852,6 +1905,14 @@ function renderProducts(){
   list = activeCategory === 'الكل' ? list : list.filter(p => p.category === activeCategory);
   list = selectedBrands.size === 0 ? list : list.filter(p => selectedBrands.has(p.brand));
   list = selectedConcentrations.size === 0 ? list : list.filter(p => selectedConcentrations.has(p.concentration));
+  // Scent type: product's scent_tags must include at least one selected scent
+  list = selectedScents.size === 0 ? list : list.filter(p => {
+    if (!p.scent_tags) return false;
+    const tags = p.scent_tags.split(/[،,]/).map(s => s.trim());
+    return [...selectedScents].some(s => tags.includes(s));
+  });
+  // Season
+  list = selectedSeasons.size === 0 ? list : list.filter(p => selectedSeasons.has(p.season));
   if (filterPriceMin != null) list = list.filter(p => (p.price ?? 0) >= filterPriceMin);
   if (filterPriceMax != null) list = list.filter(p => (p.price ?? 0) <= filterPriceMax);
   if (query) {
@@ -2770,6 +2831,53 @@ sb.from('gift_packages').select('*').eq('is_active', true).order('sort_order', {
     if (section) section.style.display = 'none';
   }
   renderFeaturedCollections();
+});
+
+// Seasonal offers — shows products matching the admin-selected current season
+sb.from('shop_settings').select('seasonal_title, seasonal_season, seasonal_active').eq('id', 1).maybeSingle().then(({ data }) => {
+  if (!data || !data.seasonal_active || !data.seasonal_season) return;
+  const section = document.getElementById('seasonalOffers');
+  const grid = document.getElementById('seasonalGrid');
+  const titleEl = document.getElementById('seasonalTitle');
+  if (!section || !grid) return;
+
+  const renderSeasonal = () => {
+    if (!allProducts || allProducts.length === 0) return;
+    // Match products whose season includes the selected season (or "all seasons")
+    const matched = allProducts.filter(p => {
+      if (!p.season) return false;
+      return p.season.includes(data.seasonal_season) || p.season.includes('كل');
+    });
+    if (matched.length === 0) { section.style.display = 'none'; return; }
+    if (data.seasonal_title) titleEl.textContent = data.seasonal_title;
+    section.style.display = 'block';
+    grid.innerHTML = matched.slice(0, 10).map(p => `
+      <div class="perfume-card" style="display:flex;flex-direction:column;">
+        ${p.image_url
+          ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-2);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+          : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;"></div>`}
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <h3 style="font-size:var(--text-md);margin-bottom:4px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
+          <div style="margin-top:auto;">
+            ${p.price ? `<p style="color:var(--gold);font-weight:700;font-size:var(--text-lg);margin:8px 0 12px;">${formatPrice(p.price)} جنيه</p>` : ''}
+            <button class="btn-ghost view-details-seasonal" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+    grid.querySelectorAll('.view-details-seasonal').forEach(btn => {
+      btn.addEventListener('click', () => openProductDetail(btn.dataset.id));
+    });
+  };
+
+  // Render once products are loaded
+  if (allProducts && allProducts.length > 0) renderSeasonal();
+  else {
+    const check = setInterval(() => {
+      if (allProducts && allProducts.length > 0) { clearInterval(check); renderSeasonal(); }
+    }, 300);
+    setTimeout(() => clearInterval(check), 6000);
+  }
 });
 
 function renderFeaturedCollections(){
@@ -4123,7 +4231,7 @@ document.getElementById('closeFilterPanel').addEventListener('click', closeFilte
 document.getElementById('filterOverlay').addEventListener('click', closeFilterPanel);
 
 function updateActiveFilterCount(){
-  const count = selectedBrands.size + selectedConcentrations.size + (filterPriceMin != null ? 1 : 0) + (filterPriceMax != null ? 1 : 0);
+  const count = selectedBrands.size + selectedConcentrations.size + selectedScents.size + selectedSeasons.size + (filterPriceMin != null ? 1 : 0) + (filterPriceMax != null ? 1 : 0);
   const badge = document.getElementById('activeFilterCount');
   badge.style.display = count > 0 ? 'inline-block' : 'none';
   badge.textContent = count;
@@ -4132,6 +4240,8 @@ function updateActiveFilterCount(){
 document.getElementById('applyFiltersBtn').addEventListener('click', ()=>{
   selectedBrands = new Set(Array.from(document.querySelectorAll('.filter-brand-cb:checked')).map(cb => cb.value));
   selectedConcentrations = new Set(Array.from(document.querySelectorAll('.filter-conc-cb:checked')).map(cb => cb.value));
+  selectedScents = new Set(Array.from(document.querySelectorAll('.filter-scent-cb:checked')).map(cb => cb.value));
+  selectedSeasons = new Set(Array.from(document.querySelectorAll('.filter-season-cb:checked')).map(cb => cb.value));
   const min = document.getElementById('filterPriceMin').value;
   const max = document.getElementById('filterPriceMax').value;
   filterPriceMin = min ? Number(min) : null;
@@ -4144,6 +4254,8 @@ document.getElementById('applyFiltersBtn').addEventListener('click', ()=>{
 document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
   selectedBrands = new Set();
   selectedConcentrations = new Set();
+  selectedScents = new Set();
+  selectedSeasons = new Set();
   filterPriceMin = null;
   filterPriceMax = null;
   document.getElementById('filterPriceMin').value = '';

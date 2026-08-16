@@ -133,7 +133,8 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
           <option value="دهب">💛 دهب</option>
           <option value="سلاسل">📿 سلاسل</option>
           <option value="مكياج">💄 مكياج</option>
-          <option value="إكسسوارات">👓 إكسسوارات</option>
+          <option value="إكسسوارات">👜 إكسسوارات</option>
+          <option value="نظارات">🕶️ نظارات</option>
           <option value="بخور">🕯️ بخور</option>
           <option value="عطور منزلية">🏠 عطور منزلية</option>
         </select>
@@ -298,6 +299,22 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <input type="number" id="freeShippingThreshold" placeholder="1500">
       <label>سعر تغليف الهدية (جنيه) — بيتضاف لو العميل اختار الطلب هدية — 0 يعني مجاني</label>
       <input type="number" id="giftWrapPrice" placeholder="50">
+
+      <div style="background:var(--ink-3);border-radius:12px;padding:16px;margin-top:16px;">
+        <h3 style="font-size:1rem;margin-bottom:6px;">🌤️ قسم عروض الموسم</h3>
+        <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:12px;">لما تفعّله، بيظهر قسم في الموقع بيعرض المنتجات اللي موسمها زي اللي تختاره. (مثلاً: في الصيف اختار "صيفي" → يعرض كل المنتجات الصيفية).</p>
+        <label>عنوان القسم</label>
+        <input type="text" id="seasonalTitleInput" placeholder="عروض الصيف">
+        <label>الموسم</label>
+        <select id="seasonalSeasonInput">
+          <option value="صيفي">صيفي ☀️</option>
+          <option value="شتوي">شتوي ❄️</option>
+          <option value="كل الفصول">كل الفصول 🍃</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;">
+          <input type="checkbox" id="seasonalActiveInput" style="width:auto;"> فعّل قسم عروض الموسم
+        </label>
+      </div>
       <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
       <div class="status" id="settingsStatus"></div>
     </div>
@@ -645,6 +662,11 @@ async function loadShopSettings(){
   const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
   if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
   if (data) document.getElementById('giftWrapPrice').value = data.gift_wrap_price || '';
+  if (data) {
+    document.getElementById('seasonalTitleInput').value = data.seasonal_title || '';
+    document.getElementById('seasonalSeasonInput').value = data.seasonal_season || 'صيفي';
+    document.getElementById('seasonalActiveInput').checked = !!data.seasonal_active;
+  }
 }
 
 // ===== Payment settings (admin-editable, no code changes needed) =====
@@ -734,7 +756,13 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('settingsStatus');
   const value = Number(document.getElementById('freeShippingThreshold').value) || 0;
   const giftWrap = Number(document.getElementById('giftWrapPrice').value) || 0;
-  const { error } = await sb.from('shop_settings').update({ free_shipping_threshold: value, gift_wrap_price: giftWrap }).eq('id', 1);
+  const { error } = await sb.from('shop_settings').update({
+    free_shipping_threshold: value,
+    gift_wrap_price: giftWrap,
+    seasonal_title: document.getElementById('seasonalTitleInput').value.trim() || null,
+    seasonal_season: document.getElementById('seasonalSeasonInput').value,
+    seasonal_active: document.getElementById('seasonalActiveInput').checked
+  }).eq('id', 1);
   statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
   statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
 });
