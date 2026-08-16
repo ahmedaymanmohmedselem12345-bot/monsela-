@@ -1675,18 +1675,16 @@ function renderProducts(){
   if (filterPriceMin != null) list = list.filter(p => (p.price ?? 0) >= filterPriceMin);
   if (filterPriceMax != null) list = list.filter(p => (p.price ?? 0) <= filterPriceMax);
   if (query) {
-    list = list.filter(p =>
-      (p.name || '').toLowerCase().includes(query) ||
-      (p.notes || '').toLowerCase().includes(query) ||
-      (p.tag || '').toLowerCase().includes(query) ||
-      (p.top_notes || '').toLowerCase().includes(query) ||
-      (p.heart_notes || '').toLowerCase().includes(query) ||
-      (p.base_notes || '').toLowerCase().includes(query) ||
-      (p.fragrance_family || '').toLowerCase().includes(query) ||
-      (p.season || '').toLowerCase().includes(query) ||
-      (p.occasion || '').toLowerCase().includes(query) ||
-      (p.brand || '').toLowerCase().includes(query)
-    );
+    // Multi-word search: every word must match somewhere (e.g. "صيفي منعش" matches both)
+    const words = query.split(/\s+/).filter(Boolean);
+    list = list.filter(p => {
+      const haystack = [
+        p.name, p.name_en, p.notes, p.tag, p.top_notes, p.heart_notes, p.base_notes,
+        p.fragrance_family, p.season, p.occasion, p.brand, p.concentration,
+        p.scent_tags, p.intensity, p.usage_time, p.department, p.category
+      ].filter(Boolean).join(' ').toLowerCase();
+      return words.every(w => haystack.includes(w));
+    });
   }
 
   const sortBy = document.getElementById('productSort').value;
@@ -1931,6 +1929,48 @@ function renderProducts(){
 }
 
 // ===== Product detail modal (gallery + reviews) =====
+async function loadProductReviews(productId){
+  const contentEl = document.getElementById('pdReviewsContent');
+  if (!contentEl) return;
+  const { data, error } = await sb.rpc('get_product_reviews', { p_product_id: productId });
+  if (error || !data || data.length === 0) {
+    contentEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش تقييمات للمنتج ده. كن أول واحد يقيّمه بعد ما تستلمه!</p>';
+    return;
+  }
+  const count = data.length;
+  const avg = (data.reduce((s, r) => s + r.rating, 0) / count).toFixed(1);
+  // Star distribution
+  const dist = [5,4,3,2,1].map(star => ({ star, n: data.filter(r => r.rating === star).length }));
+  contentEl.innerHTML = `
+    <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line);">
+      <div style="text-align:center;">
+        <div style="font-size:2.4rem;font-weight:700;color:var(--gold);line-height:1;">${avg}</div>
+        <div style="color:var(--gold);font-size:0.9rem;">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div>
+        <div style="color:var(--smoke);font-size:0.78rem;margin-top:4px;">${count} تقييم</div>
+      </div>
+      <div style="flex:1;min-width:160px;">
+        ${dist.map(d => `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:0.75rem;">
+            <span style="color:var(--smoke);width:32px;">${d.star} ★</span>
+            <div style="flex:1;height:6px;background:var(--ink-3);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${count ? (d.n/count*100) : 0}%;background:var(--gold);"></div></div>
+            <span style="color:var(--smoke);width:20px;">${d.n}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div>
+      ${data.slice(0, 10).map(r => `
+        <div style="border-bottom:1px solid var(--line-soft);padding:10px 0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <b style="font-size:0.88rem;">${escapeHTML(r.customer_name || 'عميل')}</b>
+            <span style="color:var(--gold);font-size:0.82rem;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+          </div>
+          ${r.comment ? `<p style="color:var(--smoke);margin-top:4px;font-size:0.84rem;line-height:1.6;">${escapeHTML(r.comment)}</p>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 async function openProductDetail(productId){
   const p = allProducts.find(x => x.id === productId);
   if (!p) return;
@@ -2047,24 +2087,15 @@ async function openProductDetail(productId){
       <h4 style="margin-bottom:10px;color:var(--gold);" data-i18n="pd_related">منتجات مشابهة</h4>
       <div id="pdRelatedGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
     </div>
-    <details style="margin-top:14px;">
-      <summary style="cursor:pointer;color:var(--gold);" data-i18n="pd_write_review">اكتب مراجعة</summary>
-      <div style="margin-top:12px;">
-        <input type="text" id="pdReviewName" data-i18n-ph="ph_your_name" placeholder="اسمك" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
-        <input type="text" id="pdReviewPhone" placeholder="رقم موبايلك اللي طلبت بيه (اختياري - يظهر شارة مشترى موثقة)" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
-        <select id="pdReviewRating" style="width:100%;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;">
-          <option value="5">⭐⭐⭐⭐⭐</option>
-          <option value="4">⭐⭐⭐⭐</option>
-          <option value="3">⭐⭐⭐</option>
-          <option value="2">⭐⭐</option>
-          <option value="1">⭐</option>
-        </select>
-        <textarea id="pdReviewComment" data-i18n-ph="ph_review" placeholder="رأيك في المنتج..." style="width:100%;min-height:60px;margin-bottom:10px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';resize:vertical;"></textarea>
-        <button id="pdSubmitReview" class="btn-ghost" style="width:100%;" data-i18n="pd_submit_review">إرسال المراجعة</button>
-        <div id="pdReviewStatus" style="font-size:0.8rem;margin-top:8px;"></div>
-      </div>
-    </details>
+    <div id="pdReviewsSection" style="margin-top:24px;border-top:1px solid var(--line);padding-top:20px;">
+      <h4 style="margin-bottom:14px;color:var(--gold);font-family:'Aref Ruqaa',serif;font-size:1.1rem;">تقييمات العملاء</h4>
+      <div id="pdReviewsContent"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
+      <p style="color:var(--smoke);font-size:0.78rem;margin-top:14px;padding:10px 14px;background:var(--ink-3);border-radius:8px;">💡 التقييم متاح للعملاء اللي طلبوا المنتج واستلموه — من صفحة "حسابي" → الطلبات.</p>
+    </div>
   `;
+
+  // Load and render real reviews for this product
+  loadProductReviews(p.id);
 
   // Fragrance notes (the pyramid) — shown prominently
   const notesRows = [
@@ -2169,37 +2200,6 @@ async function openProductDetail(productId){
       setTimeout(()=> btn.textContent = original, 2000);
     } catch(e) { toast(url, 'info', 8000); }
   });
-
-  document.getElementById('pdSubmitReview').addEventListener('click', async ()=>{
-    const name = document.getElementById('pdReviewName').value.trim();
-    const phone = document.getElementById('pdReviewPhone').value.trim();
-    const rating = Number(document.getElementById('pdReviewRating').value);
-    const comment = document.getElementById('pdReviewComment').value.trim();
-    const statusEl = document.getElementById('pdReviewStatus');
-    if (!name) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب اسمك الأول.'; return; }
-    if (!canSubmitAgain('review', 20000)) { statusEl.style.color='var(--danger)'; statusEl.textContent='استنى شوية قبل ما تبعت مراجعة تانية.'; return; }
-    const { error } = await sb.from('product_reviews').insert({ product_id: productId, customer_name: name, customer_phone: phone || null, rating, comment: comment || null });
-    if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة، حاول تاني.'; return; }
-    statusEl.style.color='var(--success)'; statusEl.textContent='شكرًا! مراجعتك هتظهر بعد المراجعة.';
-    document.getElementById('pdReviewName').value=''; document.getElementById('pdReviewPhone').value=''; document.getElementById('pdReviewComment').value='';
-  });
-
-  const { data: reviews } = await sb.from('product_reviews').select('*').eq('product_id', productId).eq('approved', true).order('created_at', { ascending: false });
-  const summaryEl = document.getElementById('pdReviewsSummary');
-  const listEl = document.getElementById('pdReviewsList');
-  if (!reviews || reviews.length === 0) {
-    summaryEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش تقييمات لهذا المنتج.</p>';
-  } else {
-    const avg = (reviews.reduce((s,r)=>s+r.rating,0) / reviews.length).toFixed(1);
-    summaryEl.innerHTML = `<p style="font-weight:700;">⭐ ${avg} من 5 (${reviews.length} تقييم)</p>`;
-    listEl.innerHTML = reviews.map(r => `
-      <div style="border-bottom:1px solid var(--line);padding:10px 0;font-size:0.85rem;">
-        <b>${escapeHTML(r.customer_name)}</b> ${'⭐'.repeat(r.rating)}
-        ${r.verified_purchase ? `<span style="color:var(--success);font-size:0.72rem;margin-right:6px;">✓ مشترى موثقة</span>` : ''}
-        <p style="color:var(--smoke);margin-top:4px;">${escapeHTML(r.comment || '')}</p>
-      </div>
-    `).join('');
-  }
 
   // Related products (same department, excluding this one)
   if (p.department) {
@@ -2614,13 +2614,29 @@ function renderCompareBar(){
 document.getElementById('compareNowBtn').addEventListener('click', ()=>{
   const products = compareList.map(id => allProducts.find(p => p.id === id)).filter(Boolean);
   if (products.length < 2) { toast('اختار منتجين على الأقل عشان تقارن.','info'); return; }
-  const rows = [
-    ['', ...products.map(p => p.name)],
-    ['السعر', ...products.map(p => p.price ? formatPrice(p.price) + ' جنيه' : '—')],
-    ['التصنيف', ...products.map(p => p.tag || '—')],
-    ['النوتات', ...products.map(p => p.notes || '—')],
-    ['المخزون', ...products.map(p => (p.stock ?? 0) > 0 ? 'متوفر' : 'خلص')]
+  // Build candidate rows; only keep a row if at least one product has a value for it
+  const candidateRows = [
+    ['السعر', p => p.price ? formatPrice(p.price) + ' جنيه' : null],
+    ['التقييم', p => productRatings[p.id] ? productRatings[p.id].avg.toFixed(1) + ' ⭐' : null],
+    ['النوع', p => p.fragrance_family],
+    ['نوع الرائحة', p => p.scent_tags],
+    ['قوة الرائحة', p => p.intensity],
+    ['الثبات', p => p.longevity],
+    ['الفوحان', p => p.projection],
+    ['الموسم', p => p.season],
+    ['المناسبة', p => p.occasion],
+    ['أفضل وقت', p => p.usage_time],
+    ['التركيز', p => p.concentration],
+    ['النوتات', p => p.notes],
+    ['المخزون', p => (p.stock ?? 0) > 0 ? 'متوفر' : 'خلص']
   ];
+  const rows = [['', ...products.map(p => p.name)]];
+  candidateRows.forEach(([label, getter]) => {
+    const values = products.map(getter);
+    if (values.some(v => v != null && v !== '')) {
+      rows.push([label, ...values.map(v => (v != null && v !== '') ? String(v).replace(/[،,]/g, ' • ') : '—')]);
+    }
+  });
   document.getElementById('compareModalContent').innerHTML = `
     <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
       ${rows.map(row => `
@@ -2658,11 +2674,17 @@ async function loadRecentlyViewed(){
   if (ordered.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
   document.getElementById('recentlyViewedGrid').innerHTML = ordered.map(p => `
-    <div class="perfume-card">
-      ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;margin-bottom:16px;">` : `<div class="glass"></div>`}
-      <h3>${localizedField(p,'name')}</h3>
-      ${p.price ? `<p style="color:var(--gold);font-weight:700;margin:8px 0;">${formatPrice(p.price)} جنيه</p>` : ''}
-      <button class="btn-ghost view-details-rv" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
+    <div class="perfume-card" style="display:flex;flex-direction:column;">
+      ${p.image_url
+        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+        : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;"></div>`}
+      <div style="flex:1;display:flex;flex-direction:column;">
+        <h3 style="font-size:var(--text-md);margin-bottom:4px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
+        <div style="margin-top:auto;">
+          ${p.price ? `<p style="color:var(--gold);font-weight:700;font-size:var(--text-lg);margin:8px 0 12px;">${formatPrice(p.price)} جنيه</p>` : ''}
+          <button class="btn-ghost view-details-rv" data-id="${p.id}" style="width:100%;">${translations[currentLang].btn_view_details}</button>
+        </div>
+      </div>
     </div>
   `).join('');
   document.querySelectorAll('.view-details-rv').forEach(btn=>{
@@ -3414,10 +3436,12 @@ async function refreshAccountView(){
 
   const STEPS = ['جديد', 'قيد التجهيز', 'في الطريق', 'اتسلم'];
 
-  ordersListEl.innerHTML = myOrders.map(o => `
+  ordersListEl.innerHTML = myOrders.map(o => {
+    const isDelivered = ['delivered','تم التسليم','تم التوصيل','اتسلم'].includes((o.status||'').toLowerCase()) || (o.status||'') === 'اتسلم';
+    return `
     <div style="border-bottom:1px solid var(--line);padding:14px 0;font-size:0.85rem;">
       <div style="display:flex;justify-content:space-between;">
-        <b>${escapeHTML(o.order_number || '')} — ${o.total} جنيه</b>
+        <b>${escapeHTML(o.order_number || '')} — ${formatPrice(o.total)} جنيه</b>
         <span style="color:var(--gold);">${o.status}</span>
       </div>
       <div style="color:var(--smoke);margin-top:4px;">${(o.items||[]).map(i=>`${escapeHTML(i.name)} ×${i.qty}`).join('، ')}</div>
@@ -3425,8 +3449,73 @@ async function refreshAccountView(){
       ${trackerHTML(o.status)}
       ${etaHTML(o)}
       ${paymentStatusHTML(o)}
+      ${isDelivered ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${(o.items||[]).map(i => i.id ? `<button class="btn-ghost review-btn" data-product="${i.id}" data-order="${o.id}" data-name="${escapeHTML(i.name)}" style="font-size:0.75rem;padding:6px 12px;">⭐ قيّم ${escapeHTML(i.name)}</button>` : '').join('')}
+      </div>` : ''}
     </div>
-  `).join('');
+  `;}).join('');
+
+  // Wire review buttons
+  ordersListEl.querySelectorAll('.review-btn').forEach(btn => {
+    btn.addEventListener('click', () => openReviewModal(btn.dataset.product, btn.dataset.order, btn.dataset.name));
+  });
+}
+
+// Review modal for delivered products
+function openReviewModal(productId, orderId, productName){
+  let modal = document.getElementById('reviewModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'reviewModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(36,31,26,0.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
+    document.body.appendChild(modal);
+  }
+  let selectedRating = 5;
+  modal.innerHTML = `
+    <div style="background:var(--ink-2);border-radius:16px;padding:26px;max-width:400px;width:100%;">
+      <h3 style="font-family:'Aref Ruqaa',serif;margin-bottom:6px;">كيف كانت تجربتك؟</h3>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:18px;">${escapeHTML(productName)}</p>
+      <div id="reviewStars" style="display:flex;gap:8px;justify-content:center;margin-bottom:18px;font-size:2rem;cursor:pointer;">
+        ${[1,2,3,4,5].map(n => `<span class="review-star" data-n="${n}" style="color:var(--gold);">★</span>`).join('')}
+      </div>
+      <textarea id="reviewCommentInput" placeholder="اكتب رأيك (اختياري)..." style="width:100%;min-height:70px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px;border-radius:10px;font-family:'Cairo';resize:vertical;margin-bottom:16px;"></textarea>
+      <div id="reviewModalStatus" style="font-size:0.8rem;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:10px;">
+        <button id="reviewSubmitBtn" class="btn-primary" style="flex:1;">إرسال التقييم</button>
+        <button id="reviewCancelBtn" class="btn-ghost">إلغاء</button>
+      </div>
+    </div>
+  `;
+  modal.style.display = 'flex';
+
+  const updateStars = () => {
+    modal.querySelectorAll('.review-star').forEach(s => {
+      s.textContent = Number(s.dataset.n) <= selectedRating ? '★' : '☆';
+    });
+  };
+  updateStars();
+  modal.querySelectorAll('.review-star').forEach(s => {
+    s.addEventListener('click', () => { selectedRating = Number(s.dataset.n); updateStars(); });
+  });
+  document.getElementById('reviewCancelBtn').addEventListener('click', () => { modal.style.display = 'none'; });
+  document.getElementById('reviewSubmitBtn').addEventListener('click', async () => {
+    const statusEl = document.getElementById('reviewModalStatus');
+    const comment = document.getElementById('reviewCommentInput').value.trim();
+    const btn = document.getElementById('reviewSubmitBtn');
+    btn.disabled = true; statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الإرسال...';
+    const { error } = await sb.rpc('submit_review', {
+      p_product_id: productId, p_order_id: orderId, p_rating: selectedRating, p_comment: comment || null
+    });
+    if (error) {
+      statusEl.style.color = 'var(--danger)';
+      statusEl.textContent = error.message || 'حصلت مشكلة، حاول تاني.';
+      btn.disabled = false;
+      return;
+    }
+    statusEl.style.color = 'var(--success)';
+    statusEl.textContent = 'شكرًا! تقييمك اتسجّل ✓';
+    setTimeout(() => { modal.style.display = 'none'; }, 1500);
+  });
 }
 
 sb.auth.getSession().then(({ data }) => { if (data.session) refreshAccountView(); });

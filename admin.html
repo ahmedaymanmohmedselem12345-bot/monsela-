@@ -931,31 +931,31 @@ async function loadBrandLogos(){
 // ===== Review moderation =====
 async function loadReviews(){
   const listEl = document.getElementById('reviewsList');
-  const { data, error } = await sb.from('product_reviews').select('*, products(name)').order('created_at', { ascending: false });
-  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش مراجعات.</p>'; return; }
+  const { data, error } = await sb.from('reviews').select('*, products(name)').order('created_at', { ascending: false });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش تقييمات.</p>'; return; }
   listEl.innerHTML = data.map(r => `
-    <div class="product-item" style="align-items:flex-start;">
+    <div class="product-item" style="align-items:flex-start;${r.is_hidden ? 'opacity:0.5;' : ''}">
       <div class="info">
-        <h4>${escapeHTML(r.customer_name)} — ${'⭐'.repeat(r.rating)} ${r.approved ? '' : '(مستنية موافقة)'} ${r.verified_purchase ? '✓ مشترى موثقة' : ''}</h4>
-        <p>${escapeHTML(r.comment || '')}</p>
-        <p style="font-size:0.75rem;">على منتج: ${escapeHTML(r.products ? r.products.name : '(محذوف)')}</p>
+        <h4>${escapeHTMLAdmin(r.customer_name || 'عميل')} — ${'⭐'.repeat(r.rating)} ${r.is_hidden ? '<span style="color:var(--danger);">(مخفي)</span>' : ''}</h4>
+        <p>${escapeHTMLAdmin(r.comment || '(بدون تعليق)')}</p>
+        <p style="font-size:0.75rem;">على منتج: ${escapeHTMLAdmin(r.products ? r.products.name : '(محذوف)')} · ${new Date(r.created_at).toLocaleDateString('ar-EG')}</p>
       </div>
       <div class="actions">
-        ${!r.approved ? `<button class="btn" data-approve-review="${r.id}">موافقة</button>` : ''}
+        <button class="btn btn-ghost" data-toggle-review="${r.id}" data-hidden="${r.is_hidden}">${r.is_hidden ? 'إظهار' : 'إخفاء'}</button>
         <button class="btn btn-danger" data-delete-review="${r.id}">حذف</button>
       </div>
     </div>
   `).join('');
-  listEl.querySelectorAll('[data-approve-review]').forEach(btn=>{
+  listEl.querySelectorAll('[data-toggle-review]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
-      await sb.from('product_reviews').update({ approved: true }).eq('id', btn.dataset.approveReview);
+      await sb.from('reviews').update({ is_hidden: btn.dataset.hidden !== 'true' }).eq('id', btn.dataset.toggleReview);
       loadReviews();
     });
   });
   listEl.querySelectorAll('[data-delete-review]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
-      if (!confirm('تمسح المراجعة دي؟')) return;
-      await sb.from('product_reviews').delete().eq('id', btn.dataset.deleteReview);
+      if (!confirm('تمسح التقييم ده نهائيًا؟')) return;
+      await sb.from('reviews').delete().eq('id', btn.dataset.deleteReview);
       loadReviews();
     });
   });
