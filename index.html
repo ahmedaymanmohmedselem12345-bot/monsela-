@@ -721,6 +721,11 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 </button>
 
 <!-- Back to top -->
+<!-- Floating WhatsApp button -->
+<a id="floatingWhatsApp" href="#" target="_blank" rel="noopener" aria-label="تواصل معنا واتساب" style="position:fixed;bottom:24px;left:24px;z-index:60;width:56px;height:56px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(37,211,102,0.4);transition:transform .2s;text-decoration:none;">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
 <button id="backToTop" aria-label="ارجع لفوق" style="display:none;position:fixed;bottom:24px;right:24px;z-index:60;width:46px;height:46px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;align-items:center;justify-content:center;">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
@@ -1375,6 +1380,8 @@ function openWhatsAppMessage(message){
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
 }
 document.getElementById('footerWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}`;
+const floatWa = document.getElementById('floatingWhatsApp');
+if (floatWa) floatWa.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('مرحبا Monsela! 👋 عايز أستفسر عن منتجاتكم')}`;
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Escape any user-controlled text before putting it into innerHTML, so a customer
@@ -2286,6 +2293,10 @@ async function openProductDetail(productId){
             </div>
             <button class="btn-primary" id="pdAddToCart" style="flex:1;">${translations[currentLang].btn_add_to_cart}</button>
           </div>
+          <button id="pdOrderWhatsApp" style="width:100%;margin-top:12px;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Cairo';font-weight:700;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+            اطلبه على واتساب
+          </button>
           <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
             <div style="display:flex;align-items:center;gap:6px;color:var(--smoke);font-size:0.75rem;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
@@ -2313,9 +2324,15 @@ async function openProductDetail(productId){
 
     <details style="margin-top:20px;">
       <summary style="cursor:pointer;color:var(--gold);font-weight:700;" data-i18n="pd_share">شارك المنتج ده</summary>
-      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:14px;flex-wrap:wrap;">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
-        <button id="pdCopyLink" class="btn-ghost" style="padding:8px 16px;font-size:0.85rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="pdCopyLink" class="btn-ghost" style="padding:8px 16px;font-size:0.85rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
+          <a id="pdShareWa" href="#" target="_blank" rel="noopener" style="padding:8px 16px;font-size:0.85rem;background:#25D366;color:#fff;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+            شارك واتساب
+          </a>
+        </div>
       </div>
     </details>
 
@@ -2448,6 +2465,21 @@ async function openProductDetail(productId){
     addToCart(p, qty, variant, bottleColor);
   });
 
+  const pdWaBtn = document.getElementById('pdOrderWhatsApp');
+  if (pdWaBtn) pdWaBtn.addEventListener('click', ()=>{
+    const qty = Number(document.getElementById('pdQty').textContent) || 1;
+    const variant = pdCurrentVariant();
+    const price = variant ? variant.price : p.price;
+    const sizeText = variant ? ` (${variant.label})` : '';
+    const productUrl = location.origin + location.pathname + '?product=' + p.id;
+    const msg = `مرحبا Monsela! 🛍️ عايز أطلب:%0a%0a` +
+      `🔸 ${p.name}${sizeText}%0a` +
+      `🔢 الكمية: ${qty}%0a` +
+      (price ? `💰 السعر: ${formatPrice(price * qty)} جنيه%0a` : '') +
+      `%0a🔗 ${productUrl}`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+  });
+
   content.querySelectorAll('.pd-thumb').forEach(thumb=>{
     thumb.addEventListener('click', ()=>{ document.getElementById('pdMainImage').src = thumb.src; });
   });
@@ -2461,6 +2493,11 @@ async function openProductDetail(productId){
       setTimeout(()=> btn.textContent = original, 2000);
     } catch(e) { toast(url, 'info', 8000); }
   });
+  const pdShareWa = document.getElementById('pdShareWa');
+  if (pdShareWa) {
+    const url = location.origin + location.pathname + '?product=' + p.id;
+    pdShareWa.href = `https://wa.me/?text=${encodeURIComponent('شوف المنتج ده من Monsela 😍: ' + p.name + '%0a' + url)}`;
+  }
 
   // Related products (same department, excluding this one)
   if (p.department) {
