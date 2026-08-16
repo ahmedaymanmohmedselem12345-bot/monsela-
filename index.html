@@ -900,17 +900,19 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
         <button class="opt" id="tabCustomerSignup" data-i18n="btn_signup">حساب جديد</button>
       </div>
       <div id="customerLoginForm">
-        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_email">الإيميل</label>
-        <input type="email" id="custLoginEmail" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_password">كلمة المرور</label>
+        <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل</label>
+        <input type="tel" id="custLoginPhone" placeholder="01xxxxxxxxx" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+        <label style="display:block;font-weight:700;margin-bottom:8px;">كلمة المرور</label>
         <input type="password" id="custLoginPassword" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
         <button id="custLoginBtn" class="btn-primary" style="width:100%;" data-i18n="btn_login_action">دخول</button>
       </div>
       <div id="customerSignupForm" style="display:none;">
-        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_email">الإيميل</label>
-        <input type="email" id="custSignupEmail" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
-        <label style="display:block;font-weight:700;margin-bottom:8px;" data-i18n="field_password">كلمة المرور</label>
-        <input type="password" id="custSignupPassword" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+        <label style="display:block;font-weight:700;margin-bottom:8px;">الاسم</label>
+        <input type="text" id="custSignupName" placeholder="اسمك بالكامل" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+        <label style="display:block;font-weight:700;margin-bottom:8px;">رقم الموبايل</label>
+        <input type="tel" id="custSignupPhone" placeholder="01xxxxxxxxx" style="width:100%;margin-bottom:14px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
+        <label style="display:block;font-weight:700;margin-bottom:8px;">كلمة المرور</label>
+        <input type="password" id="custSignupPassword" placeholder="6 حروف على الأقل" style="width:100%;margin-bottom:16px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:10px;font-family:'Cairo';">
         <button id="custSignupBtn" class="btn-primary" style="width:100%;" data-i18n="btn_signup_action">إنشاء الحساب</button>
       </div>
       <div id="accountStatus" style="margin-top:12px;font-size:0.85rem;"></div>
@@ -918,7 +920,41 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
     <div id="accountLoggedIn" style="display:none;">
       <p id="accountEmail" style="color:var(--smoke);margin-bottom:16px;"></p>
-      <h4 style="margin-bottom:12px;" data-i18n="my_orders">طلباتي</h4>
+
+      <!-- Full profile form (like reference) -->
+      <div style="background:var(--ink-3);border-radius:14px;padding:20px;margin-bottom:24px;">
+        <h4 style="margin-bottom:16px;font-family:'Aref Ruqaa',serif;">بياناتي</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:5px;">الاسم</label>
+            <input type="text" id="profName" style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:8px;font-family:'Cairo';">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:5px;">رقم الموبايل</label>
+            <input type="tel" id="profPhone" style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:8px;font-family:'Cairo';">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:5px;">البريد الإلكتروني (اختياري)</label>
+            <input type="email" id="profEmail" placeholder="اختياري" style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:8px;font-family:'Cairo';">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:5px;">تاريخ الميلاد</label>
+            <input type="date" id="profBirthDate" style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:8px;font-family:'Cairo';">
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="display:block;font-size:0.82rem;font-weight:600;margin-bottom:5px;">الجنس</label>
+            <select id="profGender" style="width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:8px;font-family:'Cairo';">
+              <option value="">حدد نوع الجنس</option>
+              <option value="ذكر">ذكر</option>
+              <option value="أنثى">أنثى</option>
+            </select>
+          </div>
+        </div>
+        <button id="saveProfileBtn" class="btn-primary" style="width:100%;margin-top:16px;">حفظ</button>
+        <div id="profileStatus" style="font-size:0.82rem;margin-top:8px;text-align:center;"></div>
+      </div>
+
+      <h4 style="margin-bottom:12px;" data-i18n="my_orders">طلباتي وفواتيري</h4>
       <div id="myOrdersList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
       <button id="custLogoutBtn" class="btn-ghost" style="width:100%;margin-top:18px;" data-i18n="btn_logout">تسجيل الخروج</button>
     </div>
@@ -3520,27 +3556,58 @@ document.getElementById('tabCustomerSignup').addEventListener('click', ()=>{
   document.getElementById('customerLoginForm').style.display = 'none';
 });
 
+// Convert phone to a stable internal email for Supabase auth
+function phoneToEmail(phone){
+  const clean = phone.replace(/[^0-9]/g, '');
+  return `${clean}@monsela.customer`;
+}
+
 document.getElementById('custLoginBtn').addEventListener('click', async ()=>{
-  const email = document.getElementById('custLoginEmail').value.trim();
+  const phone = document.getElementById('custLoginPhone').value.trim();
   const password = document.getElementById('custLoginPassword').value;
   const statusEl = document.getElementById('accountStatus');
+  if (!phone) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب رقم موبايلك.'; return; }
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الدخول...';
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الإيميل أو كلمة المرور غلط.'; return; }
+  const { error } = await sb.auth.signInWithPassword({ email: phoneToEmail(phone), password });
+  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الرقم أو كلمة المرور غلط.'; return; }
   statusEl.textContent = '';
   await refreshAccountView();
 });
 
 document.getElementById('custSignupBtn').addEventListener('click', async ()=>{
-  const email = document.getElementById('custSignupEmail').value.trim();
+  const name = document.getElementById('custSignupName').value.trim();
+  const phone = document.getElementById('custSignupPhone').value.trim();
   const password = document.getElementById('custSignupPassword').value;
   const statusEl = document.getElementById('accountStatus');
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (!name) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب اسمك.'; return; }
+  if (cleanPhone.length < 10) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب رقم موبايل صحيح.'; return; }
   if (password.length < 6) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'كلمة المرور 6 حروف على الأقل.'; return; }
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الإنشاء...';
-  const { error } = await sb.auth.signUp({ email, password });
-  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = error.message; return; }
+  const { data, error } = await sb.auth.signUp({
+    email: phoneToEmail(phone),
+    password,
+    options: { data: { full_name: name, phone: cleanPhone } }
+  });
+  if (error) {
+    if (error.message && error.message.toLowerCase().includes('already')) {
+      statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الرقم ده معمول بيه حساب قبل كده. سجّل دخول.';
+    } else {
+      statusEl.style.color = 'var(--danger)'; statusEl.textContent = error.message;
+    }
+    return;
+  }
+  // Save profile immediately
+  if (data && data.user) {
+    await sb.from('customer_profiles').upsert({ id: data.user.id, name, phone: cleanPhone });
+  }
   statusEl.style.color = 'var(--success)';
-  statusEl.textContent = 'اتعمل الحساب! لو محتاج تأكيد بالإيميل، دوس على اللينك اللي هيوصلك وبعدين سجّل دخول.';
+  statusEl.textContent = 'اتعمل الحساب بنجاح! بتسجّل دخول...';
+  // Auto login
+  setTimeout(async ()=>{
+    await sb.auth.signInWithPassword({ email: phoneToEmail(phone), password });
+    await refreshAccountView();
+  }, 800);
 });
 
 document.getElementById('wishlistShareBtn').addEventListener('click', async ()=>{
@@ -3567,6 +3634,27 @@ document.getElementById('custLogoutBtn').addEventListener('click', async ()=>{
   currentCustomer = null;
   document.getElementById('accountLoggedIn').style.display = 'none';
   document.getElementById('accountLoggedOut').style.display = 'block';
+});
+
+// Save full profile
+document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('profileStatus');
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const name = document.getElementById('profName').value.trim();
+  const phone = document.getElementById('profPhone').value.trim().replace(/[^0-9]/g, '');
+  if (!name) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب اسمك.'; return; }
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الحفظ...';
+  const { error } = await sb.from('customer_profiles').upsert({
+    id: user.id,
+    name,
+    phone: phone || null,
+    email: document.getElementById('profEmail').value.trim() || null,
+    birth_date: document.getElementById('profBirthDate').value || null,
+    gender: document.getElementById('profGender').value || null
+  });
+  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'حصلت مشكلة، حاول تاني.'; return; }
+  statusEl.style.color = 'var(--success)'; statusEl.textContent = 'اتحفظت بياناتك ✓';
 });
 
 // ===== Shared order tracking display helpers (used by both "حسابي" and guest tracking) =====
@@ -3660,14 +3748,20 @@ async function refreshAccountView(){
   currentCustomer = user;
   document.getElementById('accountLoggedOut').style.display = 'none';
   document.getElementById('accountLoggedIn').style.display = 'block';
-  document.getElementById('accountEmail').textContent = `مسجل دخول بإيميل: ${user.email}`;
+  document.getElementById('accountEmail').style.display = 'none';
 
-  // prefill checkout with saved profile info, if any
+  // prefill checkout + profile form with saved info
   const { data: profile } = await sb.from('customer_profiles').select('*').eq('id', user.id).maybeSingle();
   if (profile) {
     document.getElementById('checkoutName').value = profile.name || '';
     document.getElementById('checkoutPhone').value = profile.phone || '';
     document.getElementById('checkoutAddress').value = profile.address || '';
+    // Full profile form
+    document.getElementById('profName').value = profile.name || '';
+    document.getElementById('profPhone').value = profile.phone || '';
+    document.getElementById('profEmail').value = profile.email || '';
+    document.getElementById('profBirthDate').value = profile.birth_date || '';
+    document.getElementById('profGender').value = profile.gender || '';
   }
 
   const ordersListEl = document.getElementById('myOrdersList');

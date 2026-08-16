@@ -385,6 +385,12 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     </div>
 
     <div class="card" data-tab="customers">
+      <h2>👥 العملاء المسجّلين</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:14px;">كل الناس اللي عملت حساب على الموقع، مع عدد طلباتهم. تقدر تحذف أي حساب.</p>
+      <div id="customersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
+    </div>
+
+    <div class="card" data-tab="customers">
       <h2>طلبات "أبلغني لو السعر قلّ"</h2>
       <div id="priceAlertList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
@@ -591,6 +597,7 @@ async function showAdmin(){
   loadBrandLogos();
   loadReviews();
   loadPackages();
+  loadCustomers();
   loadFlashSale();
   loadNewsletterSubscribers();
   loadStockNotifications();
@@ -974,6 +981,53 @@ async function loadBrandLogos(){
 }
 
 // ===== Review moderation =====
+async function loadCustomers(){
+  const listEl = document.getElementById('customersList');
+  if (!listEl) return;
+  const { data, error } = await sb.rpc('admin_list_customers');
+  if (error || !data || data.length === 0) {
+    listEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش عملاء مسجّلين.</p>';
+    return;
+  }
+  listEl.innerHTML = `
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+      <thead>
+        <tr style="border-bottom:2px solid var(--line);text-align:right;">
+          <th style="padding:8px;">الاسم</th>
+          <th style="padding:8px;">الموبايل</th>
+          <th style="padding:8px;">الطلبات</th>
+          <th style="padding:8px;">إجمالي الشراء</th>
+          <th style="padding:8px;">تاريخ التسجيل</th>
+          <th style="padding:8px;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(c => `
+          <tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:8px;font-weight:600;">${escapeHTMLAdmin(c.name || '—')}</td>
+            <td style="padding:8px;direction:ltr;text-align:right;">${escapeHTMLAdmin(c.phone || '—')}</td>
+            <td style="padding:8px;text-align:center;">${c.order_count}</td>
+            <td style="padding:8px;">${Number(c.total_spent).toLocaleString('ar-EG')} ج</td>
+            <td style="padding:8px;font-size:0.75rem;color:var(--smoke);">${new Date(c.created_at).toLocaleDateString('ar-EG')}</td>
+            <td style="padding:8px;"><button class="btn btn-danger" data-delete-customer="${c.id}" style="font-size:0.72rem;padding:5px 10px;">حذف</button></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    </div>
+    <p style="color:var(--smoke);font-size:0.75rem;margin-top:12px;">إجمالي العملاء: ${data.length}</p>
+  `;
+  listEl.querySelectorAll('[data-delete-customer]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تحذف الحساب ده نهائيًا؟ العميل مش هيقدر يدخل بيه تاني.')) return;
+      const { error } = await sb.rpc('admin_delete_customer', { p_customer_id: btn.dataset.deleteCustomer });
+      if (error) { alert('حصلت مشكلة: ' + error.message); return; }
+      loadCustomers();
+    });
+  });
+}
+
 async function loadPackages(){
   const listEl = document.getElementById('packagesList');
   if (!listEl) return;
