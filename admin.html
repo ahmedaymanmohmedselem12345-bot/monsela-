@@ -123,9 +123,23 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     </div>
 
     <div class="card" data-tab="products">
-      <h2 id="formTitle">إضافة برفان جديد</h2>
+      <h2 id="formTitle">إضافة منتج جديد</h2>
       <input type="hidden" id="productId">
-      <label>اسم البرفان</label>
+      <div style="background:rgba(154,119,57,0.08);border:1px solid rgba(154,119,57,0.3);border-radius:12px;padding:16px;margin-bottom:16px;">
+        <label style="font-weight:700;color:var(--gold-dark);">📦 نوع المنتج (اختار الأول)</label>
+        <select id="pDepartmentSelect" style="width:100%;margin-top:6px;">
+          <option value="عطور">🌸 عطور</option>
+          <option value="ساعات">⌚ ساعات</option>
+          <option value="دهب">💛 دهب</option>
+          <option value="سلاسل">📿 سلاسل</option>
+          <option value="مكياج">💄 مكياج</option>
+          <option value="إكسسوارات">👓 إكسسوارات</option>
+          <option value="بخور">🕯️ بخور</option>
+          <option value="عطور منزلية">🏠 عطور منزلية</option>
+        </select>
+        <p style="color:var(--smoke);font-size:0.76rem;margin-top:8px;">اختار نوع المنتج الأول، وبعدين هتظهرلك المواصفات المناسبة ليه.</p>
+      </div>
+      <label>اسم المنتج</label>
       <input type="text" id="pName" placeholder="مثال: عود ملكي">
       <div class="row">
         <div>
@@ -164,7 +178,7 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
         <textarea id="pDescriptionEn" placeholder="Description in English"></textarea>
       </details>
 
-      <details style="margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;">
+      <details id="perfumeAdvancedDetails" style="margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;">
         <summary style="cursor:pointer;font-weight:700;color:var(--gold);">+ تفاصيل متقدمة (اختياري - سيبها فاضية لو مش عايز تضيعك وقت)</summary>
         <div class="row" style="margin-top:14px;">
           <div><label>نوتة علوية</label><input type="text" id="pTopNotes" placeholder="برغموت، ليمون"></div>
@@ -598,6 +612,23 @@ async function showAdmin(){
   loadReviews();
   loadPackages();
   loadCustomers();
+
+  // Sync department selector with hidden field + toggle perfume-specific fields
+  const deptSelect = document.getElementById('pDepartmentSelect');
+  const deptVisible = document.getElementById('pDepartmentVisible');
+  function syncDepartment(){
+    if (deptVisible) deptVisible.value = deptSelect.value;
+    // Show perfume-specific advanced fields only for scent products
+    const scentDepts = ['عطور', 'بخور', 'عطور منزلية'];
+    const perfumeDetails = document.getElementById('perfumeAdvancedDetails');
+    if (perfumeDetails) {
+      perfumeDetails.style.display = scentDepts.includes(deptSelect.value) ? 'block' : 'none';
+    }
+  }
+  if (deptSelect) {
+    deptSelect.addEventListener('change', syncDepartment);
+    syncDepartment();
+  }
   loadFlashSale();
   loadNewsletterSubscribers();
   loadStockNotifications();
@@ -1286,6 +1317,8 @@ function resetForm(){
   document.getElementById('pOriginalPrice').value = '';
   document.getElementById('pTag').value = '';
   document.getElementById('pDepartmentVisible').value = 'عطور';
+  const deptSelReset = document.getElementById('pDepartmentSelect');
+  if (deptSelReset) { deptSelReset.value = 'عطور'; deptSelReset.dispatchEvent(new Event('change')); }
   document.getElementById('pBrand').value = '';
   document.getElementById('pStock').value = '0';
   document.getElementById('pCategory').value = '';
@@ -1536,6 +1569,8 @@ function editProduct(p){
   document.getElementById('pOriginalPrice').value = p.original_price || '';
   document.getElementById('pTag').value = p.tag || '';
   document.getElementById('pDepartmentVisible').value = p.department || 'عطور';
+  const deptSel = document.getElementById('pDepartmentSelect');
+  if (deptSel) { deptSel.value = p.department || 'عطور'; deptSel.dispatchEvent(new Event('change')); }
   document.getElementById('pBrand').value = p.brand || '';
   document.getElementById('pStock').value = p.stock ?? 0;
   document.getElementById('pCategory').value = p.category || '';

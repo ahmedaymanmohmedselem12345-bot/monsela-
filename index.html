@@ -260,6 +260,7 @@ nav .container{
 .nav-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
 .nav-icon-btn{background:none;border:none;color:var(--cream);width:38px;height:38px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s;position:relative;text-decoration:none;}
 .nav-icon-btn:hover{background:var(--ink-3);color:var(--gold);}
+.account-menu-item:hover{background:var(--ink-3);}
 .nav-lang{font-family:'Cairo';font-size:0.72rem;font-weight:700;letter-spacing:0.05em;width:auto;padding:0 10px;}
 .nav-cart-badge{position:absolute;top:2px;right:2px;background:var(--gold);color:#fff;border-radius:50%;min-width:16px;height:16px;font-size:0.62rem;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:1;}
 .nav-cart-badge.show{display:flex;}
@@ -677,9 +678,21 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
       <button id="trackOrderBtn" class="nav-icon-btn" aria-label="تتبع طلبك" title="تتبع طلبك">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
       </button>
-      <button id="accountBtn" class="nav-icon-btn" aria-label="حسابي" title="حسابي">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </button>
+      <div id="accountMenuWrap" style="position:relative;">
+        <button id="accountBtn" class="nav-icon-btn" aria-label="حسابي" title="حسابي">
+          <svg id="accountBtnIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="accountBtnAvatar" style="display:none;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem;"></span>
+        </button>
+        <div id="accountDropdown" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.18);min-width:210px;z-index:80;overflow:hidden;">
+          <div id="accountDropdownName" style="padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;font-size:0.9rem;"></div>
+          <button class="account-menu-item" data-action="notifications" style="width:100%;text-align:right;padding:12px 18px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.88rem;color:var(--cream);display:flex;align-items:center;gap:10px;transition:background .15s;">🔔 الإشعارات</button>
+          <button class="account-menu-item" data-action="orders" style="width:100%;text-align:right;padding:12px 18px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.88rem;color:var(--cream);display:flex;align-items:center;gap:10px;transition:background .15s;">📦 طلباتي</button>
+          <button class="account-menu-item" data-action="track" style="width:100%;text-align:right;padding:12px 18px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.88rem;color:var(--cream);display:flex;align-items:center;gap:10px;transition:background .15s;">🚚 تتبع الطلب</button>
+          <button class="account-menu-item" data-action="wishlist" style="width:100%;text-align:right;padding:12px 18px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.88rem;color:var(--cream);display:flex;align-items:center;gap:10px;transition:background .15s;">♥ الأمنيات</button>
+          <button class="account-menu-item" data-action="account" style="width:100%;text-align:right;padding:12px 18px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.88rem;color:var(--cream);display:flex;align-items:center;gap:10px;transition:background .15s;">👤 حسابي</button>
+          <button class="account-menu-item" data-action="logout" style="width:100%;text-align:right;padding:12px 18px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.88rem;color:var(--danger);display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);transition:background .15s;">↩ تسجيل الخروج</button>
+        </div>
+      </div>
       <a href="#gallery" class="nav-icon-btn" id="wishlistNavBtn" aria-label="المفضلة" title="المفضلة">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
       </a>
@@ -3553,9 +3566,53 @@ sb.rpc('increment_page_view').then(()=>{}).catch(()=>{});
 // ===== Customer accounts =====
 let currentCustomer = null;
 
-document.getElementById('accountBtn').addEventListener('click', ()=>{
-  document.getElementById('accountOverlay').style.display = 'flex';
-  renderWishlistInAccount();
+document.getElementById('accountBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  if (currentCustomer) {
+    // Logged in: toggle dropdown
+    const dropdown = document.getElementById('accountDropdown');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  } else {
+    // Not logged in: open login/signup modal
+    document.getElementById('accountOverlay').style.display = 'flex';
+    renderWishlistInAccount();
+  }
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e)=>{
+  const wrap = document.getElementById('accountMenuWrap');
+  const dropdown = document.getElementById('accountDropdown');
+  if (wrap && dropdown && !wrap.contains(e.target)) dropdown.style.display = 'none';
+});
+
+// Account dropdown menu actions
+document.querySelectorAll('.account-menu-item').forEach(item=>{
+  item.addEventListener('click', ()=>{
+    document.getElementById('accountDropdown').style.display = 'none';
+    const action = item.dataset.action;
+    if (action === 'logout') {
+      document.getElementById('custLogoutBtn').click();
+      return;
+    }
+    if (action === 'track') {
+      document.getElementById('trackOrderBtn').click();
+      return;
+    }
+    if (action === 'wishlist') {
+      // open account and scroll to wishlist
+      document.getElementById('accountOverlay').style.display = 'flex';
+      renderWishlistInAccount();
+      setTimeout(()=>{ const w = document.getElementById('wishlistInAccount'); if (w) w.scrollIntoView({behavior:'smooth'}); }, 200);
+      return;
+    }
+    // notifications / orders / account → open account panel
+    document.getElementById('accountOverlay').style.display = 'flex';
+    renderWishlistInAccount();
+    if (action === 'orders') {
+      setTimeout(()=>{ const o = document.getElementById('myOrdersList'); if (o) o.scrollIntoView({behavior:'smooth'}); }, 200);
+    }
+  });
 });
 document.getElementById('closeAccount').addEventListener('click', ()=>{
   document.getElementById('accountOverlay').style.display = 'none';
@@ -3652,6 +3709,11 @@ document.getElementById('custLogoutBtn').addEventListener('click', async ()=>{
   currentCustomer = null;
   document.getElementById('accountLoggedIn').style.display = 'none';
   document.getElementById('accountLoggedOut').style.display = 'block';
+  // Reset navbar avatar back to default icon
+  const avatar = document.getElementById('accountBtnAvatar');
+  const icon = document.getElementById('accountBtnIcon');
+  if (avatar && icon) { avatar.style.display = 'none'; icon.style.display = 'block'; }
+  document.getElementById('accountOverlay').style.display = 'none';
 });
 
 // Save full profile
@@ -3780,6 +3842,17 @@ async function refreshAccountView(){
     document.getElementById('profEmail').value = profile.email || '';
     document.getElementById('profBirthDate').value = profile.birth_date || '';
     document.getElementById('profGender').value = profile.gender || '';
+    // Update navbar avatar with first letter of name
+    const name = profile.name || 'ع';
+    const avatar = document.getElementById('accountBtnAvatar');
+    const icon = document.getElementById('accountBtnIcon');
+    if (avatar && icon) {
+      avatar.textContent = name.trim().charAt(0);
+      avatar.style.display = 'flex';
+      icon.style.display = 'none';
+    }
+    const ddName = document.getElementById('accountDropdownName');
+    if (ddName) ddName.textContent = name;
   }
 
   const ordersListEl = document.getElementById('myOrdersList');
