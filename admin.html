@@ -182,6 +182,31 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
           <div><label>الموسم المناسب</label><input type="text" id="pSeason" placeholder="شتوي / صيفي / كل المواسم"></div>
           <div><label>المناسبة</label><input type="text" id="pOccasion" placeholder="سهرة / يومي"></div>
         </div>
+
+        <div style="background:rgba(154,119,57,0.08);border:1px solid rgba(154,119,57,0.25);border-radius:12px;padding:16px;margin:14px 0;">
+          <p style="font-weight:700;color:var(--gold-dark);margin-bottom:6px;font-size:0.9rem;">🧠 بيانات الاختبار الذكي (Quiz)</p>
+          <p style="color:var(--smoke);font-size:0.76rem;margin-bottom:12px;">دي البيانات اللي بيستخدمها الاختبار الذكي عشان يرشّح المنتج للعميل. كل ما تملاها صح، كل ما الترشيح يبقى أدق.</p>
+          <div class="row">
+            <div>
+              <label>قوة الرائحة</label>
+              <select id="pIntensity">
+                <option value="">— اختار —</option>
+                <option value="هادية">هادية</option>
+                <option value="متوسطة">متوسطة</option>
+                <option value="واضحة وقوية">واضحة وقوية</option>
+              </select>
+            </div>
+            <div>
+              <label>نوع الرائحة (اختار أكتر من واحد بمسافة كوما)</label>
+              <input type="text" id="pScentTags" placeholder="حلوة، منعشة، خشبية، شرقية، زهرية، دافئة">
+            </div>
+          </div>
+          <label>أفضل وقت للاستخدام (اختار وقت أو أكتر)</label>
+          <div id="pUsageTimeChips" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+            ${['الصباح','الظهر','العصر','المغرب','المساء','الليل'].map(t => `<label style="display:flex;align-items:center;gap:5px;background:var(--ink-2);border:1px solid var(--line);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:0.82rem;"><input type="checkbox" class="usage-time-cb" value="${t}" style="width:auto;margin:0;">${t}</label>`).join('')}
+          </div>
+        </div>
+
         <div class="row">
           <div><label>التركيز</label><input type="text" id="pConcentration" placeholder="Eau de Parfum"></div>
           <div><label>بلد المنشأ</label><input type="text" id="pOriginCountry" placeholder="فرنسا"></div>
@@ -1102,6 +1127,9 @@ function resetForm(){
   document.getElementById('pLongevity').value = '';
   document.getElementById('pProjection').value = '';
   document.getElementById('pSeason').value = '';
+  const pIntensityEl = document.getElementById('pIntensity'); if (pIntensityEl) pIntensityEl.value = '';
+  const pScentTagsEl = document.getElementById('pScentTags'); if (pScentTagsEl) pScentTagsEl.value = '';
+  document.querySelectorAll('.usage-time-cb').forEach(cb => cb.checked = false);
   document.getElementById('pOccasion').value = '';
   document.getElementById('pConcentration').value = '';
   document.getElementById('pOriginCountry').value = '';
@@ -1205,6 +1233,9 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     projection: document.getElementById('pProjection').value.trim() || null,
     season: document.getElementById('pSeason').value.trim() || null,
     occasion: document.getElementById('pOccasion').value.trim() || null,
+    intensity: document.getElementById('pIntensity').value.trim() || null,
+    scent_tags: document.getElementById('pScentTags').value.trim() || null,
+    usage_time: Array.from(document.querySelectorAll('.usage-time-cb:checked')).map(cb => cb.value).join(',') || null,
     concentration: document.getElementById('pConcentration').value.trim() || null,
     origin_country: document.getElementById('pOriginCountry').value.trim() || null,
     featured: document.getElementById('pFeatured').checked,
@@ -1347,6 +1378,10 @@ function editProduct(p){
   document.getElementById('pProjection').value = p.projection || '';
   document.getElementById('pSeason').value = p.season || '';
   document.getElementById('pOccasion').value = p.occasion || '';
+  document.getElementById('pIntensity').value = p.intensity || '';
+  document.getElementById('pScentTags').value = p.scent_tags || '';
+  const usageTimes = (p.usage_time || '').split(',').map(s => s.trim());
+  document.querySelectorAll('.usage-time-cb').forEach(cb => { cb.checked = usageTimes.includes(cb.value); });
   document.getElementById('pConcentration').value = p.concentration || '';
   document.getElementById('pOriginCountry').value = p.origin_country || '';
   document.getElementById('pFeatured').checked = !!p.featured;
