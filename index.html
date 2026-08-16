@@ -2211,15 +2211,16 @@ async function openProductDetail(productId){
       </div>
     </div>
 
-    <details style="margin-top:24px;border-top:1px solid var(--line);padding-top:16px;">
-      <summary style="cursor:pointer;color:var(--gold);font-weight:700;">تفاصيل المنتج</summary>
-      <p style="color:var(--smoke);line-height:1.8;margin-top:12px;">${localizedField(p,'description') || localizedField(p,'notes') || ''}</p>
-      <div id="pdFragranceProfile" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:14px;font-size:0.82rem;"></div>
-    </details>
+    <div style="margin-top:24px;border-top:1px solid var(--line);padding-top:20px;">
+      <h4 style="color:var(--gold);font-weight:700;font-family:'Aref Ruqaa',serif;font-size:1.2rem;margin-bottom:12px;">تفاصيل المنتج</h4>
+      <p style="color:var(--smoke);line-height:1.9;margin-bottom:16px;">${localizedField(p,'description') || localizedField(p,'notes') || 'منتج فاخر من Monsela.'}</p>
+      <div id="pdFragranceProfile" style="display:none;"></div>
+      <div id="pdUsageTime" style="display:none;"></div>
+    </div>
 
-    <details style="margin-top:14px;">
+    <details style="margin-top:20px;">
       <summary style="cursor:pointer;color:var(--gold);font-weight:700;" data-i18n="pd_share">شارك المنتج ده</summary>
-      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:14px;">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
         <button id="pdCopyLink" class="btn-ghost" style="padding:8px 16px;font-size:0.85rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
       </div>
@@ -2283,6 +2284,23 @@ async function openProductDetail(productId){
     profileEl.style.display = 'none';
   }
 
+  // Best time to use — with icons
+  const usageTimeEl = document.getElementById('pdUsageTime');
+  if (usageTimeEl && p.usage_time) {
+    const timeIcons = { 'الصباح':'🌅', 'الظهر':'☀️', 'العصر':'🌇', 'المغرب':'🌆', 'المساء':'🌙', 'الليل':'🌙' };
+    const times = p.usage_time.split(',').map(t => t.trim()).filter(Boolean);
+    if (times.length > 0) {
+      usageTimeEl.style.display = 'block';
+      usageTimeEl.innerHTML = `
+        <div style="margin-top:16px;">
+          <h4 style="font-family:'Aref Ruqaa',serif;font-size:1.05rem;margin-bottom:10px;color:var(--gold-dark);">⏰ أفضل وقت للاستخدام</h4>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            ${times.map(t => `<div style="display:flex;align-items:center;gap:6px;background:var(--ink-3);border:1px solid var(--line);border-radius:20px;padding:8px 16px;font-size:0.88rem;font-weight:600;"><span style="font-size:1.1rem;">${timeIcons[t] || '🕐'}</span>${escapeHTML(t)}</div>`).join('')}
+          </div>
+        </div>`;
+    }
+  }
+
   // ===== Purchase controls in the product detail modal =====
   function pdCurrentVariant(){
     if (!hasVariants) return null;
@@ -2297,11 +2315,11 @@ async function openProductDetail(productId){
     const qtyWrap = document.getElementById('pdQty');
     const outOfStock = (stock ?? 0) <= 0;
     if (outOfStock) {
-      badge.innerHTML = `<span style="color:var(--danger);font-size:0.8rem;">خلصت الكمية حاليًا</span>`;
+      badge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;color:var(--danger);font-size:0.9rem;font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>خلصت الكمية حاليًا</span>`;
       addBtn.disabled = true; addBtn.style.opacity = '0.5';
     } else {
       const lowStock = stock <= 5;
-      badge.innerHTML = `<span style="color:${lowStock ? '#c98a2c' : 'var(--success)'};font-size:0.8rem;">${lowStock ? 'متبقي ' + stock + ' بس' : 'متوفر'}</span>`;
+      badge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;color:${lowStock ? '#c98a2c' : 'var(--success)'};font-size:0.9rem;font-weight:600;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>${lowStock ? 'متبقي ' + stock + ' بس' : 'متوفر'}</span>`;
       addBtn.disabled = false; addBtn.style.opacity = '1';
     }
     if (qtyWrap) qtyWrap.textContent = Math.min(Math.max(1, stock), Number(qtyWrap.textContent) || 1);
@@ -3855,7 +3873,53 @@ function openReviewModal(productId, orderId, productName){
   });
 }
 
-sb.auth.getSession().then(({ data }) => { if (data.session) refreshAccountView(); });
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    refreshAccountView();
+  } else {
+    // Show a friendly "create account" welcome prompt to guests (once per day)
+    const lastShown = localStorage.getItem('monsela_welcome_shown');
+    const today = new Date().toDateString();
+    if (lastShown !== today) {
+      setTimeout(() => {
+        const banner = document.createElement('div');
+        banner.id = 'welcomePrompt';
+        banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink-2);border:1px solid var(--gold);border-radius:16px;padding:18px 22px;box-shadow:0 12px 40px rgba(0,0,0,0.25);z-index:150;max-width:90%;width:420px;transition:transform .5s cubic-bezier(.2,.8,.2,1);';
+        banner.innerHTML = `
+          <div style="display:flex;align-items:center;gap:14px;">
+            <span style="font-size:2rem;">👋</span>
+            <div style="flex:1;">
+              <p style="font-weight:700;margin-bottom:2px;">أهلاً بيك في Monsela!</p>
+              <p style="font-size:0.82rem;color:var(--smoke);">اعمل حساب دلوقتي وتابع طلباتك واحفظ مفضلاتك.</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button id="welcomeCreateBtn" class="btn-primary" style="flex:1;padding:10px;font-size:0.88rem;">اعمل حساب الآن</button>
+            <button id="welcomeCloseBtn" class="btn-ghost" style="padding:10px 16px;font-size:0.88rem;">بعدين</button>
+          </div>
+        `;
+        document.body.appendChild(banner);
+        requestAnimationFrame(() => { banner.style.transform = 'translateX(-50%) translateY(0)'; });
+        const closeBanner = () => {
+          banner.style.transform = 'translateX(-50%) translateY(120%)';
+          localStorage.setItem('monsela_welcome_shown', today);
+          setTimeout(() => banner.remove(), 500);
+        };
+        document.getElementById('welcomeCloseBtn').addEventListener('click', closeBanner);
+        document.getElementById('welcomeCreateBtn').addEventListener('click', () => {
+          closeBanner();
+          document.getElementById('accountOverlay').style.display = 'flex';
+          renderWishlistInAccount();
+          // Switch to signup tab
+          setTimeout(() => {
+            const signupTab = document.getElementById('tabCustomerSignup');
+            if (signupTab) signupTab.click();
+          }, 300);
+        });
+      }, 3000); // show after 3 seconds
+    }
+  }
+});
 
 let searchDebounceTimer;
 document.getElementById('productSearch').addEventListener('input', ()=>{
