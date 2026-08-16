@@ -3380,6 +3380,24 @@ document.getElementById('paymentProofFile').addEventListener('change', (e)=>{
 });
 
 document.getElementById('checkoutBtn').addEventListener('click', async ()=>{
+  // Require a registered account before ordering
+  if (!currentCustomer) {
+    // Close cart, open account with a clear message
+    document.getElementById('cartOverlay').style.display = 'none';
+    document.getElementById('accountOverlay').style.display = 'block';
+    renderWishlistInAccount();
+    // Switch to signup tab and show a note
+    setTimeout(() => {
+      const signupTab = document.getElementById('tabCustomerSignup');
+      if (signupTab) signupTab.click();
+      const statusEl = document.getElementById('accountStatus');
+      if (statusEl) {
+        statusEl.style.color = 'var(--gold-dark)';
+        statusEl.textContent = 'اعمل حساب سريع (برقمك بس) عشان تكمّل طلبك وتقدر تتابعه بعد كده 🛍️';
+      }
+    }, 300);
+    return;
+  }
   document.getElementById('checkoutOverlay').style.display = 'flex';
   updateCheckoutSummary();
   await loadPaymentSettingsForCheckout();
@@ -4010,49 +4028,72 @@ sb.auth.getSession().then(({ data }) => {
   if (data.session) {
     refreshAccountView();
   } else {
-    // Show a friendly "create account" welcome prompt to guests (once per day)
-    const lastShown = localStorage.getItem('monsela_welcome_shown');
-    const today = new Date().toDateString();
-    if (lastShown !== today) {
-      setTimeout(() => {
-        const banner = document.createElement('div');
-        banner.id = 'welcomePrompt';
-        banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--ink-2);border:1px solid var(--gold);border-radius:16px;padding:18px 22px;box-shadow:0 12px 40px rgba(0,0,0,0.25);z-index:150;max-width:90%;width:420px;transition:transform .5s cubic-bezier(.2,.8,.2,1);';
-        banner.innerHTML = `
-          <div style="display:flex;align-items:center;gap:14px;">
-            <span style="font-size:2rem;">👋</span>
-            <div style="flex:1;">
-              <p style="font-weight:700;margin-bottom:2px;">أهلاً بيك في Monsela!</p>
-              <p style="font-size:0.82rem;color:var(--smoke);">اعمل حساب دلوقتي وتابع طلباتك واحفظ مفضلاتك.</p>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px;">
-            <button id="welcomeCreateBtn" class="btn-primary" style="flex:1;padding:10px;font-size:0.88rem;">اعمل حساب الآن</button>
-            <button id="welcomeCloseBtn" class="btn-ghost" style="padding:10px 16px;font-size:0.88rem;">بعدين</button>
-          </div>
-        `;
-        document.body.appendChild(banner);
-        requestAnimationFrame(() => { banner.style.transform = 'translateX(-50%) translateY(0)'; });
-        const closeBanner = () => {
-          banner.style.transform = 'translateX(-50%) translateY(120%)';
-          localStorage.setItem('monsela_welcome_shown', today);
-          setTimeout(() => banner.remove(), 500);
-        };
-        document.getElementById('welcomeCloseBtn').addEventListener('click', closeBanner);
-        document.getElementById('welcomeCreateBtn').addEventListener('click', () => {
-          closeBanner();
-          document.getElementById('accountOverlay').style.display = 'block';
-          renderWishlistInAccount();
-          // Switch to signup tab
-          setTimeout(() => {
-            const signupTab = document.getElementById('tabCustomerSignup');
-            if (signupTab) signupTab.click();
-          }, 300);
-        });
-      }, 3000); // show after 3 seconds
-    }
+    startAccountNudges();
   }
 });
+
+// Recurring "create account" nudge for guests — reminds them periodically until they sign up
+let accountNudgeTimer = null;
+let accountNudgeCount = 0;
+function startAccountNudges(){
+  // First nudge after 8 seconds, then repeat every 45 seconds
+  accountNudgeTimer = setTimeout(function showNudge(){
+    // Stop if the user logged in meanwhile
+    if (currentCustomer) { clearTimeout(accountNudgeTimer); return; }
+    // Don't stack: if one is already open, skip this round
+    if (!document.getElementById('welcomePrompt')) {
+      accountNudgeCount++;
+      showAccountNudge();
+    }
+    accountNudgeTimer = setTimeout(showNudge, 45000); // every 45s
+  }, 8000); // first after 8s
+}
+
+function showAccountNudge(){
+  // Rotate the message so it doesn't feel identical each time
+  const messages = [
+    { icon: '👋', title: 'أهلاً بيك في Monsela!', text: 'اعمل حساب دلوقتي وتابع طلباتك واحفظ مفضلاتك.' },
+    { icon: '📦', title: 'عايز تتابع طلباتك؟', text: 'اعمل حساب في ثانية برقم موبايلك بس — من غير تعقيد.' },
+    { icon: '⭐', title: 'خلّي تجربتك أسهل', text: 'بحساب واحد تحفظ عناوينك ومفضلاتك وتطلب أسرع.' },
+    { icon: '🎁', title: 'العملاء المسجّلين بيوصلهم عروضنا الأول', text: 'اعمل حساب دلوقتي وكن أول من يعرف عروضنا.' }
+  ];
+  const msg = messages[(accountNudgeCount - 1) % messages.length];
+  const banner = document.createElement('div');
+  banner.id = 'welcomePrompt';
+  banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(150%);background:var(--ink-2);border:1px solid var(--gold);border-radius:16px;padding:18px 22px;box-shadow:0 12px 40px rgba(0,0,0,0.25);z-index:150;max-width:90%;width:420px;transition:transform .5s cubic-bezier(.2,.8,.2,1);';
+  banner.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:2rem;">${msg.icon}</span>
+      <div style="flex:1;">
+        <p style="font-weight:700;margin-bottom:2px;">${msg.title}</p>
+        <p style="font-size:0.82rem;color:var(--smoke);">${msg.text}</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button id="welcomeCreateBtn" class="btn-primary" style="flex:1;padding:10px;font-size:0.88rem;">اعمل حساب الآن</button>
+      <button id="welcomeCloseBtn" class="btn-ghost" style="padding:10px 16px;font-size:0.88rem;">بعدين</button>
+    </div>
+  `;
+  document.body.appendChild(banner);
+  requestAnimationFrame(() => { banner.style.transform = 'translateX(-50%) translateY(0)'; });
+  const closeBanner = () => {
+    banner.style.transform = 'translateX(-50%) translateY(150%)';
+    setTimeout(() => banner.remove(), 500);
+  };
+  document.getElementById('welcomeCloseBtn').addEventListener('click', closeBanner);
+  // Auto-hide after 8 seconds if ignored (so it's not stuck on screen)
+  setTimeout(() => { if (document.getElementById('welcomePrompt') === banner) closeBanner(); }, 8000);
+  document.getElementById('welcomeCreateBtn').addEventListener('click', () => {
+    closeBanner();
+    clearTimeout(accountNudgeTimer); // stop nudging once they engage
+    document.getElementById('accountOverlay').style.display = 'block';
+    renderWishlistInAccount();
+    setTimeout(() => {
+      const signupTab = document.getElementById('tabCustomerSignup');
+      if (signupTab) signupTab.click();
+    }, 300);
+  });
+}
 
 let searchDebounceTimer;
 document.getElementById('productSearch').addEventListener('input', ()=>{
