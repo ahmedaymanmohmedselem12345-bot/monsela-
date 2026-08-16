@@ -282,6 +282,8 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <h2>إعدادات المتجر</h2>
       <label>حد الشحن المجاني (جنيه) — 0 يعني معطّل</label>
       <input type="number" id="freeShippingThreshold" placeholder="1500">
+      <label>سعر تغليف الهدية (جنيه) — بيتضاف لو العميل اختار الطلب هدية — 0 يعني مجاني</label>
+      <input type="number" id="giftWrapPrice" placeholder="50">
       <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
       <div class="status" id="settingsStatus"></div>
     </div>
@@ -340,6 +342,46 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <button class="btn" id="saveSaleBtn">حفظ العرض</button>
       <button class="btn btn-ghost" id="clearSaleBtn">إلغاء العرض الحالي</button>
       <div class="status" id="saleFormStatus"></div>
+    </div>
+
+    <div class="card" data-tab="marketing">
+      <h2>🎁 باقات الهدايا (Gift Packages)</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">الباقات دي بتظهر في "مساعد الهدايا" في الموقع. العميل بيجاوب أسئلة وبتترشحله الباقة المناسبة.</p>
+      <div style="background:var(--ink-3);border-radius:12px;padding:16px;margin-bottom:18px;">
+        <h3 style="font-size:1rem;margin-bottom:12px;">➕ إضافة باقة</h3>
+        <label>اسم الباقة *</label>
+        <input type="text" id="pkgName" placeholder="باقة التوقيع">
+        <label>الوصف</label>
+        <input type="text" id="pkgDesc" placeholder="عطر فاخر + تغليف أنيق">
+        <div class="row">
+          <div><label>السعر *</label><input type="number" id="pkgPrice" placeholder="1899"></div>
+          <div><label>الفئة (لمين)</label>
+            <select id="pkgGender">
+              <option value="الكل">الكل</option>
+              <option value="رجل">رجل</option>
+              <option value="امرأة">امرأة</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div><label>المناسبة (بمسافة كوما)</label><input type="text" id="pkgOccasion" placeholder="عيد ميلاد،تخرج،ذكرى"></div>
+          <div><label>فئة الميزانية</label>
+            <select id="pkgBudget">
+              <option value="500">500</option>
+              <option value="1000">1000</option>
+              <option value="1500">1500</option>
+              <option value="2000">2000</option>
+              <option value="3000">3000</option>
+            </select>
+          </div>
+        </div>
+        <label>صورة الباقة (اختياري)</label>
+        <input type="file" id="pkgImage" accept="image/*">
+        <button class="btn" id="addPkgBtn">إضافة الباقة</button>
+        <div class="status" id="pkgStatus"></div>
+      </div>
+      <h3 style="font-size:1rem;margin-bottom:12px;">الباقات الحالية</h3>
+      <div id="packagesList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
     </div>
 
     <div class="card" data-tab="customers">
@@ -548,6 +590,7 @@ async function showAdmin(){
   loadBanners();
   loadBrandLogos();
   loadReviews();
+  loadPackages();
   loadFlashSale();
   loadNewsletterSubscribers();
   loadStockNotifications();
@@ -563,6 +606,7 @@ async function loadViewCounter(){
 async function loadShopSettings(){
   const { data } = await sb.from('shop_settings').select('*').eq('id', 1).maybeSingle();
   if (data) document.getElementById('freeShippingThreshold').value = data.free_shipping_threshold || '';
+  if (data) document.getElementById('giftWrapPrice').value = data.gift_wrap_price || '';
 }
 
 // ===== Payment settings (admin-editable, no code changes needed) =====
@@ -651,7 +695,8 @@ async function loadPaymentVerificationQueue(){
 document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('settingsStatus');
   const value = Number(document.getElementById('freeShippingThreshold').value) || 0;
-  const { error } = await sb.from('shop_settings').update({ free_shipping_threshold: value }).eq('id', 1);
+  const giftWrap = Number(document.getElementById('giftWrapPrice').value) || 0;
+  const { error } = await sb.from('shop_settings').update({ free_shipping_threshold: value, gift_wrap_price: giftWrap }).eq('id', 1);
   statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
   statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
 });
@@ -929,6 +974,80 @@ async function loadBrandLogos(){
 }
 
 // ===== Review moderation =====
+async function loadPackages(){
+  const listEl = document.getElementById('packagesList');
+  if (!listEl) return;
+  const { data, error } = await sb.from('gift_packages').select('*').order('sort_order', { ascending: true });
+  if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش باقات.</p>'; return; }
+  listEl.innerHTML = data.map(pkg => `
+    <div class="product-item" style="${pkg.is_active ? '' : 'opacity:0.5;'}">
+      ${pkg.image_url ? `<img src="${escapeHTMLAdmin(pkg.image_url)}" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:8px;">` : '<div style="width:50px;height:50px;border-radius:8px;background:var(--ink-3);display:flex;align-items:center;justify-content:center;">🎁</div>'}
+      <div class="info">
+        <h4>${escapeHTMLAdmin(pkg.name)} — ${pkg.price} جنيه ${pkg.is_active ? '' : '<span style="color:var(--danger);">(متوقفة)</span>'}</h4>
+        <p>${escapeHTMLAdmin(pkg.description || '')}</p>
+        <p style="font-size:0.72rem;">لـ: ${escapeHTMLAdmin(pkg.for_gender || 'الكل')} · مناسبات: ${escapeHTMLAdmin(pkg.occasion || '-')}</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" data-toggle-pkg="${pkg.id}" data-active="${pkg.is_active}">${pkg.is_active ? 'إيقاف' : 'تفعيل'}</button>
+        <button class="btn btn-danger" data-delete-pkg="${pkg.id}">حذف</button>
+      </div>
+    </div>
+  `).join('');
+  listEl.querySelectorAll('[data-toggle-pkg]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      await sb.from('gift_packages').update({ is_active: btn.dataset.active !== 'true' }).eq('id', btn.dataset.togglePkg);
+      loadPackages();
+    });
+  });
+  listEl.querySelectorAll('[data-delete-pkg]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تمسح الباقة دي؟')) return;
+      await sb.from('gift_packages').delete().eq('id', btn.dataset.deletePkg);
+      loadPackages();
+    });
+  });
+}
+
+document.getElementById('addPkgBtn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('pkgStatus');
+  const name = document.getElementById('pkgName').value.trim();
+  const price = Number(document.getElementById('pkgPrice').value);
+  if (!name || !price) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب اسم وسعر الباقة.'; return; }
+  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الحفظ...';
+
+  let imageUrl = null;
+  const fileInput = document.getElementById('pkgImage');
+  if (fileInput.files && fileInput.files[0]) {
+    try {
+      const compressed = await compressImage(fileInput.files[0], 800);
+      const fileName = `pkg-${Date.now()}.jpg`;
+      const { error: upErr } = await sb.storage.from('product-images').upload(fileName, compressed);
+      if (!upErr) {
+        imageUrl = sb.storage.from('product-images').getPublicUrl(fileName).data.publicUrl;
+      }
+    } catch(e) { /* image optional */ }
+  }
+
+  const { error } = await sb.from('gift_packages').insert({
+    name,
+    description: document.getElementById('pkgDesc').value.trim() || null,
+    price,
+    for_gender: document.getElementById('pkgGender').value,
+    occasion: document.getElementById('pkgOccasion').value.trim() || null,
+    budget_tier: Number(document.getElementById('pkgBudget').value) || null,
+    image_url: imageUrl,
+    is_active: true
+  });
+  if (error) { statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة: '+error.message; return; }
+  statusEl.style.color='var(--success)'; statusEl.textContent='الباقة اتضافت ✓';
+  document.getElementById('pkgName').value='';
+  document.getElementById('pkgDesc').value='';
+  document.getElementById('pkgPrice').value='';
+  document.getElementById('pkgOccasion').value='';
+  fileInput.value='';
+  loadPackages();
+});
+
 async function loadReviews(){
   const listEl = document.getElementById('reviewsList');
   const { data, error } = await sb.from('reviews').select('*, products(name)').order('created_at', { ascending: false });
