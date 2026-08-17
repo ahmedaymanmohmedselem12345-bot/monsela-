@@ -178,6 +178,83 @@
   --shadow-gold:0 8px 28px rgba(207,174,114,0.28);
 }
 
+/* Emerald — deep emerald green with sand gold (palette image 1).
+   The hex labels under that swatch strip were unreadable, so these values were
+   sampled from the swatches themselves; easy to fine-tune if you have the codes. */
+[data-theme="emerald"]{
+  --ink:#0c2f28;
+  --ink-2:#123f35;
+  --ink-3:#1a4f43;
+  --amber:#c9a063;
+  --amber-light:#ddbb85;
+  --gold:#c9a063;
+  --gold-light:#ddbb85;
+  --gold-dark:#a07c46;
+  --cream:#f7f7f2;
+  --rose:#b1685f;
+  --rose-light:#c98a80;
+  --smoke:#9fbcb2;
+  --line:rgba(201,160,99,0.22);
+  --line-soft:rgba(201,160,99,0.12);
+  --success:#7fc0a2;
+  --danger:#e08b80;
+  --charcoal:#08221d;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.5), 0 24px 56px rgba(0,0,0,0.4);
+  --shadow-gold:0 8px 28px rgba(201,160,99,0.28);
+}
+
+/* Navy — deep navy with classic gold (palette image 2: 0D1B2A / 1B263B / 415A77 / D4AF37 / F7F3E9) */
+[data-theme="navy"]{
+  --ink:#0d1b2a;
+  --ink-2:#1b263b;
+  --ink-3:#243350;
+  --amber:#d4af37;
+  --amber-light:#e6c96a;
+  --gold:#d4af37;
+  --gold-light:#e6c96a;
+  --gold-dark:#a8871f;
+  --cream:#f7f3e9;
+  --rose:#b1685f;
+  --rose-light:#c98a80;
+  --smoke:#8fa3bf;
+  --line:rgba(212,175,55,0.22);
+  --line-soft:rgba(212,175,55,0.12);
+  --success:#7db38a;
+  --danger:#e08b80;
+  --charcoal:#08131e;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.45);
+  --shadow-gold:0 8px 28px rgba(212,175,55,0.30);
+}
+
+/* Bronze — warm brown to pale gold (palette image 3: 583714 / FFEB97) */
+[data-theme="bronze"]{
+  --ink:#2b1a09;
+  --ink-2:#3d2610;
+  --ink-3:#583714;
+  --amber:#ffeb97;
+  --amber-light:#fff4c4;
+  --gold:#e8cd7c;
+  --gold-light:#ffeb97;
+  --gold-dark:#b8943f;
+  --cream:#fff6dc;
+  --rose:#c07f5f;
+  --rose-light:#d69f83;
+  --smoke:#c0a476;
+  --line:rgba(255,235,151,0.22);
+  --line-soft:rgba(255,235,151,0.12);
+  --success:#a8c47f;
+  --danger:#e59a86;
+  --charcoal:#1d1105;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.5), 0 24px 56px rgba(0,0,0,0.4);
+  --shadow-gold:0 8px 28px rgba(255,235,151,0.28);
+}
+
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 
@@ -815,7 +892,7 @@ window.__monselaErrors = [];
         <button id="themeSwitchBtn" class="nav-icon-btn" aria-label="غيّر ألوان الموقع" title="غيّر ألوان الموقع">
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h2a4 4 0 0 0 4-4 10 10 0 0 0-10-8z"/></svg>
         </button>
-        <div id="themeMenu" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);min-width:190px;z-index:80;overflow:hidden;">
+        <div id="themeMenu" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);min-width:200px;z-index:80;overflow:hidden;max-height:70vh;overflow-y:auto;">
           <div style="padding:11px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:0.82rem;color:var(--smoke);">ألوان الموقع</div>
           <button class="theme-opt" data-theme-value="light" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
             <span style="width:16px;height:16px;border-radius:50%;background:#f5f0e6;border:1px solid #9a7b42;flex-shrink:0;"></span>بيج فاخر
@@ -825,6 +902,15 @@ window.__monselaErrors = [];
           </button>
           <button class="theme-opt" data-theme-value="royal" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
             <span style="width:16px;height:16px;border-radius:50%;background:#120a0d;border:1px solid #cfae72;flex-shrink:0;"></span>ليلي ملكي
+          </button>
+          <button class="theme-opt" data-theme-value="emerald" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:#0c2f28;border:1px solid #c9a063;flex-shrink:0;"></span>أخضر زمردي
+          </button>
+          <button class="theme-opt" data-theme-value="navy" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:#0d1b2a;border:1px solid #d4af37;flex-shrink:0;"></span>كحلي وذهبي
+          </button>
+          <button class="theme-opt" data-theme-value="bronze" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:#583714;border:1px solid #ffeb97;flex-shrink:0;"></span>برونزي ذهبي
           </button>
         </div>
       </div>
