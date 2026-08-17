@@ -349,10 +349,6 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     <div class="card" data-tab="dashboard">
       <h2>لوحة المعلومات</h2>
       <div class="row" id="dashboardStats" style="margin-bottom:20px;"></div>
-      <div style="text-align:left;margin-bottom:24px;">
-        <button class="btn" id="resetRevenueBtn" style="background:transparent;color:var(--danger);border:1px solid var(--danger);box-shadow:none;font-size:0.82rem;padding:9px 18px;">🗑 تصفير الإيرادات (مسح كل الطلبات)</button>
-        <p style="color:var(--smoke);font-size:0.72rem;margin-top:8px;">بيمسح كل الطلبات ويرجّع الإيرادات لصفر — استخدمه وأنت بتجرّب. هيسألك تأكيد الأول.</p>
-      </div>
       <div class="row">
         <div>
           <h3 style="font-size:1rem;margin-bottom:10px;">أكتر الماركات مبيعًا</h3>
@@ -547,11 +543,12 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
 
     <div class="card" data-tab="orders">
       <h2>طلبات المتجر (السلة)</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;">
         <button class="btn btn-ghost" id="exportOrdersBtn">⬇ تصدير الطلبات Excel</button>
-        <button class="btn" id="exportAndClearOrdersBtn" style="background:transparent;color:var(--danger);border:1px solid var(--danger);box-shadow:none;">⬇🗑 تصدير كل الطلبات + مسحها</button>
+        <button class="btn btn-ghost" id="ordersViewActiveBtn" style="border-color:var(--gold);color:var(--gold);">📋 الطلبات النشطة</button>
+        <button class="btn btn-ghost" id="ordersViewArchivedBtn">🗄 الأرشيف</button>
       </div>
-      <p style="color:var(--smoke);font-size:0.75rem;margin-bottom:16px;">💡 لما الطلبات تكتر، اضغط "تصدير + مسح" — هيحمّلها Excel على جهازك الأول وبعدين يمسحها من قاعدة البيانات عشان توفّر مساحة.</p>
+      <p style="color:var(--smoke);font-size:0.75rem;margin-bottom:16px;">💡 لما الطلب يوصل للعميل، اضغط <b>«اتسلّم — أرشفة»</b>. الطلب هيختفي من القايمة دي ويروح للأرشيف، وهيفضل محفوظ للأبد كإثبات ليك وللعميل. <b>مفيش مسح نهائي.</b></p>
       <div id="ordersList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
@@ -1813,71 +1810,30 @@ document.getElementById('exportOrdersBtn').addEventListener('click', ()=>{
   downloadCSV(rows, 'monsela-orders.csv');
 });
 
-// Reset revenue (delete all orders) — for testing
-const resetRevenueBtn = document.getElementById('resetRevenueBtn');
-if (resetRevenueBtn) {
-  resetRevenueBtn.addEventListener('click', async ()=>{
-    if (!confirm('متأكد إنك عايز تمسح كل الطلبات وتصفّر الإيرادات؟\n\nده هيمسح كل الطلبات نهائيًا. لو عايز تحتفظ بيها، اقفل ده واستخدم "تصدير + مسح" من تبويب الطلبات الأول.')) return;
-    if (!confirm('تأكيد أخير: هيتمسح كل الطلبات. تمام؟')) return;
-    resetRevenueBtn.disabled = true;
-    resetRevenueBtn.textContent = 'جاري المسح...';
-    const { error } = await sb.rpc('admin_clear_all_orders');
-    if (error) {
-      alert('حصلت مشكلة: ' + error.message);
-      resetRevenueBtn.disabled = false;
-      resetRevenueBtn.textContent = '🗑 تصفير الإيرادات (مسح كل الطلبات)';
-      return;
-    }
-    alert('✓ اتصفّرت الإيرادات وكل الطلبات اتمسحت.');
-    resetRevenueBtn.disabled = false;
-    resetRevenueBtn.textContent = '🗑 تصفير الإيرادات (مسح كل الطلبات)';
-    loadDashboard();
-    loadOrdersList();
-  });
-}
 
-// Export all orders to Excel THEN delete them — for periodic cleanup
-const exportAndClearBtn = document.getElementById('exportAndClearOrdersBtn');
-if (exportAndClearBtn) {
-  exportAndClearBtn.addEventListener('click', async ()=>{
-    if (!lastLoadedOrders || lastLoadedOrders.length === 0) {
-      alert('مفيش طلبات تتصدّر.');
-      return;
-    }
-    if (!confirm(`هيتم تصدير ${lastLoadedOrders.length} طلب لملف Excel، وبعدها يتمسحوا من قاعدة البيانات.\n\nتمام؟`)) return;
-    // 1) Export first
-    const rows = [['رقم الطلب','الاسم','الموبايل','العنوان','المنتجات','الإجمالي','طريقة الدفع','حالة الدفع','الحالة','التاريخ']];
-    lastLoadedOrders.forEach(o => rows.push([
-      o.order_number, o.customer_name, o.customer_phone, o.customer_address,
-      (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(' | '),
-      o.total, o.payment_method, o.payment_status, o.status, o.created_at
-    ]));
-    downloadCSV(rows, `monsela-orders-${new Date().toISOString().slice(0,10)}.csv`);
-    // 2) Confirm the download saved before deleting
-    if (!confirm('تأكد إن ملف الإكسيل اتحمّل على جهازك.\n\nدوس OK عشان نمسح الطلبات من قاعدة البيانات، أو Cancel لو عايز تتأكد الأول.')) return;
-    exportAndClearBtn.disabled = true;
-    exportAndClearBtn.textContent = 'جاري المسح...';
-    const { error } = await sb.rpc('admin_clear_all_orders');
-    if (error) {
-      alert('حصلت مشكلة في المسح: ' + error.message);
-      exportAndClearBtn.disabled = false;
-      exportAndClearBtn.textContent = '⬇🗑 تصدير كل الطلبات + مسحها';
-      return;
-    }
-    alert('✓ اتصدّرت الطلبات واتمسحت من قاعدة البيانات. الملف محفوظ على جهازك.');
-    exportAndClearBtn.disabled = false;
-    exportAndClearBtn.textContent = '⬇🗑 تصدير كل الطلبات + مسحها';
-    loadOrdersList();
-    loadDashboard();
-  });
-}
+// Which orders the admin is currently looking at: active (default) or archived.
+// Archiving only flips a flag — order rows are never deleted, so the customer's
+// invoice and the admin's proof of sale both survive permanently.
+let ordersViewMode = 'active';
 
 async function loadOrdersList(){
   const listEl = document.getElementById('ordersList');
-  const { data, error } = await sb.from('store_orders').select('*').order('created_at', { ascending: false });
+  const showArchived = ordersViewMode === 'archived';
+
+  let query = sb.from('store_orders').select('*');
+  // `archived` may be null on rows created before the column existed, so for the
+  // active view we ask for "not true" rather than "= false".
+  query = showArchived ? query.eq('archived', true) : query.or('archived.is.null,archived.eq.false');
+  const { data, error } = await query.order('created_at', { ascending: false });
+
   if (error) { listEl.innerHTML = '<p style="color:var(--danger);">مشكلة في تحميل الطلبات.</p>'; return; }
   lastLoadedOrders = data || [];
-  if (!data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات واردة.</p>'; return; }
+  if (!data || data.length === 0) {
+    listEl.innerHTML = showArchived
+      ? '<p style="color:var(--smoke);">الأرشيف فاضي. أول ما تأرشف طلب هيظهر هنا.</p>'
+      : '<p style="color:var(--smoke);">مفيش طلبات نشطة. لو أرشفت طلبات، هتلاقيها في تبويب الأرشيف.</p>';
+    return;
+  }
 
   listEl.innerHTML = data.map(o => {
     const itemsText = (o.items || []).map(i => `${escapeHTML(i.name)} × ${i.qty}`).join('، ');
@@ -1885,7 +1841,7 @@ async function loadOrdersList(){
     const payLabels = { cod: 'كاش عند الاستلام', pending_verification: 'مستنية مراجعة الدفع', approved: 'الدفع مؤكد ✓', rejected: 'الدفع مرفوض ✕', need_new_proof: 'مطلوب إثبات جديد' };
     const payColors = { cod: 'var(--smoke)', pending_verification: '#c9a227', approved: 'var(--success)', rejected: 'var(--danger)', need_new_proof: 'var(--danger)' };
     return `
-    <div class="product-item" style="align-items:flex-start;">
+    <div class="product-item" style="align-items:flex-start;${showArchived ? 'opacity:0.75;' : ''}">
       <div class="info">
         <h4>${escapeHTML(o.order_number || '')} — ${escapeHTML(o.customer_name)} — ${o.total} جنيه</h4>
         <p style="color:${payColors[o.payment_status] || 'var(--smoke)'};">💳 ${payLabels[o.payment_status] || o.payment_status}</p>
@@ -1894,11 +1850,15 @@ async function loadOrdersList(){
         ${o.notes ? `<p style="color:var(--gold);">📝 ${escapeHTML(o.notes)}</p>` : ''}
         ${o.is_gift ? `<p style="color:var(--rose);">🎁 هدية ${o.gift_message ? '— ' + escapeHTML(o.gift_message) : ''}</p>` : ''}
         <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
+        ${showArchived && o.archived_at ? `<p style="font-size:0.75rem;color:var(--gold);">🗄 اتأرشف: ${new Date(o.archived_at).toLocaleString('ar-EG')}</p>` : ''}
       </div>
-      <div class="actions">
+      <div class="actions" style="display:flex;flex-direction:column;gap:8px;align-items:stretch;">
         <select data-order="${o.id}" class="order-status" style="background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;">
           ${statusOptions}
         </select>
+        ${showArchived
+          ? `<button class="btn btn-ghost" data-unarchive="${o.id}" style="font-size:0.78rem;padding:8px 12px;">↩ رجّعه للنشطة</button>`
+          : `<button class="btn btn-ghost" data-archive="${o.id}" style="font-size:0.78rem;padding:8px 12px;border-color:var(--success);color:var(--success);">📦 اتسلّم — أرشفة</button>`}
       </div>
     </div>`;
   }).join('');
@@ -1909,7 +1869,48 @@ async function loadOrdersList(){
       if (error) alert('حصلت مشكلة في تحديث الحالة: ' + error.message);
     });
   });
+
+  listEl.querySelectorAll('[data-archive]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if (!confirm('تأكيد إن الطلب ده وصل للعميل؟\n\nهيروح للأرشيف ويختفي من القايمة دي. الطلب مش هيتمسح — تقدر ترجّعه في أي وقت، والعميل هيفضل شايف فاتورته.')) return;
+      btn.disabled = true;
+      const { error } = await sb.from('store_orders')
+        .update({ archived: true, archived_at: new Date().toISOString() })
+        .eq('id', btn.dataset.archive);
+      if (error) { alert('حصلت مشكلة: ' + error.message); btn.disabled = false; return; }
+      loadOrdersList();
+    });
+  });
+
+  listEl.querySelectorAll('[data-unarchive]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      btn.disabled = true;
+      const { error } = await sb.from('store_orders')
+        .update({ archived: false, archived_at: null })
+        .eq('id', btn.dataset.unarchive);
+      if (error) { alert('حصلت مشكلة: ' + error.message); btn.disabled = false; return; }
+      loadOrdersList();
+    });
+  });
 }
+
+// Switching between the active list and the archive.
+(function(){
+  try {
+    const activeBtn = document.getElementById('ordersViewActiveBtn');
+    const archivedBtn = document.getElementById('ordersViewArchivedBtn');
+    if (!activeBtn || !archivedBtn) return;
+    function setMode(mode){
+      ordersViewMode = mode;
+      const on = 'border-color:var(--gold);color:var(--gold);';
+      activeBtn.style.cssText = mode === 'active' ? on : '';
+      archivedBtn.style.cssText = mode === 'archived' ? on : '';
+      loadOrdersList();
+    }
+    activeBtn.addEventListener('click', ()=> setMode('active'));
+    archivedBtn.addEventListener('click', ()=> setMode('archived'));
+  } catch (e) { console.error('Orders view toggle failed:', e); }
+})();
 
 async function loadCustomizerOrdersList(){
   const listEl = document.getElementById('customizerOrdersList');
