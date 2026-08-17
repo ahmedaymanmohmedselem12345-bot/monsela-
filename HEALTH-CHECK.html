@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فحص صحة موقع Monsela</title>
+<style>
+  body{font-family:system-ui,'Segoe UI',Tahoma,sans-serif;background:#f5f0e6;color:#2e2820;
+       margin:0;padding:24px;line-height:1.7;}
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{font-size:1.5rem;margin-bottom:4px;}
+  .sub{color:#7a7062;font-size:.9rem;margin-bottom:24px;}
+  .card{background:#faf6ee;border:1px solid rgba(46,40,32,.14);border-radius:14px;
+        padding:20px;margin-bottom:16px;}
+  button{background:#211d18;color:#fff;border:none;border-radius:10px;padding:14px 28px;
+         font-size:1rem;cursor:pointer;font-family:inherit;width:100%;}
+  button:disabled{opacity:.5;cursor:default;}
+  .row{display:flex;gap:10px;align-items:flex-start;padding:9px 0;
+       border-bottom:1px solid rgba(46,40,32,.08);font-size:.92rem;}
+  .row:last-child{border-bottom:none;}
+  .ico{font-size:1.1rem;line-height:1.4;flex-shrink:0;}
+  .verdict{padding:18px;border-radius:12px;font-weight:700;text-align:center;margin-bottom:16px;font-size:1.05rem;}
+  .good{background:#e6f4ea;border:1px solid #34a853;color:#186a3b;}
+  .bad{background:#fdecea;border:1px solid #c0392b;color:#922b21;}
+  .warn{background:#fff6e5;border:1px solid #c98a2c;color:#8a5a12;}
+  .fix{background:#fff;border-radius:10px;padding:16px;margin-top:12px;font-size:.9rem;}
+  .fix ol{margin:8px 0 0;padding-right:20px;}
+  code{background:#efe8d8;padding:2px 6px;border-radius:5px;font-size:.85rem;}
+  .muted{color:#7a7062;font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🩺 فحص صحة موقع Monsela</h1>
+  <p class="sub">افتح الصفحة دي في أي وقت تشك إن الموقع مش شغال. الفحص بياخد ثواني.</p>
+
+  <div class="card">
+    <button id="runBtn">ابدأ الفحص</button>
+    <div id="results" style="margin-top:18px;"></div>
+  </div>
+
+  <div class="card">
+    <strong>لو الفحص طلع أحمر 🔴</strong>
+    <div class="fix">
+      <p style="margin:0 0 6px;">ارجع لآخر نسخة شغالة:</p>
+      <ol>
+        <li>افتح مجلد <code>RECOVERY</code></li>
+        <li>غيّر اسم <code>index-WORKING-BACKUP.html</code> لـ <code>index.html</code></li>
+        <li>ارفعه على GitHub مكان الملف القديم</li>
+        <li>استنى دقيقة، وبعدين افتح موقعك واعمل <code>Ctrl+Shift+R</code></li>
+      </ol>
+      <p class="muted" style="margin:10px 0 0;">النسخة دي متأكد إنها شغالة — اختبرتها بالكامل.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const SITE = 'https://monsela-xi.vercel.app/index.html';
+const results = document.getElementById('results');
+const btn = document.getElementById('runBtn');
+
+function row(ok, text, note){
+  const d = document.createElement('div');
+  d.className = 'row';
+  d.innerHTML = '<span class="ico">' + (ok === true ? '✅' : ok === false ? '❌' : '⚠️') + '</span>' +
+                '<span><strong>' + text + '</strong>' +
+                (note ? '<br><span class="muted">' + note + '</span>' : '') + '</span>';
+  results.appendChild(d);
+}
+
+btn.addEventListener('click', async () => {
+  btn.disabled = true;
+  btn.textContent = 'بيفحص...';
+  results.innerHTML = '';
+  const problems = [];
+
+  // 1) Is the site reachable at all?
+  let html = '';
+  try {
+    const res = await fetch(SITE, { cache: 'no-store' });
+    if (!res.ok) {
+      row(false, 'الموقع مش راجع رد سليم', 'كود الرد: ' + res.status);
+      problems.push('unreachable');
+    } else {
+      html = await res.text();
+      row(true, 'الموقع شغال وبيرد', Math.round(html.length / 1024) + ' كيلوبايت');
+    }
+  } catch (e) {
+    row(false, 'مش قادر يوصل للموقع', 'اتأكد من النت أو إن الرفع تم');
+    problems.push('unreachable');
+  }
+
+  if (html) {
+    // 2) The exact bug that broke the site before: sb used before it is defined.
+    const defIdx = html.indexOf('const sb = window.supabase.createClient');
+    const useMatch = html.search(/sb\.(from|rpc|auth)\(/);
+    if (defIdx === -1) {
+      row(false, 'اتصال قاعدة البيانات مش موجود', 'الملف المرفوع ناقص');
+      problems.push('no-sb');
+    } else if (useMatch !== -1 && useMatch < defIdx) {
+      row(false, 'خطأ ترتيب اتصال قاعدة البيانات', 'ده بالظبط اللي كسر الموقع قبل كده — ارجع للنسخة الاحتياطية فورًا');
+      problems.push('sb-order');
+    } else {
+      row(true, 'ترتيب اتصال قاعدة البيانات سليم', 'مفيش استخدام قبل التعريف');
+    }
+
+    // 3) Are the essential page pieces present?
+    const needed = [
+      ['productsGrid', 'شبكة المنتجات'],
+      ['cartOverlay', 'السلة'],
+      ['accountOverlay', 'صفحة الحساب'],
+      ['productDetailOverlay', 'صفحة المنتج'],
+      ['checkoutOverlay', 'صفحة إتمام الطلب']
+    ];
+    const missing = needed.filter(([id]) => !html.includes('id="' + id + '"'));
+    if (missing.length) {
+      row(false, 'أجزاء أساسية ناقصة', missing.map(m => m[1]).join('، '));
+      problems.push('missing');
+    } else {
+      row(true, 'كل أجزاء الموقع الأساسية موجودة', 'منتجات، سلة، حساب، طلب');
+    }
+
+    // 4) Safety nets that keep the page visible if JS fails
+    const hasFailsafe = html.includes('revealAll') && html.includes('noscript');
+    row(hasFailsafe ? true : 'warn',
+        hasFailsafe ? 'شبكة الأمان موجودة' : 'شبكة الأمان ناقصة',
+        hasFailsafe ? 'المحتوى هيفضل ظاهر حتى لو حصل خطأ' : 'يفضّل ترجع للنسخة الاحتياطية');
+    if (!hasFailsafe) problems.push('no-failsafe');
+  }
+
+  // 5) Can the database actually be reached?
+  try {
+    const r = await fetch('https://oujdveezelfokelyptza.supabase.co/rest/v1/products?select=id&limit=1', {
+      headers: { apikey: 'sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn' }, cache: 'no-store'
+    });
+    if (r.ok) {
+      const rows = await r.json();
+      row(true, 'قاعدة البيانات شغالة', 'المنتجات بترجع عادي');
+      if (!rows.length) row('warn', 'مفيش منتجات راجعة', 'راجع المنتجات من لوحة التحكم');
+    } else {
+      row(false, 'قاعدة البيانات مش بترد', 'كود: ' + r.status);
+      problems.push('db');
+    }
+  } catch (e) {
+    row(false, 'مش قادر يوصل لقاعدة البيانات', 'ممكن يكون النت أو Supabase');
+    problems.push('db');
+  }
+
+  // Verdict
+  const v = document.createElement('div');
+  if (problems.length === 0) {
+    v.className = 'verdict good';
+    v.textContent = '✅ الموقع سليم وشغال — مفيش أي مشكلة';
+  } else if (problems.includes('sb-order') || problems.includes('no-sb') || problems.includes('missing')) {
+    v.className = 'verdict bad';
+    v.textContent = '🔴 فيه مشكلة خطيرة — ارجع للنسخة الاحتياطية دلوقتي (الخطوات تحت)';
+  } else {
+    v.className = 'verdict warn';
+    v.textContent = '⚠️ فيه ملاحظات محتاجة مراجعة';
+  }
+  results.prepend(v);
+
+  btn.disabled = false;
+  btn.textContent = 'افحص تاني';
+});
+</script>
+</body>
+</html>
