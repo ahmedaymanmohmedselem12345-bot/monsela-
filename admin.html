@@ -458,6 +458,14 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <div class="status" id="paymentSettingsStatus"></div>
     </div>
 
+    <div class="card" style="border-color:var(--gold);" data-tab="settings">
+      <h2>💾 نسخة احتياطية من البيانات</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">بيحمّل كل بياناتك (المنتجات، الطلبات، العملاء، الكوبونات، الإعدادات) في ملف واحد على جهازك. <b>اعمله كل أسبوعين</b> وارفع الملف على GitHub في مجلد <code>BACKUPS</code>.</p>
+      <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:16px;">⚠️ ده بيحفظ <b>البيانات</b> بس. تصميم الموقع نفسه محفوظ في GitHub تلقائيًا.</p>
+      <button class="btn" id="downloadBackupBtn">تحميل نسخة احتياطية الآن</button>
+      <div class="status" id="backupStatus"></div>
+    </div>
+
     <div class="card" style="border-color:var(--gold);" data-tab="orders">
       <h2>💳 مراجعة إثباتات الدفع</h2>
       <div id="paymentVerificationList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
@@ -2133,6 +2141,77 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     });
   } catch (e) {
     console.error('Admin theme switcher failed (panel still works):', e);
+  }
+})();
+</script>
+
+<script>
+/* ===== One-click data backup (isolated on purpose) =====
+   Reads every table and saves the result as a single JSON file on the admin's
+   machine. Read-only: it never writes to the database, so it cannot damage
+   anything. Kept in its own block and fully wrapped in try/catch so a failure
+   here can never affect the rest of the panel. */
+(function(){
+  var TABLES = [
+    'products','store_orders','order_items','customer_profiles','shop_settings',
+    'coupons','gift_packages','delivery_zones','banners','hero_banners',
+    'brand_logos','newsletter_subscribers','stock_notifications','price_alerts',
+    'product_reviews','search_logs'
+  ];
+  try {
+    var btn = document.getElementById('downloadBackupBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async function(){
+      var statusEl = document.getElementById('backupStatus');
+      btn.disabled = true;
+      var backup = { _info: {
+        store: 'Monsela',
+        created_at: new Date().toISOString(),
+        note: 'نسخة احتياطية للبيانات فقط. تصميم الموقع محفوظ في GitHub.'
+      }, tables: {} };
+      var ok = 0, skipped = [];
+      for (var i = 0; i < TABLES.length; i++) {
+        var t = TABLES[i];
+        if (statusEl) {
+          statusEl.style.color = 'var(--smoke)';
+          statusEl.textContent = 'بيقرأ ' + t + '... (' + (i+1) + '/' + TABLES.length + ')';
+        }
+        try {
+          var res = await sb.from(t).select('*');
+          // A missing table just gets skipped; it must not abort the whole backup.
+          if (res.error) { skipped.push(t); continue; }
+          backup.tables[t] = res.data || [];
+          ok++;
+        } catch (e) { skipped.push(t); }
+      }
+      backup._info.tables_saved = ok;
+      backup._info.tables_skipped = skipped;
+
+      try {
+        var stamp = new Date().toISOString().slice(0,10);
+        var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'monsela-backup-' + stamp + '.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+        if (statusEl) {
+          statusEl.style.color = 'var(--success)';
+          statusEl.textContent = 'تم ✓ اتحفظ ' + ok + ' جدول'
+            + (skipped.length ? ' (اتخطى: ' + skipped.join(', ') + ')' : '')
+            + ' — دور على الملف في مجلد التنزيلات.';
+        }
+      } catch (e) {
+        if (statusEl) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'حصلت مشكلة وقت الحفظ.'; }
+        console.error('Backup save failed:', e);
+      }
+      btn.disabled = false;
+    });
+  } catch (e) {
+    console.error('Backup block failed (panel still works):', e);
   }
 })();
 </script>
