@@ -1013,47 +1013,9 @@ window.__monselaErrors = [];
 
     <!-- Minimal action icons (left side in RTL) -->
     <div class="nav-actions">
-      <div id="themeSwitchWrap" style="position:relative;">
-        <button id="themeSwitchBtn" class="nav-icon-btn" aria-label="غيّر ألوان الموقع" title="غيّر ألوان الموقع">
-          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h2a4 4 0 0 0 4-4 10 10 0 0 0-10-8z"/></svg>
-        </button>
-        <div id="themeMenu" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);min-width:200px;z-index:80;overflow:hidden;max-height:70vh;overflow-y:auto;">
-          <div style="padding:11px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:0.82rem;color:var(--smoke);">ألوان الموقع</div>
-          <button class="theme-opt" data-theme-value="light" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#f5f0e6;border:1px solid #9a7b42;flex-shrink:0;"></span>بيج فاخر
-          </button>
-          <button class="theme-opt" data-theme-value="dark" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#0e0b09;border:1px solid #c9a86a;flex-shrink:0;"></span>أسود وذهبي
-          </button>
-          <button class="theme-opt" data-theme-value="royal" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#120a0d;border:1px solid #cfae72;flex-shrink:0;"></span>ليلي ملكي
-          </button>
-          <button class="theme-opt" data-theme-value="emerald" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#0c2f28;border:1px solid #c9a063;flex-shrink:0;"></span>أخضر زمردي
-          </button>
-          <button class="theme-opt" data-theme-value="navy" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#0d1b2a;border:1px solid #d4af37;flex-shrink:0;"></span>كحلي وذهبي
-          </button>
-          <button class="theme-opt" data-theme-value="bronze" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#583714;border:1px solid #ffeb97;flex-shrink:0;"></span>برونزي ذهبي
-          </button>
-          <button class="theme-opt" data-theme-value="crimson" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#02060e;border:1px solid #c50337;flex-shrink:0;"></span>أحمر قرمزي
-          </button>
-          <button class="theme-opt" data-theme-value="violet" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#02060e;border:1px solid #9303c5;flex-shrink:0;"></span>بنفسجي كهربي
-          </button>
-          <button class="theme-opt" data-theme-value="teal" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#013f4a;border:1px solid #068562;flex-shrink:0;"></span>أزرق مخضر
-          </button>
-          <button class="theme-opt" data-theme-value="midnight" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#021c4f;border:1px solid #c50337;flex-shrink:0;"></span>كحلي وقرمزي
-          </button>
-          <button class="theme-opt" data-theme-value="forest" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
-            <span style="width:16px;height:16px;border-radius:50%;background:#0d795f;border:1px solid #ddb303;flex-shrink:0;"></span>أخضر وخردلي
-          </button>
-        </div>
-      </div>
+      <!-- Theme switcher removed from the storefront on purpose: the site colour
+           is now chosen by the admin in shop_settings.site_theme and applied to
+           every visitor. See the isolated theme script at the end of <body>. -->
       <button id="langSwitchBtn" class="nav-icon-btn nav-lang" aria-label="Language">EN</button>
       <button id="trackOrderBtn" class="nav-icon-btn" aria-label="تتبع طلبك" title="تتبع طلبك">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
@@ -1834,8 +1796,8 @@ function showPriceAlertModal(productId){
   modal.innerHTML = `
     <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:28px;max-width:360px;width:100%;box-shadow:var(--shadow-lg);">
       <h3 style="font-family:'Aref Ruqaa',serif;font-size:var(--text-xl);margin-bottom:12px;">تنبيه انخفاض السعر</h3>
-      <p style="color:var(--smoke);font-size:var(--text-sm);margin-bottom:16px;">هنبعتلك إيميل لما السعر ينزل.</p>
-      <input type="email" id="priceAlertEmail" placeholder="إيميلك" style="width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:var(--r-md);font-family:'Cairo';margin-bottom:12px;">
+      <p style="color:var(--smoke);font-size:var(--text-sm);margin-bottom:16px;">هنبعتلك رسالة واتساب لما السعر ينزل.</p>
+      <input type="tel" inputmode="numeric" maxlength="11" id="priceAlertPhone" placeholder="رقم موبايلك (01xxxxxxxxx)" style="width:100%;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:12px 14px;border-radius:var(--r-md);font-family:'Cairo';margin-bottom:12px;">
       <div style="display:flex;gap:10px;">
         <button id="priceAlertSubmit" class="btn-primary" style="flex:1;padding:12px;">تأكيد</button>
         <button id="priceAlertCancel" class="btn-ghost" style="flex:0;padding:12px 18px;">إلغاء</button>
@@ -1845,9 +1807,10 @@ function showPriceAlertModal(productId){
   document.getElementById('priceAlertCancel').addEventListener('click', ()=> modal.remove());
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.getElementById('priceAlertSubmit').addEventListener('click', async ()=>{
-    const email = document.getElementById('priceAlertEmail').value.trim();
-    if (!email || !email.includes('@')) { toast('اكتب إيميل صحيح.', 'error'); return; }
-    const { error } = await sb.from('price_alerts').insert({ product_id: productId, email });
+    const phone = document.getElementById('priceAlertPhone').value.replace(/[\s-]/g, '').trim();
+    if (!/^01[0-2,5]\d{8}$/.test(phone)) { toast('اكتب رقم موبايل صحيح يبدأ بـ 01 و11 رقم.', 'error'); return; }
+    const { error } = await sb.from('price_alerts').insert({ product_id: productId, phone });
+    if (error) console.error('price_alerts insert failed:', error);
     modal.remove();
     toast(error ? 'حصلت مشكلة، حاول تاني.' : 'هنبلغك لو السعر قلّ ✓', error ? 'error' : 'success');
   });
@@ -2482,7 +2445,7 @@ function renderProducts(){
                 <button class="btn-primary add-to-cart" data-id="${p.id}" style="flex:1;padding:10px;">${translations[currentLang].btn_add_to_cart}</button>
                </div>`
             : `<div>
-                <input type="email" class="notify-email" data-id="${p.id}" placeholder="إيميلك للإشعار"
+                <input type="tel" inputmode="numeric" maxlength="11" class="notify-phone" data-id="${p.id}" placeholder="رقم موبايلك (01xxxxxxxxx)"
                   style="width:100%;margin-bottom:6px;background:var(--ink);border:1px solid var(--line);color:var(--cream);padding:9px 12px;border-radius:var(--r-md);font-family:'Cairo';font-size:var(--text-sm);">
                 <button class="btn-ghost notify-btn" data-id="${p.id}" style="width:100%;font-size:var(--text-sm);padding:9px;">${translations[currentLang].btn_notify_stock}</button>
                </div>`}
@@ -2494,14 +2457,18 @@ function renderProducts(){
 
   grid.querySelectorAll('.notify-btn').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
-      const emailInput = grid.querySelector(`.notify-email[data-id="${btn.dataset.id}"]`);
-      const email = emailInput.value.trim();
-      if (!email || !email.includes('@')) { toast('اكتب إيميل صحيح.','error'); return; }
-      const { error } = await sb.from('stock_notifications').insert({ product_id: btn.dataset.id, email });
-      if (error) { toast('حصلت مشكلة، حاول تاني.','error'); return; }
+      const phoneInput = grid.querySelector(`.notify-phone[data-id="${btn.dataset.id}"]`);
+      // Strip spaces/dashes so "010 1234 5678" is accepted the same as "01012345678".
+      const phone = phoneInput.value.replace(/[\s-]/g, '').trim();
+      if (!/^01[0-2,5]\d{8}$/.test(phone)) {
+        toast('اكتب رقم موبايل صحيح يبدأ بـ 01 و11 رقم.','error');
+        return;
+      }
+      const { error } = await sb.from('stock_notifications').insert({ product_id: btn.dataset.id, phone });
+      if (error) { console.error('stock_notifications insert failed:', error); toast('حصلت مشكلة، حاول تاني.','error'); return; }
       btn.textContent = '✓ هنبلغك أول ما يتوفر';
       btn.disabled = true;
-      emailInput.style.display = 'none';
+      phoneInput.style.display = 'none';
     });
   });
 
@@ -4184,7 +4151,14 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:var(--r-xl);padding:36px;max-width:420px;width:100%;box-shadow:var(--shadow-lg);text-align:center;">
       <div style="font-size:2.5rem;margin-bottom:16px;">✓</div>
       <h2 style="font-family:'Aref Ruqaa',serif;font-size:var(--text-2xl);margin-bottom:8px;">تم تأكيد طلبك</h2>
-      ${orderNumDisplay ? `<p style="color:var(--gold);font-weight:700;font-size:var(--text-md);margin-bottom:8px;">${orderNumDisplay}</p>` : ''}
+      ${orderNumDisplay ? `<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <span style="color:var(--gold);font-weight:700;font-size:var(--text-md);">${escapeHTML(orderNumDisplay)}</span>
+          <button id="copyOrderNumBtn" type="button" aria-label="انسخ رقم الطلب" title="انسخ رقم الطلب"
+            style="display:inline-flex;align-items:center;gap:5px;background:var(--ink);border:1px solid var(--line);color:var(--cream);border-radius:var(--r-md);padding:5px 10px;cursor:pointer;font-family:'Cairo';font-size:var(--text-xs);line-height:1;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copyOrderNumLabel">نسخ</span>
+          </button>
+        </div>` : ''}
       ${etaDisplay ? `<p style="color:var(--smoke);font-size:var(--text-sm);margin-bottom:8px;">📦 متوقع يوصلك ${etaDisplay}</p>` : ''}
       ${isPendingPayment ? `<p style="background:var(--ink);border:1px solid var(--line);border-radius:var(--r-md);padding:12px;font-size:var(--text-sm);color:var(--smoke);margin:14px 0;">إثبات الدفع استلمناه، وهيتراجع من فريقنا قبل ما نبدأ التجهيز.</p>` : ''}
       ${orderNumDisplay ? `<p style="color:var(--smoke);font-size:var(--text-xs);margin-bottom:20px;">⚠ احتفظ برقم الطلب عشان تتابعه.</p>` : ''}
@@ -4192,6 +4166,40 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     </div>`;
   document.body.appendChild(confirmOverlay);
   document.getElementById('confirmOverlayClose').addEventListener('click', ()=> confirmOverlay.remove());
+
+  // Copy-order-number button. Wrapped in try/catch and guarded on the element so
+  // that a clipboard failure can never stop the confirmation modal from working.
+  try {
+    const copyBtn = document.getElementById('copyOrderNumBtn');
+    if (copyBtn && orderNumDisplay) {
+      copyBtn.addEventListener('click', async ()=>{
+        const label = document.getElementById('copyOrderNumLabel');
+        let copied = false;
+        try {
+          // navigator.clipboard needs HTTPS; falls back to the old method below.
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(orderNumDisplay);
+            copied = true;
+          } else {
+            const tmp = document.createElement('textarea');
+            tmp.value = orderNumDisplay;
+            tmp.style.cssText = 'position:fixed;top:-1000px;opacity:0;';
+            document.body.appendChild(tmp);
+            tmp.select();
+            copied = document.execCommand('copy');
+            tmp.remove();
+          }
+        } catch (e) { copied = false; }
+        if (copied) {
+          if (label) label.textContent = 'اتنسخ ✓';
+          copyBtn.style.borderColor = 'var(--gold)';
+          setTimeout(()=>{ if (label) label.textContent = 'نسخ'; copyBtn.style.borderColor = 'var(--line)'; }, 2000);
+        } else {
+          toast('انسخ الرقم يدويًا: ' + orderNumDisplay, 'info', 8000);
+        }
+      });
+    }
+  } catch (e) { console.error('Copy order number button failed:', e); }
 
   } catch (unexpectedError) {
     console.error('Checkout error:', unexpectedError);
@@ -4881,53 +4889,38 @@ syncBottomNavCart();
 </script>
 
 <script>
-/* ===== Theme switcher (isolated) =====
-   Purely visual: it only sets data-theme on <html> and saves the choice.
-   Kept separate from the app code so it can never affect products, cart or checkout. */
-(function(){
-  var btn  = document.getElementById('themeSwitchBtn');
-  var menu = document.getElementById('themeMenu');
-  var wrap = document.getElementById('themeSwitchWrap');
-  if (!btn || !menu || !wrap) return;
+/* ===== Site theme (isolated, admin-controlled) =====
+   The visitor has no theme control any more. The colour scheme is whatever the
+   admin saved in shop_settings.site_theme, and it applies to every visitor.
 
-  function currentTheme(){
-    return document.documentElement.getAttribute('data-theme') || 'light';
-  }
-  function markActive(){
-    var cur = currentTheme();
-    menu.querySelectorAll('.theme-opt').forEach(function(o){
-      var on = o.dataset.themeValue === cur;
-      o.style.background = on ? 'var(--ink-3)' : 'none';
-      o.style.fontWeight = on ? '700' : '400';
-    });
-  }
+   Two-step so there is no colour flash on load:
+     1. The tiny script in <head> instantly applies the theme cached in
+        localStorage from the visitor's previous visit.
+     2. This block then asks the database for the current value and, if it
+        changed, applies it and refreshes the cache for next time.
+
+   Entirely visual: it only sets data-theme on <html>. If the request fails, the
+   cached/default theme simply stays, so products, cart and checkout are never
+   affected. */
+(function(){
+  var VALID = ['light','dark','royal','emerald','navy','bronze',
+               'crimson','violet','teal','midnight','forest'];
   function applyTheme(name){
+    if (VALID.indexOf(name) === -1) return;
     if (name === 'light') document.documentElement.removeAttribute('data-theme');
     else document.documentElement.setAttribute('data-theme', name);
     try { localStorage.setItem('monsela_theme', name); } catch (e) {}
-    markActive();
   }
-
-  btn.addEventListener('click', function(e){
-    e.stopPropagation();
-    var open = menu.style.display === 'block';
-    menu.style.display = open ? 'none' : 'block';
-    if (!open) markActive();
-  });
-  menu.querySelectorAll('.theme-opt').forEach(function(o){
-    o.addEventListener('click', function(){
-      applyTheme(o.dataset.themeValue);
-      menu.style.display = 'none';
-    });
-    o.addEventListener('mouseenter', function(){
-      if (o.dataset.themeValue !== currentTheme()) o.style.background = 'var(--ink-3)';
-    });
-    o.addEventListener('mouseleave', markActive);
-  });
-  document.addEventListener('click', function(e){
-    if (!wrap.contains(e.target)) menu.style.display = 'none';
-  });
-  markActive();
+  try {
+    // `sb` is created much earlier in the page, so it is safe to use here.
+    sb.from('shop_settings').select('site_theme').eq('id', 1).maybeSingle()
+      .then(function(res){
+        if (res && res.data && res.data.site_theme) applyTheme(res.data.site_theme);
+      })
+      .catch(function(err){ console.error('Theme load failed (keeping current theme):', err); });
+  } catch (e) {
+    console.error('Theme block failed (keeping current theme):', e);
+  }
 })();
 </script>
 

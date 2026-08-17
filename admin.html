@@ -9,6 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* Applies the saved admin-panel theme immediately, before the page paints. */
+(function(){
+  try {
+    var t = localStorage.getItem('monsela_admin_theme');
+    if (t && t !== 'light') document.documentElement.setAttribute('data-admin-theme', t);
+  } catch (e) {}
+})();
+</script>
 <style>
 :root{
   --ink:#faf7f2; --ink-2:#ffffff; --ink-3:#f4ede1;
@@ -20,6 +29,58 @@
   --shadow-md:0 4px 12px rgba(36,31,26,0.05), 0 8px 24px rgba(36,31,26,0.05);
   --shadow-lg:0 12px 28px rgba(36,31,26,0.08), 0 24px 56px rgba(36,31,26,0.08);
   --r-sm:8px; --r-md:12px; --r-lg:18px; --r-pill:999px;
+}
+
+/* ===== Admin panel colour themes =====
+   These only restyle THIS control panel. They are separate from the storefront
+   theme (which lives in shop_settings.site_theme). Chosen via the palette button
+   in the top bar and remembered in localStorage. */
+[data-admin-theme="dark"]{
+  --ink:#0e0b09; --ink-2:#17120e; --ink-3:#231b15;
+  --amber:#c9a86a; --gold:#c9a86a; --gold-light:#e2c893; --gold-dark:#9a7b42;
+  --cream:#f2e9da; --rose:#b1685f; --smoke:#a2947f;
+  --line:rgba(201,168,106,0.20); --line-soft:rgba(201,168,106,0.10);
+  --success:#7da36a; --danger:#d4736a;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.45);
+}
+[data-admin-theme="navy"]{
+  --ink:#0d1b2a; --ink-2:#152738; --ink-3:#1e3450;
+  --amber:#d4af37; --gold:#d4af37; --gold-light:#e8ca63; --gold-dark:#a8862a;
+  --cream:#eaf0f7; --rose:#c07a6e; --smoke:#93a7bd;
+  --line:rgba(212,175,55,0.20); --line-soft:rgba(212,175,55,0.10);
+  --success:#6fa37a; --danger:#d4736a;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.28);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.5), 0 24px 56px rgba(0,0,0,0.4);
+}
+[data-admin-theme="emerald"]{
+  --ink:#0c2f28; --ink-2:#123d34; --ink-3:#1a5045;
+  --amber:#c9a063; --gold:#c9a063; --gold-light:#e0bd84; --gold-dark:#96743f;
+  --cream:#e8f2ed; --rose:#c08a7e; --smoke:#8faea2;
+  --line:rgba(201,160,99,0.20); --line-soft:rgba(201,160,99,0.10);
+  --success:#7db98a; --danger:#d4736a;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.26);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.38), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.48), 0 24px 56px rgba(0,0,0,0.38);
+}
+[data-admin-theme="royal"]{
+  --ink:#120a0d; --ink-2:#1c1014; --ink-3:#26161b;
+  --amber:#cfae72; --gold:#cfae72; --gold-light:#e5cb96; --gold-dark:#9c8049;
+  --cream:#f3e7e4; --rose:#c07d78; --smoke:#a89087;
+  --line:rgba(207,174,114,0.20); --line-soft:rgba(207,174,114,0.10);
+  --success:#7da36a; --danger:#d4736a;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.45);
+}
+[data-admin-theme="slate"]{
+  --ink:#eef1f5; --ink-2:#ffffff; --ink-3:#e2e7ee;
+  --amber:#4a6fa5; --gold:#3d5f91; --gold-light:#6f8fbe; --gold-dark:#2c4670;
+  --cream:#1c2430; --rose:#a8524a; --smoke:#61708a;
+  --line:rgba(28,36,48,0.12); --line-soft:rgba(28,36,48,0.07);
+  --success:#4f8a5e; --danger:#b34a42;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:radial-gradient(ellipse 1000px 700px at 50% -5%, var(--ink-2) 0%, var(--ink) 55%, var(--ink-3) 100%) fixed;color:var(--cream);font-family:'Cairo',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.7;}
@@ -110,7 +171,18 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     <div class="top-bar">
       <span id="whoami" style="color:var(--smoke);font-size:0.9rem;"></span>
       <span id="viewCounter" style="color:var(--smoke);font-size:0.85rem;"></span>
-      <button class="btn btn-ghost" id="logoutBtn">تسجيل الخروج</button>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <select id="adminThemeSelect" title="لون لوحة التحكم"
+          style="background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:9px 12px;border-radius:var(--r-pill);font-family:'Cairo';font-size:0.85rem;cursor:pointer;margin:0;">
+          <option value="light">🎨 لوحة: فاتح</option>
+          <option value="dark">🎨 لوحة: أسود وذهبي</option>
+          <option value="navy">🎨 لوحة: كحلي وذهبي</option>
+          <option value="emerald">🎨 لوحة: أخضر زمردي</option>
+          <option value="royal">🎨 لوحة: ليلي ملكي</option>
+          <option value="slate">🎨 لوحة: رمادي أزرق</option>
+        </select>
+        <button class="btn btn-ghost" id="logoutBtn">تسجيل الخروج</button>
+      </div>
     </div>
 
     <div id="adminTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;border-bottom:1px solid var(--line);padding-bottom:16px;">
@@ -324,6 +396,24 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
         <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;">
           <input type="checkbox" id="seasonalActiveInput" style="width:auto;"> فعّل قسم عروض الموسم
         </label>
+      </div>
+      <div style="background:var(--ink-3);border-radius:12px;padding:16px;margin-top:16px;">
+        <h3 style="font-size:1rem;margin-bottom:6px;">🎨 لون الموقع (اللي العميل بيشوفه)</h3>
+        <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:12px;">اللون ده بيتطبّق على كل زوار الموقع. العميل مالوش تحكم فيه — إنت بس اللي بتختاره من هنا. <b>ملاحظة:</b> ده غير لون لوحة التحكم اللي فوق.</p>
+        <label>اللون</label>
+        <select id="siteThemeInput">
+          <option value="light">بيج فاخر (الافتراضي)</option>
+          <option value="dark">أسود وذهبي</option>
+          <option value="royal">ليلي ملكي</option>
+          <option value="emerald">أخضر زمردي</option>
+          <option value="navy">كحلي وذهبي</option>
+          <option value="bronze">برونزي ذهبي</option>
+          <option value="crimson">أحمر قرمزي</option>
+          <option value="violet">بنفسجي كهربي</option>
+          <option value="teal">أزرق مخضر</option>
+          <option value="midnight">كحلي وقرمزي</option>
+          <option value="forest">أخضر وخردلي</option>
+        </select>
       </div>
       <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
       <div class="status" id="settingsStatus"></div>
@@ -678,6 +768,7 @@ async function loadShopSettings(){
     document.getElementById('seasonalActiveInput').checked = !!data.seasonal_active;
     document.getElementById('announcementTextInput').value = data.announcement_text || '';
     document.getElementById('announcementActiveInput').checked = !!data.announcement_active;
+    document.getElementById('siteThemeInput').value = data.site_theme || 'light';
   }
 }
 
@@ -775,10 +866,11 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
     seasonal_season: document.getElementById('seasonalSeasonInput').value,
     seasonal_active: document.getElementById('seasonalActiveInput').checked,
     announcement_text: document.getElementById('announcementTextInput').value.trim() || null,
-    announcement_active: document.getElementById('announcementActiveInput').checked
+    announcement_active: document.getElementById('announcementActiveInput').checked,
+    site_theme: document.getElementById('siteThemeInput').value
   }).eq('id', 1);
   statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
-  statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓';
+  statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓ لون الموقع هيتغير للعملاء فورًا.';
 });
 
 // ===== Multi-banner slider management =====
@@ -951,15 +1043,25 @@ async function loadPriceAlerts(){
   const listEl = document.getElementById('priceAlertList');
   const { data, error } = await sb.from('price_alerts').select('*, products(name)').eq('notified', false).order('created_at', { ascending: false });
   if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات.</p>'; return; }
-  listEl.innerHTML = data.map(n => `
+  listEl.innerHTML = data.map(n => {
+    // New rows store `phone`; older rows only have `email`. Show whichever exists.
+    const contact = n.phone || n.email || '(مفيش بيانات تواصل)';
+    const waNumber = n.phone ? '2' + n.phone.replace(/[^0-9]/g, '') : null;
+    const waText = encodeURIComponent(
+      `مرحبًا! 👋 سعر "${n.products ? n.products.name : ''}" نزل — تقدر تشوفه دلوقتي في Monsela.`
+    );
+    return `
     <div class="product-item">
       <div class="info">
         <h4>${n.products ? escapeHTML(n.products.name) : '(منتج محذوف)'}</h4>
-        <p>${escapeHTML(n.email)}</p>
+        <p>${escapeHTML(contact)}</p>
       </div>
-      <div class="actions"><button class="btn btn-ghost" data-mark-price-notified="${n.id}">اتبلّغ ✓</button></div>
-    </div>
-  `).join('');
+      <div class="actions">
+        ${waNumber ? `<a class="btn btn-ghost" href="https://wa.me/${waNumber}?text=${waText}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">واتساب 💬</a>` : ''}
+        <button class="btn btn-ghost" data-mark-price-notified="${n.id}">اتبلّغ ✓</button>
+      </div>
+    </div>`;
+  }).join('');
   listEl.querySelectorAll('[data-mark-price-notified]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       await sb.from('price_alerts').update({ notified: true }).eq('id', btn.dataset.markPriceNotified);
@@ -973,15 +1075,25 @@ async function loadStockNotifications(){
   const listEl = document.getElementById('stockNotifyList');
   const { data, error } = await sb.from('stock_notifications').select('*, products(name)').eq('notified', false).order('created_at', { ascending: false });
   if (error || !data || data.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش طلبات.</p>'; return; }
-  listEl.innerHTML = data.map(n => `
+  listEl.innerHTML = data.map(n => {
+    // New rows store `phone`; older rows only have `email`. Show whichever exists.
+    const contact = n.phone || n.email || '(مفيش بيانات تواصل)';
+    const waNumber = n.phone ? '2' + n.phone.replace(/[^0-9]/g, '') : null;
+    const waText = encodeURIComponent(
+      `مرحبًا! 👋 منتج "${n.products ? n.products.name : ''}" اللي طلبت نتبلغك لما يتوفر — رجع متاح دلوقتي في Monsela.`
+    );
+    return `
     <div class="product-item">
       <div class="info">
         <h4>${n.products ? escapeHTML(n.products.name) : '(منتج محذوف)'}</h4>
-        <p>${escapeHTML(n.email)}</p>
+        <p>${escapeHTML(contact)}</p>
       </div>
-      <div class="actions"><button class="btn btn-ghost" data-mark-notified="${n.id}">اتبلّغ ✓</button></div>
-    </div>
-  `).join('');
+      <div class="actions">
+        ${waNumber ? `<a class="btn btn-ghost" href="https://wa.me/${waNumber}?text=${waText}" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;">واتساب 💬</a>` : ''}
+        <button class="btn btn-ghost" data-mark-notified="${n.id}">اتبلّغ ✓</button>
+      </div>
+    </div>`;
+  }).join('');
   listEl.querySelectorAll('[data-mark-notified]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       await sb.from('stock_notifications').update({ notified: true }).eq('id', btn.dataset.markNotified);
@@ -1999,6 +2111,30 @@ document.getElementById('qrCloseBtn').addEventListener('click', ()=>{
 document.getElementById('qrModal').addEventListener('click', (e)=>{
   if (e.target.id === 'qrModal') document.getElementById('qrModal').style.display = 'none';
 });
+</script>
+
+<script>
+/* ===== Admin panel theme switcher (isolated on purpose) =====
+   Purely cosmetic and completely separate from the storefront theme:
+   it only sets data-admin-theme on <html> and remembers the choice locally.
+   Kept in its own block so it can never affect products, orders or settings. */
+(function(){
+  try {
+    var sel = document.getElementById('adminThemeSelect');
+    if (!sel) return;
+    var saved = 'light';
+    try { saved = localStorage.getItem('monsela_admin_theme') || 'light'; } catch (e) {}
+    sel.value = saved;
+    sel.addEventListener('change', function(){
+      var v = sel.value;
+      if (v === 'light') document.documentElement.removeAttribute('data-admin-theme');
+      else document.documentElement.setAttribute('data-admin-theme', v);
+      try { localStorage.setItem('monsela_admin_theme', v); } catch (e) {}
+    });
+  } catch (e) {
+    console.error('Admin theme switcher failed (panel still works):', e);
+  }
+})();
 </script>
 </body>
 </html>
