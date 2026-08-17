@@ -63,7 +63,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
-  /* ── Warm beige luxury palette (reference match) ── */
+  /* ── THEME: default (warm beige luxury) ──
+     Colours live only in these tokens, so switching theme = swapping this block.
+     Alternative themes are defined below as [data-theme="..."] and applied by
+     setting the attribute on <html>. Token meanings:
+     --ink*  = surfaces (page → panels)   --cream = primary text
+     --smoke = muted text                 --gold* = accents
+     --line* = hairline borders */
   --ink:#f5f0e6;
   --ink-2:#faf6ee;
   --ink-3:#efe8d8;
@@ -115,6 +121,63 @@
   --ls-wide:0.08em;
   --ls-wider:0.18em;
 }
+
+/* ════════ ALTERNATIVE THEMES ════════
+   Each theme only re-declares the colour tokens; every component reads those
+   tokens, so nothing else in the page needs to change. A theme is applied with
+   document.documentElement.setAttribute('data-theme', 'dark') and remembered in
+   localStorage. Adding a new theme = copying one block and changing the values. */
+
+/* Dark oud — deep near-black with warm gold, matching the bottle photography */
+[data-theme="dark"]{
+  --ink:#0e0b09;
+  --ink-2:#17120e;
+  --ink-3:#231b15;
+  --amber:#c9a86a;
+  --amber-light:#e0c894;
+  --gold:#c9a86a;
+  --gold-light:#e2c893;
+  --gold-dark:#9a7b42;
+  --cream:#f2e9da;
+  --rose:#b1685f;
+  --rose-light:#c98a80;
+  --smoke:#a2947f;
+  --line:rgba(201,168,106,0.20);
+  --line-soft:rgba(201,168,106,0.10);
+  --success:#7da36a;
+  --danger:#d4736a;
+  --charcoal:#080605;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.45);
+  --shadow-gold:0 8px 28px rgba(201,168,106,0.28);
+}
+
+/* Royal night — very dark plum/burgundy with gold, from the rose serum image */
+[data-theme="royal"]{
+  --ink:#120a0d;
+  --ink-2:#1c1014;
+  --ink-3:#26161b;
+  --amber:#c9a86a;
+  --amber-light:#e0c894;
+  --gold:#cfae72;
+  --gold-light:#e8cf9c;
+  --gold-dark:#9c7c45;
+  --cream:#f4ebe2;
+  --rose:#a04a4a;
+  --rose-light:#c46f6a;
+  --smoke:#a8938b;
+  --line:rgba(207,174,114,0.20);
+  --line-soft:rgba(207,174,114,0.10);
+  --success:#7da36a;
+  --danger:#d97b72;
+  --charcoal:#0c0609;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-lg:0 12px 28px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.45);
+  --shadow-gold:0 8px 28px rgba(207,174,114,0.28);
+}
+
 *{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
 
@@ -226,14 +289,14 @@ a{color:inherit;text-decoration:none;}
 /* NAV */
 nav{
   position:sticky;top:0;z-index:50;
-  background:rgba(255,255,255,0.94);
+  background:color-mix(in srgb, var(--ink-2) 94%, transparent);
   backdrop-filter:blur(20px) saturate(1.4);
   -webkit-backdrop-filter:blur(20px) saturate(1.4);
   border-bottom:1px solid var(--line);
   transition:box-shadow .4s ease, background .4s ease, border-color .4s ease;
 }
 nav.scrolled{
-  background:rgba(255,255,255,0.9);
+  background:color-mix(in srgb, var(--ink-2) 90%, transparent);
   box-shadow:0 8px 32px rgba(36,31,26,0.07);
   border-bottom-color:var(--line);
 }
@@ -306,10 +369,10 @@ nav .container{
 .hero-arrow{
   position:absolute;top:50%;transform:translateY(-50%);z-index:5;
   width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
-  background:rgba(255,255,255,0.85);color:var(--charcoal);font-size:1.6rem;line-height:1;
+  background:color-mix(in srgb, var(--ink-2) 85%, transparent);color:var(--cream);font-size:1.6rem;line-height:1;
   display:flex;align-items:center;justify-content:center;transition:background .2s;
 }
-.hero-arrow:hover{background:#fff;}
+.hero-arrow:hover{background:var(--ink-2);}
 .hero-arrow-prev{right:16px;}
 .hero-arrow-next{left:16px;}
 html[dir="ltr"] .hero-arrow-prev{left:16px;right:auto;}
@@ -388,8 +451,8 @@ html[dir="ltr"] .hero-split-text{text-align:left;}
 .gallery-grid.reveal.in-view .perfume-card:nth-child(n+5){animation-delay:.25s;}
 @keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
 
-.skeleton-card{background:rgba(255,253,249,0.6);border:1px solid var(--line);border-radius:18px;padding:28px;}
-.skeleton-shimmer{background:linear-gradient(90deg, rgba(43,38,32,0.04) 25%, rgba(43,38,32,0.09) 37%, rgba(43,38,32,0.04) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;}
+.skeleton-card{background:color-mix(in srgb, var(--ink-2) 60%, transparent);border:1px solid var(--line);border-radius:18px;padding:28px;}
+.skeleton-shimmer{background:linear-gradient(90deg, var(--line-soft) 25%, var(--line) 37%, var(--line-soft) 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:10px;}
 @keyframes shimmer{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
 .skeleton-img{width:100%;aspect-ratio:1/1;border-radius:14px;margin-bottom:16px;}
 .skeleton-line{height:14px;margin-bottom:10px;}
@@ -653,6 +716,17 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 </style>
 <script type="application/ld+json" id="productSchemaLD"></script>
+<!-- Applies the saved colour theme before the page paints, so there is no flash
+     of the default palette. Isolated and defensive: if it fails, the site simply
+     stays on the default theme. -->
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem('monsela_theme');
+    if (t && t !== 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
 <!-- ===== Early error monitoring (must stay first) =====
      Registered before any application code so it also catches failures that happen
      during initialization. It only *reports*; it never swallows an error, and the
@@ -737,6 +811,23 @@ window.__monselaErrors = [];
 
     <!-- Minimal action icons (left side in RTL) -->
     <div class="nav-actions">
+      <div id="themeSwitchWrap" style="position:relative;">
+        <button id="themeSwitchBtn" class="nav-icon-btn" aria-label="غيّر ألوان الموقع" title="غيّر ألوان الموقع">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h2a4 4 0 0 0 4-4 10 10 0 0 0-10-8z"/></svg>
+        </button>
+        <div id="themeMenu" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);min-width:190px;z-index:80;overflow:hidden;">
+          <div style="padding:11px 16px;border-bottom:1px solid var(--line);font-weight:700;font-size:0.82rem;color:var(--smoke);">ألوان الموقع</div>
+          <button class="theme-opt" data-theme-value="light" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:#f5f0e6;border:1px solid #9a7b42;flex-shrink:0;"></span>بيج فاخر
+          </button>
+          <button class="theme-opt" data-theme-value="dark" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:#0e0b09;border:1px solid #c9a86a;flex-shrink:0;"></span>أسود وذهبي
+          </button>
+          <button class="theme-opt" data-theme-value="royal" style="width:100%;text-align:right;padding:11px 16px;background:none;border:none;cursor:pointer;font-family:'Cairo';font-size:0.86rem;color:var(--cream);display:flex;align-items:center;gap:10px;">
+            <span style="width:16px;height:16px;border-radius:50%;background:#120a0d;border:1px solid #cfae72;flex-shrink:0;"></span>ليلي ملكي
+          </button>
+        </div>
+      </div>
       <button id="langSwitchBtn" class="nav-icon-btn nav-lang" aria-label="Language">EN</button>
       <button id="trackOrderBtn" class="nav-icon-btn" aria-label="تتبع طلبك" title="تتبع طلبك">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
@@ -4477,7 +4568,7 @@ backToTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 
 </script>
 
 <!-- Mobile Bottom Navigation -->
-<nav id="bottomNav" aria-label="التنقل السريع" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:68;background:rgba(255,253,249,0.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));justify-content:space-around;align-items:center;">
+<nav id="bottomNav" aria-label="التنقل السريع" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:68;background:color-mix(in srgb, var(--ink-2) 97%, transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));justify-content:space-around;align-items:center;">
   <a href="#main-content" class="bottom-nav-item" aria-label="الرئيسية">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     <span>الرئيسية</span>
@@ -4560,6 +4651,57 @@ syncBottomNavCart();
   } catch (e) {
     revealAll();
   }
+})();
+</script>
+
+<script>
+/* ===== Theme switcher (isolated) =====
+   Purely visual: it only sets data-theme on <html> and saves the choice.
+   Kept separate from the app code so it can never affect products, cart or checkout. */
+(function(){
+  var btn  = document.getElementById('themeSwitchBtn');
+  var menu = document.getElementById('themeMenu');
+  var wrap = document.getElementById('themeSwitchWrap');
+  if (!btn || !menu || !wrap) return;
+
+  function currentTheme(){
+    return document.documentElement.getAttribute('data-theme') || 'light';
+  }
+  function markActive(){
+    var cur = currentTheme();
+    menu.querySelectorAll('.theme-opt').forEach(function(o){
+      var on = o.dataset.themeValue === cur;
+      o.style.background = on ? 'var(--ink-3)' : 'none';
+      o.style.fontWeight = on ? '700' : '400';
+    });
+  }
+  function applyTheme(name){
+    if (name === 'light') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', name);
+    try { localStorage.setItem('monsela_theme', name); } catch (e) {}
+    markActive();
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = menu.style.display === 'block';
+    menu.style.display = open ? 'none' : 'block';
+    if (!open) markActive();
+  });
+  menu.querySelectorAll('.theme-opt').forEach(function(o){
+    o.addEventListener('click', function(){
+      applyTheme(o.dataset.themeValue);
+      menu.style.display = 'none';
+    });
+    o.addEventListener('mouseenter', function(){
+      if (o.dataset.themeValue !== currentTheme()) o.style.background = 'var(--ink-3)';
+    });
+    o.addEventListener('mouseleave', markActive);
+  });
+  document.addEventListener('click', function(e){
+    if (!wrap.contains(e.target)) menu.style.display = 'none';
+  });
+  markActive();
 })();
 </script>
 
