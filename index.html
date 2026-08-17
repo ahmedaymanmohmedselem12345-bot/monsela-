@@ -376,6 +376,8 @@ html[dir="ltr"] .hero-split-text{text-align:left;}
 .hero h1{font-size:clamp(2.4rem, 7vw, 4.2rem);line-height:1.15;margin:16px 0 22px;font-weight:600;}
 .hero p.lead{color:var(--smoke);font-size:clamp(0.95rem, 2.5vw, 1.15rem);max-width:480px;line-height:1.9;margin-bottom:32px;}
 
+/* Content starts hidden only to animate in. Three safety nets guarantee it becomes
+   visible: the IntersectionObserver, a 3s failsafe timer, and the <noscript> rule. */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
 .reveal.in-view{opacity:1;transform:translateY(0);}
 .gallery-grid.reveal.in-view .perfume-card{animation:cardIn .6s cubic-bezier(.2,.8,.2,1) both;}
@@ -651,6 +653,40 @@ footer .logo{margin-bottom:10px;justify-content:center;display:block;}
 
 </style>
 <script type="application/ld+json" id="productSchemaLD"></script>
+<!-- ===== Early error monitoring (must stay first) =====
+     Registered before any application code so it also catches failures that happen
+     during initialization. It only *reports*; it never swallows an error, and the
+     real error object is always logged to the console for debugging. -->
+<script>
+window.__monselaErrors = [];
+(function(){
+  function report(label, detail){
+    // Always surface the real error in the console — never hide it.
+    console.error(label, detail);
+    window.__monselaErrors.push({ label: label, detail: String(detail && detail.message || detail), at: Date.now() });
+    // Show a non-blocking notice once the body exists.
+    function showNotice(){
+      if (!document.body || document.getElementById('globalErrorToast')) return;
+      var t = document.createElement('div');
+      t.id = 'globalErrorToast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#faf6ee;border:1px solid #c0392b;color:#2e2820;padding:12px 20px;border-radius:12px;font-size:0.85rem;z-index:200;box-shadow:0 10px 30px rgba(43,38,32,0.15);font-family:Cairo,sans-serif;';
+      t.textContent = '⚠️ حصلت مشكلة بسيطة في الصفحة. لو حاجة مش شغالة، جرب تحدّث الصفحة.';
+      document.body.appendChild(t);
+      setTimeout(function(){ t.remove(); }, 6000);
+    }
+    if (document.body) showNotice();
+    else document.addEventListener('DOMContentLoaded', showNotice);
+  }
+  window.addEventListener('error', function(e){ report('Unhandled error:', e.error || e.message); });
+  window.addEventListener('unhandledrejection', function(e){ report('Unhandled promise rejection:', e.reason); });
+})();
+</script>
+<noscript>
+  <style>
+    /* Without JS the reveal animation can never run, so show everything immediately. */
+    .reveal{opacity:1 !important;transform:none !important;}
+  </style>
+</noscript>
 </head>
 <body>
 <a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--cream);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
@@ -1396,6 +1432,12 @@ footer .logo span { color:var(--gold); }
 <script>
 const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
 const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
+
+// Supabase client is created FIRST, before anything below can reference `sb`.
+// Keep this line at the very top of the script: any `sb.*` call placed above it
+// throws a TDZ ReferenceError that kills this entire <script> block.
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 const WHATSAPP_NUMBER = "201068828900"; // رقم الواتساب الحقيقي
 function openWhatsAppMessage(message){
   window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank');
@@ -1419,7 +1461,6 @@ sb.from('shop_settings').select('announcement_text, announcement_active').eq('id
     });
   }
 });
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Escape any user-controlled text before putting it into innerHTML, so a customer
 // can never inject working HTML/JS via their name, comment, notes, etc.
@@ -1628,8 +1669,8 @@ function showErrorToast(){
   document.body.appendChild(toast);
   setTimeout(()=> toast.remove(), 6000);
 }
-window.addEventListener('error', (e)=>{ console.error('Unhandled error:', e.error || e.message); showErrorToast(); });
-window.addEventListener('unhandledrejection', (e)=>{ console.error('Unhandled promise rejection:', e.reason); showErrorToast(); });
+// Global error/rejection handlers are registered in the early block in <head>, so they
+// also catch initialization failures. showErrorToast() above is kept for manual use.
 
 // ===== Lightweight anti-spam helpers =====
 const pageLoadTime = Date.now();
@@ -1768,12 +1809,18 @@ async function loadProducts(){
     return;
   }
   allProducts = data || [];
-  renderCategoryStrip();
-  renderDepartmentFilters();
-  renderCategoryFilters();
-  renderFilterPanelOptions();
-  renderProducts();
-  updateHeroVisual();
+
+  // Each step is isolated: a failure in an optional widget (category strip, filters,
+  // hero) must never prevent the product grid itself from rendering.
+  function safe(label, fn){
+    try { fn(); } catch (err) { console.error('[Monsela] ' + label + ' failed:', err); }
+  }
+  safe('renderProducts', renderProducts);          // most important — runs first
+  safe('renderCategoryStrip', renderCategoryStrip);
+  safe('renderDepartmentFilters', renderDepartmentFilters);
+  safe('renderCategoryFilters', renderCategoryFilters);
+  safe('renderFilterPanelOptions', renderFilterPanelOptions);
+  safe('updateHeroVisual', updateHeroVisual);
   sb.rpc('get_product_ratings').then(({ data }) => {
     if (!data) return;
     productRatings = {};
@@ -2536,9 +2583,21 @@ async function openProductDetail(productId){
     pdShareWa.href = `https://wa.me/?text=${encodeURIComponent('شوف المنتج ده من Monsela 😍: ' + p.name + '%0a' + url)}`;
   }
 
-  // Related products (same department, excluding this one)
+  // Open the page NOW. Everything below is optional enrichment, so a slow or failing
+  // request must never leave the customer staring at a product that won't open.
+  overlay.style.display = 'block';
+  overlay.scrollTop = 0;
+  window.scrollTo(0, 0);
+
+  // Related products (same department, excluding this one) — optional, never fatal
   if (p.department) {
-    const { data: related } = await sb.from('products').select('*').eq('department', p.department).neq('id', productId).limit(4);
+    let related = null;
+    try {
+      const res = await sb.from('products').select('*').eq('department', p.department).neq('id', productId).limit(4);
+      related = res.data;
+    } catch (err) {
+      console.error('[Monsela] related products failed:', err);
+    }
     const relatedWrap = document.getElementById('pdRelatedWrap');
     if (related && related.length > 0) {
       relatedWrap.style.display = 'block';
@@ -2555,10 +2614,6 @@ async function openProductDetail(productId){
       relatedWrap.style.display = 'none';
     }
   }
-
-  overlay.style.display = 'block';
-  overlay.scrollTop = 0;
-  window.scrollTo(0, 0);
 }
 document.getElementById('closeProductDetail').addEventListener('click', ()=>{
   document.getElementById('productDetailOverlay').style.display = 'none';
@@ -3599,18 +3654,23 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   const address = document.getElementById('checkoutAddress').value.trim();
   const statusEl = document.getElementById('checkoutStatus');
 
-  // Honeypot: real customers never fill this hidden field; bots often do
+  // Honeypot: real customers never fill this hidden field; bots often do.
+  // This one stays silent on purpose — a bot should not learn why it was rejected.
   if (document.getElementById('hpField').value.trim() !== '') {
-    return; // silently drop suspected bot submissions
-  }
-  if (tooFastToBeHuman()) {
-    return; // suspiciously fast submission right after page load — likely a bot
-  }
-  if (!canSubmitAgain('checkout', 10000)) {
-    statusEl.style.color = 'var(--danger)';
-    statusEl.textContent = 'استنى شوية قبل ما تبعت طلب تاني.';
     return;
   }
+  // Submitted implausibly fast after page load. A real customer has to type a name,
+  // phone and address first, so this practically never fires for them — but if it
+  // ever does, tell them clearly instead of failing silently.
+  if (tooFastToBeHuman()) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'ثانية واحدة بس وجرّب تأكيد الطلب تاني.';
+    return;
+  }
+
+  // NOTE: the repeat-submission throttle intentionally runs *after* all validation,
+  // further down. Running it here used to record a failed attempt as if it succeeded,
+  // which locked a customer out for 10s just for mistyping their phone number.
 
   if (!name || !phone) {
     statusEl.style.color = 'var(--danger)';
@@ -3646,6 +3706,14 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
       statusEl.textContent = 'كود الخصم بقى مش صالح بعد تغيير السلة، شيلناه من الطلب. راجع الإجمالي وأكّد تاني.';
       return;
     }
+  }
+
+  // Everything is valid — only now guard against genuine double-submits.
+  // Placed here so a validation error never counts as an attempt.
+  if (!canSubmitAgain('checkout', 10000)) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = 'طلبك اتبعت خلاص، استنى شوية قبل ما تبعت طلب تاني.';
+    return;
   }
 
   const { subtotal, discount, deliveryFee, total, zone } = calcOrderTotals();
@@ -3705,6 +3773,9 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   btn.disabled = false;
   if (error) {
     console.error('Order insert error:', error);
+    // The order did NOT go through, so release the double-submit guard immediately —
+    // otherwise a server-side failure would lock the customer out for 10 seconds.
+    try { localStorage.removeItem('monsela_throttle_checkout'); } catch(e) {}
     const msg = error.message || '';
     if (msg.includes('منتج غير موجود')) {
       statusEl.style.color = 'var(--danger)';
@@ -4384,20 +4455,8 @@ window.addEventListener('scroll', ()=>{
 }, { passive: true });
 backToTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-// ===== Scroll-reveal for section containers =====
-if ('IntersectionObserver' in window) {
-  const revealObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in-view');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.15 });
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-} else {
-  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
-}
+// NOTE: scroll-reveal now lives in its own isolated <script> block below, so that
+// a failure anywhere in this block can never leave the page's content invisible.
 
 </script>
 
@@ -4449,6 +4508,40 @@ function syncBottomNavCart(){
 const _origSaveCart2 = saveCart;
 saveCart = function(){ _origSaveCart2(); syncBottomNavCart(); };
 syncBottomNavCart();
+</script>
+
+<!-- ===== Scroll-reveal (isolated on purpose) =====
+     Kept in a separate block from the main app code, so that a runtime error anywhere
+     else on the page can never leave `.reveal` sections stuck at opacity:0. It also runs
+     a failsafe timer that force-reveals everything, so content is shown even if the
+     observer never fires (odd viewports, zoom levels, or a blocked observer). -->
+<script>
+(function(){
+  function revealAll(){
+    try {
+      document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in-view'); });
+    } catch (e) { /* nothing else we can do; CSS failsafe below still applies */ }
+  }
+  try {
+    if ('IntersectionObserver' in window) {
+      var revealObserver = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15 });
+      document.querySelectorAll('.reveal').forEach(function(el){ revealObserver.observe(el); });
+      // Failsafe: whatever happens, nothing stays invisible for more than 3s.
+      setTimeout(revealAll, 3000);
+    } else {
+      revealAll();
+    }
+  } catch (e) {
+    revealAll();
+  }
+})();
 </script>
 
 </body>
