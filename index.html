@@ -1013,27 +1013,75 @@ window.__monselaErrors = [];
 </style>
 <script>
 (function(){
-  // Remove the splash after the animation ends. The fallback timeout guarantees
-  // the site always shows even if the animation event doesn't fire (old browser).
+  // ===== Bullet-proof splash removal =====
+  // The splash must NEVER trap the user on a black screen. Multiple independent
+  // safety nets each guarantee removal, so if any one fails the others still fire:
+  //   1. animationend event (normal path)
+  //   2. a hard timeout (animation didn't fire / unsupported)
+  //   3. first tap/click/keypress (user wants in NOW — let them skip)
+  //   4. an outer guard timeout as a last resort
+  //   5. reduced-motion users skip the animation entirely
+  //   6. if the logo image fails to load, remove immediately
+  // removeSplash is idempotent, so being called several times is harmless.
+  function hardRemove(){
+    var o = document.getElementById('splashOverlay');
+    if (o && o.parentNode) { try { o.parentNode.removeChild(o); } catch(e){} }
+  }
   try {
     var overlay = document.getElementById('splashOverlay');
     if (!overlay) return;
     var logo = document.getElementById('splashLogo');
+    var done = false;
     function removeSplash(){
-      if (!overlay) return;
-      overlay.style.opacity = '0';
-      setTimeout(function(){ try { overlay.remove(); } catch(e){} overlay = null; }, 800);
+      if (done) return;
+      done = true;
+      try {
+        overlay.style.pointerEvents = 'none';
+        overlay.style.opacity = '0';
+      } catch(e){}
+      setTimeout(hardRemove, 900);
     }
+
+    // 5. Respect users who asked the OS to reduce motion — skip straight to site.
+    try {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (logo) logo.style.animation = 'none';
+        setTimeout(removeSplash, 400);
+      }
+    } catch(e){}
+
+    // 1. Normal path: animation finished.
     if (logo) {
       logo.addEventListener('animationend', function(){ setTimeout(removeSplash, 100); });
+      // 6. Image failed to load → don't sit on a black screen.
+      logo.addEventListener('error', function(){ removeSplash(); });
     }
-    // Fallback: if animation doesn't fire, remove after 4 seconds max.
-    setTimeout(removeSplash, 4000);
+
+    // 3. Let the user tap/click/press to skip at any moment.
+    ['click','touchstart','keydown'].forEach(function(evt){
+      overlay.addEventListener(evt, removeSplash, { passive: true });
+    });
+
+    // 2. Primary timeout: remove after the animation's expected length + margin.
+    setTimeout(removeSplash, 3600);
+
+    // 4. Last-resort guard: no matter what, the overlay is gone by 6 seconds.
+    setTimeout(hardRemove, 6000);
   } catch(e){
-    // If anything fails, just remove the overlay immediately so the site shows.
-    try { document.getElementById('splashOverlay').remove(); } catch(ee){}
+    // If anything above throws, the site must still show.
+    hardRemove();
   }
+  // 4b. A guard that runs even if the try block itself never executed.
+  setTimeout(hardRemove, 6500);
 })();
+// Absolute final safety net, fully outside the IIFE: if the whole script above
+// somehow failed to define or run, this still clears the overlay on window load.
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    var o = document.getElementById('splashOverlay');
+    if (o && o.parentNode) { try { o.parentNode.removeChild(o); } catch(e){} }
+  }, 7000);
+});
 </script>
 
 <a href="#main-content" style="position:absolute;right:-9999px;top:0;background:var(--gold);color:var(--cream);padding:12px 20px;border-radius:0 0 10px 10px;z-index:200;">تخطى للمحتوى الرئيسي</a>
@@ -1114,8 +1162,10 @@ window.__monselaErrors = [];
 </button>
 
 <!-- Back to top -->
-<!-- Floating WhatsApp button -->
-<a id="floatingWhatsApp" href="#" target="_blank" rel="noopener" aria-label="تواصل معنا واتساب" style="position:fixed;bottom:94px;left:24px;z-index:60;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(37,211,102,0.35);transition:transform .2s;text-decoration:none;">
+<!-- Floating WhatsApp button. Positioned clearly ABOVE the cart FAB so the two
+     never overlap on mobile. The cart FAB sits at bottom ~74px (above the bottom
+     nav); this WhatsApp button sits above it with a comfortable gap. -->
+<a id="floatingWhatsApp" href="#" target="_blank" rel="noopener" aria-label="تواصل معنا واتساب" style="position:fixed;bottom:calc(140px + env(safe-area-inset-bottom,0px));left:24px;z-index:75;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(37,211,102,0.35);transition:transform .2s;text-decoration:none;">
   <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 
@@ -1273,14 +1323,11 @@ window.__monselaErrors = [];
 
     <div id="manualPaymentBox" style="display:none;background:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;">
       <p id="paymentDetailsText" style="font-size:0.85rem;color:var(--gold-dark);margin-bottom:12px;"></p>
-      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;" data-i18n="field_transaction_id">رقم العملية / المرجع</label>
-      <input type="text" id="paymentTransactionId" placeholder="مثال: 123456789" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">رقم الموبايل اللي حوّلت منه <span style="color:var(--rose);">*</span></label>
+      <input type="tel" inputmode="numeric" maxlength="11" id="paymentSenderPhone" placeholder="مثال: 01012345678" style="width:100%;margin-bottom:8px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
       <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;" data-i18n="field_amount_paid">المبلغ اللي حوّلته</label>
-      <input type="number" id="paymentAmountPaid" placeholder="0" style="width:100%;margin-bottom:12px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
-      <label style="display:block;font-weight:700;margin-bottom:8px;font-size:0.9rem;">صورة إثبات الدفع (Screenshot) <span style="color:var(--rose);">*</span></label>
-      <input type="file" id="paymentProofFile" accept="image/*">
-      <div id="paymentProofPreview" style="margin-top:10px;"></div>
-      <p style="font-size:0.72rem;color:var(--smoke);margin-top:8px;">✓ الطلب مش هيتأكد إلا بعد ما فريقنا يراجع إثبات الدفع.</p>
+      <input type="number" id="paymentAmountPaid" placeholder="0" style="width:100%;margin-bottom:8px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:10px;font-family:'Cairo';">
+      <p style="font-size:0.72rem;color:var(--smoke);margin-top:8px;">✓ هنراجع التحويل من الرقم ده ونأكد الطلب. مش محتاج ترفع أي صورة.</p>
     </div>
 
     <div style="display:flex;gap:10px;">
@@ -1663,7 +1710,7 @@ window.__monselaErrors = [];
   <div class="container" style="max-width:500px;text-align:center;">
     <h3 style="font-family:'Aref Ruqaa',serif;font-size:1.4rem;margin-bottom:10px;">اشترك عشان توصلك عروضنا الجديدة</h3>
     <div style="display:flex;gap:10px;margin-top:16px;">
-      <input type="email" id="newsletterEmail" placeholder="إيميلك" style="flex:1;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';">
+      <input type="tel" inputmode="numeric" maxlength="11" id="newsletterPhone" placeholder="رقم موبايلك (01xxxxxxxxx)" style="flex:1;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:12px 16px;border-radius:999px;font-family:'Cairo';">
       <button id="newsletterBtn" class="btn-primary" style="padding:12px 24px;">اشترك</button>
     </div>
     <div id="newsletterStatus" style="font-size:0.8rem;margin-top:10px;"></div>
@@ -2158,9 +2205,19 @@ async function loadProducts(){
     // Supabase errors are plain objects, so logging them raw shows "[object Object]".
     // Log the actual reason so the cause is visible in the console.
     console.error('[Monsela] loadProducts failed:', error.message || error.hint || JSON.stringify(error), error);
-    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">حصلت مشكلة في تحميل المنتجات، حاول تحدّث الصفحة.</p>';
+    // On slow/flaky mobile connections the first fetch sometimes fails. Instead of
+    // leaving the grid empty forever, retry a couple of times before giving up.
+    if (loadProducts._tries == null) loadProducts._tries = 0;
+    if (loadProducts._tries < 3) {
+      loadProducts._tries++;
+      grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">جاري تحميل المنتجات…</p>';
+      setTimeout(loadProducts, 1500 * loadProducts._tries);
+      return;
+    }
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--smoke);">حصلت مشكلة في تحميل المنتجات. <button onclick="loadProducts._tries=0;loadProducts();" style="background:var(--gold);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-family:Cairo;margin-top:8px;">حاول تاني</button></p>';
     return;
   }
+  loadProducts._tries = 0;
   allProducts = data || [];
 
   // Each step is isolated: a failure in an optional widget (category strip, filters,
@@ -2174,6 +2231,15 @@ async function loadProducts(){
   safe('renderCategoryFilters', renderCategoryFilters);
   safe('renderFilterPanelOptions', renderFilterPanelOptions);
   safe('updateHeroVisual', updateHeroVisual);
+  // Load the admin-managed department list (may include departments that have no
+  // products yet). Isolated: if it fails, the strip falls back to product-derived
+  // departments, so the storefront is never blocked.
+  sb.from('departments').select('*').eq('active', true).order('sort_order', { ascending: true }).then(({ data }) => {
+    if (data && data.length) {
+      customDepartments = data;
+      try { renderCategoryStrip(); } catch (e) { console.error('[Monsela] strip refresh failed:', e); }
+    }
+  }).catch(e => console.error('[Monsela] departments load failed:', e));
   sb.rpc('get_product_ratings').then(({ data }) => {
     if (!data) return;
     productRatings = {};
@@ -2272,22 +2338,58 @@ const departmentIcons = {
   'إكسسوارات': '👜', 'نظارات': '🕶️', 'بخور': '🕯️', 'عطور منزلية': '🏠', 'هدايا': '🎁', 'بوكسات': '📦'
 };
 
+let customDepartments = null;
+
 function renderCategoryStrip(){
   const grid = document.getElementById('categoryStripGrid');
   if (!grid) return;
-  const depts = [...new Set(allProducts.map(p => p.department).filter(Boolean))];
-  if (depts.length === 0) { document.getElementById('categoryStrip').style.display = 'none'; return; }
-  grid.innerHTML = depts.map(d => {
-    const count = allProducts.filter(p => p.department === d).length;
-    const icon = departmentIcons[d] || '✨';
+
+  // Prefer the admin-managed department list; fall back to departments derived
+  // from the products themselves so the strip still works before the table loads.
+  let depts;
+  if (customDepartments && customDepartments.length) {
+    depts = customDepartments.map(d => ({ name: d.name, icon: d.icon || departmentIcons[d.name] || '✨' }));
+  } else {
+    const names = [...new Set(allProducts.map(p => p.department).filter(Boolean))];
+    depts = names.map(n => ({ name: n, icon: departmentIcons[n] || '✨' }));
+  }
+  const section = document.getElementById('categoryStrip');
+  if (depts.length === 0) { if (section) section.style.display = 'none'; return; }
+  if (section) section.style.display = '';
+
+  // Build one card. The track is duplicated so the marquee can loop seamlessly.
+  function card(d){
     return `
-      <button class="category-card" data-dept="${escapeHTML(d)}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:22px 12px;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Cairo';">
-        <span style="font-size:2rem;">${icon}</span>
-        <span style="font-weight:700;font-size:0.92rem;color:var(--cream);">${escapeHTML(d)}</span>
+      <button class="category-card" data-dept="${escapeHTML(d.name)}" style="flex:0 0 auto;width:150px;background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:22px 12px;cursor:pointer;transition:transform .3s,border-color .3s,box-shadow .3s;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Cairo';">
+        <span style="font-size:2rem;">${d.icon}</span>
+        <span style="font-weight:700;font-size:0.92rem;color:var(--cream);">${escapeHTML(d.name)}</span>
       </button>`;
-  }).join('');
+  }
+
+  // Convert the grid container into a horizontal marquee viewport.
+  grid.style.cssText = 'display:block !important;overflow:hidden;position:relative;width:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);';
+  const loop = depts.concat(depts); // duplicate for a seamless loop
+  grid.innerHTML = `<div id="catStripTrack" style="display:flex;gap:14px;width:max-content;will-change:transform;">${loop.map(card).join('')}</div>`;
+
+  const track = document.getElementById('catStripTrack');
+  // Marquee speed scales with the number of cards so it always feels steady.
+  const durationSec = Math.max(18, depts.length * 4);
+  try {
+    if (!document.getElementById('catStripKeyframes')) {
+      const st = document.createElement('style');
+      st.id = 'catStripKeyframes';
+      // Moves exactly one full set of cards (50% of the doubled track), then loops.
+      st.textContent = '@keyframes catStripScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}'
+        + '#catStripTrack{animation:catStripScroll var(--cat-dur,30s) linear infinite;}'
+        + '#catStripTrack:hover{animation-play-state:paused;}'
+        + '@media(prefers-reduced-motion:reduce){#catStripTrack{animation:none;}#categoryStripGrid{overflow-x:auto;}}';
+      document.head.appendChild(st);
+    }
+    track.style.setProperty('--cat-dur', durationSec + 's');
+  } catch (e) { console.error('[Monsela] strip animation failed:', e); }
+
   grid.querySelectorAll('.category-card').forEach(btn => {
-    btn.addEventListener('mouseover', () => { btn.style.borderColor = 'var(--gold)'; btn.style.transform = 'translateY(-4px)'; btn.style.boxShadow = '0 12px 28px rgba(46,40,32,0.1)'; });
+    btn.addEventListener('mouseover', () => { btn.style.borderColor = 'var(--gold)'; btn.style.transform = 'translateY(-4px)'; btn.style.boxShadow = '0 12px 28px rgba(46,40,32,0.15)'; });
     btn.addEventListener('mouseout', () => { btn.style.borderColor = 'var(--line)'; btn.style.transform = 'none'; btn.style.boxShadow = 'none'; });
     btn.addEventListener('click', () => {
       activeDepartment = btn.dataset.dept;
@@ -3969,7 +4071,7 @@ function updatePaymentDetailsText(){
   const s = paymentSettings || {};
   if (selectedPaymentMethod === 'vodafone_cash') {
     textEl.textContent = s.vodafone_cash_number
-      ? `حوّل على رقم فودافون كاش: ${s.vodafone_cash_number}${s.payment_instructions ? ' — ' + s.payment_instructions : ''}`
+      ? `حوّل على رقم فودافون كاش: ${s.vodafone_cash_number} — حوّل المبلغ بالظبط، وبعدها اكتب رقم موبايلك اللي حوّلت منه تحت وهنراجعه ونأكد الطلب.${s.payment_instructions ? ' ' + s.payment_instructions : ''}`
       : 'رقم فودافون كاش هيتأكد معاك بعد الطلب.';
   } else if (selectedPaymentMethod === 'instapay') {
     textEl.textContent = s.instapay_info
@@ -3985,14 +4087,6 @@ document.querySelectorAll('.payment-method-opt').forEach(btn=>{
     selectedPaymentMethod = btn.dataset.method;
     updatePaymentDetailsText();
   });
-});
-
-document.getElementById('paymentProofFile').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  const preview = document.getElementById('paymentProofPreview');
-  if (!file) { preview.innerHTML = ''; return; }
-  const url = URL.createObjectURL(file);
-  preview.innerHTML = `<img src="${url}" alt="معاينة إثبات الدفع" style="max-width:140px;max-height:140px;border-radius:8px;border:1px solid var(--line);">`;
 });
 
 document.getElementById('checkoutBtn').addEventListener('click', async ()=>{
@@ -4063,15 +4157,16 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     return;
   }
 
-  let paymentProofFile = null;
+  let paymentSenderPhone = null;
   if (selectedPaymentMethod === 'vodafone_cash' || selectedPaymentMethod === 'instapay') {
-    const txId = document.getElementById('paymentTransactionId').value.trim();
+    paymentSenderPhone = document.getElementById('paymentSenderPhone').value.replace(/[\s-]/g, '').trim();
     const amount = document.getElementById('paymentAmountPaid').value;
-    paymentProofFile = document.getElementById('paymentProofFile').files[0];
-    if (!txId) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب رقم عملية التحويل.'; return; }
+    if (!/^01[0-2,5]\d{8}$/.test(paymentSenderPhone)) {
+      statusEl.style.color='var(--danger)';
+      statusEl.textContent='اكتب رقم الموبايل اللي حوّلت منه (يبدأ بـ 01 و11 رقم).';
+      return;
+    }
     if (!amount) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب المبلغ اللي حوّلته.'; return; }
-    if (!paymentProofFile) { statusEl.style.color='var(--danger)'; statusEl.textContent='ارفع صورة إثبات الدفع.'; return; }
-    if (paymentProofFile.size > 10 * 1024 * 1024) { statusEl.style.color='var(--danger)'; statusEl.textContent='الصورة كبيرة جدًا (أقصى حجم 10 ميجا).'; return; }
   }
 
   // Re-validate the coupon is still eligible right before submitting (cart may have changed since it was applied)
@@ -4101,17 +4196,6 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري تأكيد الطلب...';
 
   try {
-    let paymentProofPath = null;
-    if (paymentProofFile) {
-      statusEl.textContent = 'جاري رفع إثبات الدفع...';
-      const origExt = (paymentProofFile.name && paymentProofFile.name.includes('.')) ? paymentProofFile.name.split('.').pop().slice(0,5) : 'jpg';
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${origExt}`;
-      const { error: uploadError } = await sb.storage.from('payment-proofs').upload(path, paymentProofFile, { contentType: paymentProofFile.type || 'application/octet-stream' });
-      if (uploadError) {
-        throw new Error('upload_failed: ' + (uploadError.message || uploadError.error || JSON.stringify(uploadError)));
-      }
-      paymentProofPath = path;
-    }
     statusEl.textContent = 'جاري تأكيد الطلب...';
 
   // Use the place_order function (SECURITY DEFINER) so guests — who have INSERT but no
@@ -4139,9 +4223,9 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
     })(),
     p_payment_method: selectedPaymentMethod,
     p_payment_status: selectedPaymentMethod === 'cod' ? 'cod' : 'pending_verification',
-    p_payment_transaction_id: selectedPaymentMethod !== 'cod' ? document.getElementById('paymentTransactionId').value.trim() : null,
+    p_payment_transaction_id: paymentSenderPhone,
     p_payment_amount: selectedPaymentMethod !== 'cod' ? Number(document.getElementById('paymentAmountPaid').value) : null,
-    p_payment_proof_url: paymentProofPath
+    p_payment_proof_url: null
   });
   const insertedOrder = Array.isArray(orderResult) ? orderResult[0] : orderResult;
 
@@ -4203,10 +4287,8 @@ document.getElementById('confirmOrderBtn').addEventListener('click', async ()=>{
   document.getElementById('checkoutGiftMessage').value = '';
   document.getElementById('checkoutGiftRecipient').value = '';
   document.getElementById('giftBox').style.display = 'none';
-  document.getElementById('paymentTransactionId').value = '';
+  document.getElementById('paymentSenderPhone').value = '';
   document.getElementById('paymentAmountPaid').value = '';
-  document.getElementById('paymentProofFile').value = '';
-  document.getElementById('paymentProofPreview').innerHTML = '';
   selectedPaymentMethod = 'cod';
   document.querySelectorAll('.payment-method-opt').forEach(b=>b.classList.toggle('active', b.dataset.method === 'cod'));
   document.getElementById('manualPaymentBox').style.display = 'none';
@@ -4299,18 +4381,18 @@ renderSavedForLater();
 loadProducts();
 
 document.getElementById('newsletterBtn').addEventListener('click', async ()=>{
-  const email = document.getElementById('newsletterEmail').value.trim();
+  const phone = document.getElementById('newsletterPhone').value.replace(/[\s-]/g, '').trim();
   const statusEl = document.getElementById('newsletterStatus');
-  if (!email || !email.includes('@')) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب إيميل صحيح.'; return; }
-  const { error } = await sb.from('newsletter_subscribers').insert({ email });
+  if (!/^01[0-2,5]\d{8}$/.test(phone)) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب رقم موبايل صحيح يبدأ بـ 01 و11 رقم.'; return; }
+  const { error } = await sb.from('newsletter_subscribers').insert({ phone });
   if (error) {
     statusEl.style.color = 'var(--danger)';
-    statusEl.textContent = error.code === '23505' ? 'الإيميل ده مشترك بالفعل.' : 'حصلت مشكلة، حاول تاني.';
+    statusEl.textContent = error.code === '23505' ? 'الرقم ده مشترك بالفعل.' : 'حصلت مشكلة، حاول تاني.';
     return;
   }
   statusEl.style.color = 'var(--success)';
-  statusEl.textContent = '✓ تم الاشتراك، شكرًا!';
-  document.getElementById('newsletterEmail').value = '';
+  statusEl.textContent = '✓ تم الاشتراك، هنبعتلك عروضنا على الواتساب!';
+  document.getElementById('newsletterPhone').value = '';
 });
 sb.rpc('increment_page_view').then(()=>{}).catch(()=>{});
 
@@ -4398,6 +4480,9 @@ document.getElementById('custLoginBtn').addEventListener('click', async ()=>{
   if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الرقم أو كلمة المرور غلط.'; return; }
   statusEl.textContent = '';
   await refreshAccountView();
+  // Safety net: if products somehow didn't load yet (slow mobile), make sure the
+  // storefront isn't left empty after the user logs in.
+  if (!allProducts || allProducts.length === 0) { loadProducts._tries = 0; loadProducts(); }
 });
 
 document.getElementById('custSignupBtn').addEventListener('click', async ()=>{
@@ -4628,11 +4713,43 @@ async function refreshAccountView(){
       ${trackerHTML(o.status)}
       ${etaHTML(o)}
       ${paymentStatusHTML(o)}
+      ${isDelivered && o.order_rating ? `<div style="margin-top:10px;color:var(--gold);font-size:0.82rem;">⭐ قيّمت الطلب ده بـ ${o.order_rating}/5 — شكرًا لك!</div>` : ''}
+      ${isDelivered && !o.order_rating ? `<div class="order-feedback-box" data-order="${o.id}" style="margin-top:12px;background:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:14px;">
+        <div style="font-weight:700;font-size:0.85rem;margin-bottom:8px;">وصلك الطلب؟ قيّم تجربتك 🌸</div>
+        <div class="order-stars" style="display:flex;gap:6px;margin-bottom:10px;font-size:1.4rem;cursor:pointer;">
+          ${[1,2,3,4,5].map(n=>`<span class="order-star" data-val="${n}" style="color:var(--smoke);transition:color .15s;">★</span>`).join('')}
+        </div>
+        <textarea class="order-fb-text" placeholder="أي ملاحظة على المنتج أو التوصيل؟ (اختياري)" style="width:100%;min-height:50px;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);padding:10px 12px;border-radius:8px;font-family:'Cairo';resize:vertical;margin-bottom:8px;"></textarea>
+        <button class="btn-primary order-fb-submit" style="width:100%;padding:9px;font-size:0.82rem;">ابعت التقييم</button>
+        <div class="order-fb-status" style="font-size:0.78rem;margin-top:6px;"></div>
+      </div>` : ''}
       ${isDelivered ? `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">
         ${(o.items||[]).map(i => i.id ? `<button class="btn-ghost review-btn" data-product="${i.id}" data-order="${o.id}" data-name="${escapeHTML(i.name)}" style="font-size:0.75rem;padding:6px 12px;">⭐ قيّم ${escapeHTML(i.name)}</button>` : '').join('')}
       </div>` : ''}
     </div>
   `;}).join('');
+
+  // Wire up the order-level rating/feedback forms.
+  ordersListEl.querySelectorAll('.order-feedback-box').forEach(box => {
+    let picked = 0;
+    const stars = box.querySelectorAll('.order-star');
+    stars.forEach(star => {
+      star.addEventListener('mouseover', () => stars.forEach(s => s.style.color = Number(s.dataset.val) <= Number(star.dataset.val) ? 'var(--gold)' : 'var(--smoke)'));
+      star.addEventListener('click', () => {
+        picked = Number(star.dataset.val);
+        stars.forEach(s => s.style.color = Number(s.dataset.val) <= picked ? 'var(--gold)' : 'var(--smoke)');
+      });
+    });
+    box.addEventListener('mouseleave', () => stars.forEach(s => s.style.color = Number(s.dataset.val) <= picked ? 'var(--gold)' : 'var(--smoke)'));
+    box.querySelector('.order-fb-submit').addEventListener('click', async () => {
+      const statusEl = box.querySelector('.order-fb-status');
+      if (picked === 0) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اختار عدد النجوم الأول.'; return; }
+      const fb = box.querySelector('.order-fb-text').value.trim();
+      const { error } = await sb.from('store_orders').update({ order_rating: picked, customer_feedback: fb || null, delivery_confirmed: true }).eq('id', box.dataset.order);
+      if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'حصلت مشكلة، حاول تاني.'; return; }
+      box.innerHTML = '<div style="color:var(--success);font-size:0.85rem;text-align:center;padding:6px;">شكرًا لتقييمك 🌸 وصلنا رأيك.</div>';
+    });
+  });
 
   // Wire review buttons
   ordersListEl.querySelectorAll('.review-btn').forEach(btn => {
@@ -4907,11 +5024,13 @@ backToTopBtn.addEventListener('click', ()=> window.scrollTo({ top: 0, behavior: 
   .bottom-nav-item:hover,.bottom-nav-item:active{color:var(--gold);}
   body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px));}
   #cartFab{bottom:calc(74px + env(safe-area-inset-bottom,0px)) !important;display:none;}
-  /* cartFab is hidden on mobile (the bottom nav replaces it), so WhatsApp sits
-     directly above the nav bar instead of stacking. */
-  #floatingWhatsApp{bottom:calc(74px + env(safe-area-inset-bottom,0px)) !important;}
+  /* On mobile the bottom nav bar holds the cart in the centre. The floating
+     WhatsApp button is moved to the LEFT corner and lifted clearly above the
+     nav bar, so it can never sit on top of the cart icon or its badge. */
+  #floatingWhatsApp{bottom:calc(78px + env(safe-area-inset-bottom,0px)) !important;left:16px !important;z-index:80 !important;width:48px !important;height:48px !important;}
+  #floatingWhatsApp svg{width:26px;height:26px;}
   #backToTop{bottom:calc(74px + env(safe-area-inset-bottom,0px)) !important;}
-  #toast-container{bottom:calc(78px + env(safe-area-inset-bottom,0px)) !important;}
+  #toast-container{bottom:calc(190px + env(safe-area-inset-bottom,0px)) !important;}
 }
 </style>
 <script>

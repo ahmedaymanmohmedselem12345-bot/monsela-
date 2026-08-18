@@ -461,6 +461,24 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     </div>
 
     <div class="card" style="border-color:var(--gold);" data-tab="settings">
+      <h2>🗂️ إدارة الأقسام</h2>
+      <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">ضيف أو شيل أقسام المتجر (زي سبح، مصليات، إلخ). القسم اللي تضيفه هنا هيظهر في الموقع وفي اختيار القسم وقت إضافة منتج.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:16px;">
+        <div style="flex:2;min-width:160px;">
+          <label>اسم القسم</label>
+          <input type="text" id="newDeptName" placeholder="مثال: سبح ومصليات">
+        </div>
+        <div style="flex:0 0 90px;">
+          <label>أيقونة</label>
+          <input type="text" id="newDeptIcon" placeholder="📿" maxlength="4">
+        </div>
+        <button class="btn" id="addDeptBtn" style="flex:0;">+ إضافة</button>
+      </div>
+      <div id="deptManageList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
+      <div class="status" id="deptManageStatus"></div>
+    </div>
+
+    <div class="card" style="border-color:var(--gold);" data-tab="settings">
       <h2>💾 نسخة احتياطية من البيانات</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">بيحمّل كل بياناتك (المنتجات، الطلبات، العملاء، الكوبونات، الإعدادات) في ملف واحد على جهازك. <b>اعمله كل أسبوعين</b> وارفع الملف على GitHub في مجلد <code>BACKUPS</code>.</p>
       <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:16px;">⚠️ ده بيحفظ <b>البيانات</b> بس. تصميم الموقع نفسه محفوظ في GitHub تلقائيًا.</p>
@@ -1124,12 +1142,20 @@ async function loadNewsletterSubscribers(){
   lastLoadedSubscribers = data || [];
   if (lastLoadedSubscribers.length === 0) { listEl.innerHTML = '<p style="color:var(--smoke);">لسه مفيش مشتركين.</p>'; return; }
   listEl.innerHTML = `<p style="color:var(--smoke);margin-bottom:10px;">${lastLoadedSubscribers.length} مشترك</p>` +
-    lastLoadedSubscribers.slice(0, 20).map(s => `<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:0.85rem;">${escapeHTML(s.email)}</div>`).join('') +
-    (lastLoadedSubscribers.length > 20 ? `<p style="color:var(--smoke);font-size:0.8rem;margin-top:8px;">+ ${lastLoadedSubscribers.length - 20} تاني — صدّر Excel عشان تشوف الكل</p>` : '');
+    lastLoadedSubscribers.slice(0, 30).map(s => {
+      const contact = s.phone || s.email || '(مفيش بيانات)';
+      const waNum = s.phone ? '2' + s.phone.replace(/[^0-9]/g, '') : null;
+      const waText = encodeURIComponent('مرحبًا! 👋 عندنا عروض جديدة في Monsela 🌸');
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:0.85rem;">
+        <span>${escapeHTML(contact)}</span>
+        ${waNum ? `<a class="btn btn-ghost" href="https://wa.me/${waNum}?text=${waText}" target="_blank" rel="noopener" style="text-decoration:none;font-size:0.75rem;padding:5px 10px;">واتساب 💬</a>` : ''}
+      </div>`;
+    }).join('') +
+    (lastLoadedSubscribers.length > 30 ? `<p style="color:var(--smoke);font-size:0.8rem;margin-top:8px;">+ ${lastLoadedSubscribers.length - 30} تاني — صدّر Excel عشان تشوف الكل</p>` : '');
 }
 document.getElementById('exportNewsletterBtn').addEventListener('click', ()=>{
-  const rows = [['الإيميل', 'تاريخ الاشتراك']];
-  lastLoadedSubscribers.forEach(s => rows.push([s.email, s.created_at]));
+  const rows = [['رقم الموبايل', 'الإيميل (قديم)', 'تاريخ الاشتراك']];
+  lastLoadedSubscribers.forEach(s => rows.push([s.phone || '', s.email || '', s.created_at]));
   downloadCSV(rows, 'monsela-newsletter.csv');
 });
 
@@ -1664,18 +1690,30 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
         return;
       }
     }
+    let uploaded = 0;
     for (const file of files) {
+      uploaded++;
+      statusEl.style.color = 'var(--gold)';
+      statusEl.textContent = `جاري رفع الصور... (${uploaded}/${files.length})`;
       const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-      const compressed = await compressImage(file);
+      let compressed;
+      try {
+        compressed = await compressImage(file);
+      } catch (e) {
+        // If compression fails for an odd format, fall back to the original file.
+        compressed = file;
+      }
       const { error: uploadError } = await sb.storage.from('product-images').upload(path, compressed, { contentType: 'image/jpeg' });
       if (uploadError) {
-        statusEl.style.color='var(--danger)'; statusEl.textContent='حصلت مشكلة في رفع صورة: ' + uploadError.message;
+        statusEl.style.color='var(--danger)';
+        statusEl.textContent = `مشكلة في رفع الصورة رقم ${uploaded}: ${uploadError.message}. الصور اللي اترفعت قبلها اتحفظت.`;
         saveBtn.disabled = false;
         return;
       }
       const { data: urlData } = sb.storage.from('product-images').getPublicUrl(path);
       allImages.push(urlData.publicUrl); // append new images to the existing ones
     }
+    statusEl.textContent = 'جاري الحفظ...';
   }
 
   // First image is the cover, the rest are the gallery
@@ -1959,12 +1997,15 @@ async function loadOrdersList(){
         ${o.notes ? `<p style="color:var(--gold);">📝 ${escapeHTML(o.notes)}</p>` : ''}
         ${o.is_gift ? `<p style="color:var(--rose);">🎁 هدية ${o.gift_message ? '— ' + escapeHTML(o.gift_message) : ''}</p>` : ''}
         <p style="font-size:0.75rem;">${new Date(o.created_at).toLocaleString('ar-EG')}</p>
+        ${o.order_rating ? `<p style="color:var(--gold);font-size:0.8rem;">⭐ تقييم العميل: ${o.order_rating}/5</p>` : ''}
+        ${o.customer_feedback ? `<p style="color:var(--cream);font-size:0.8rem;background:var(--ink-3);padding:6px 10px;border-radius:8px;">💬 ${escapeHTML(o.customer_feedback)}</p>` : ''}
         ${showArchived && o.archived_at ? `<p style="font-size:0.75rem;color:var(--gold);">🗄 اتأرشف: ${new Date(o.archived_at).toLocaleString('ar-EG')}</p>` : ''}
       </div>
       <div class="actions" style="display:flex;flex-direction:column;gap:8px;align-items:stretch;">
         <select data-order="${o.id}" class="order-status" style="background:var(--ink);color:var(--cream);border:1px solid var(--line);border-radius:8px;padding:8px;">
           ${statusOptions}
         </select>
+        <button class="btn btn-ghost order-notify-btn" data-phone="${escapeHTML(o.customer_phone || '')}" data-order-num="${escapeHTML(o.order_number || '')}" data-name="${escapeHTML(o.customer_name || '')}" style="font-size:0.78rem;padding:8px 12px;">📲 بلّغ العميل بالحالة</button>
         ${showArchived
           ? `<button class="btn btn-ghost" data-unarchive="${o.id}" style="font-size:0.78rem;padding:8px 12px;">↩ رجّعه للنشطة</button>`
           : `<button class="btn btn-ghost" data-archive="${o.id}" style="font-size:0.78rem;padding:8px 12px;border-color:var(--success);color:var(--success);">📦 اتسلّم — أرشفة</button>`}
@@ -1974,8 +2015,40 @@ async function loadOrdersList(){
 
   listEl.querySelectorAll('.order-status').forEach(sel=>{
     sel.addEventListener('change', async ()=>{
-      const { error } = await sb.from('store_orders').update({ status: sel.value }).eq('id', sel.dataset.order);
-      if (error) alert('حصلت مشكلة في تحديث الحالة: ' + error.message);
+      const { error } = await sb.from('store_orders').update({ status: sel.value, last_notified_status: sel.value }).eq('id', sel.dataset.order);
+      if (error) { alert('حصلت مشكلة في تحديث الحالة: ' + error.message); return; }
+      // Nudge the admin to notify the customer of the new status via WhatsApp.
+      const row = sel.closest('.product-item');
+      const notifyBtn = row && row.querySelector('.order-notify-btn');
+      if (notifyBtn) {
+        notifyBtn.style.borderColor = 'var(--gold)';
+        notifyBtn.style.color = 'var(--gold)';
+        notifyBtn.textContent = '📲 ابعت التحديث للعميل (' + sel.value + ')';
+        notifyBtn.dataset.status = sel.value;
+      }
+    });
+  });
+
+  // WhatsApp the customer with their order's current status.
+  listEl.querySelectorAll('.order-notify-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const phone = (btn.dataset.phone || '').replace(/[^0-9]/g, '');
+      if (!phone) { alert('مفيش رقم موبايل للعميل ده.'); return; }
+      const wa = phone.startsWith('2') ? phone : '2' + phone;
+      const status = btn.dataset.status || '';
+      const orderNum = btn.dataset.orderNum || '';
+      const name = btn.dataset.name || '';
+      let msg;
+      if (status === 'في الطريق') {
+        msg = `مرحبًا ${name} 👋\\nطلبك رقم ${orderNum} في الطريق إليك دلوقتي 🚚\\nهنتواصل معاك قبل التسليم.\\nMonsela 🌸`;
+      } else if (status === 'قيد التجهيز') {
+        msg = `مرحبًا ${name} 👋\\nبنجهّز طلبك رقم ${orderNum} دلوقتي 📦\\nهنبلّغك أول ما يخرج للتوصيل.\\nMonsela 🌸`;
+      } else if (status === 'اتسلم') {
+        msg = `مرحبًا ${name} 👋\\nيا رب طلبك ${orderNum} يكون عجبك 🌸\\nلو سمحت قيّم تجربتك من صفحة حسابك — رأيك يهمنا جدًا.\\nMonsela`;
+      } else {
+        msg = `مرحبًا ${name} 👋\\nتحديث على طلبك رقم ${orderNum}: ${status}\\nMonsela 🌸`;
+      }
+      window.open('https://wa.me/' + wa + '?text=' + encodeURIComponent(msg), '_blank');
     });
   });
 
@@ -2323,6 +2396,102 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
   } catch (e) {
     console.error('Backup block failed (panel still works):', e);
   }
+})();
+</script>
+
+<script>
+/* ===== Department management (isolated) =====
+   Lets the admin add/remove store departments. Departments live in their own
+   table; adding one here makes it available on the storefront and in the product
+   form's department dropdown. Fully wrapped so a failure never breaks the panel. */
+(function(){
+  var ICON_DEFAULTS = {
+    'عطور':'🌸','ساعات':'⌚','دهب':'💛','سلاسل':'📿','مكياج':'💄',
+    'إكسسوارات':'👜','نظارات':'🕶️','بخور':'🕯️','عطور منزلية':'🏠'
+  };
+
+  async function loadDepartments(){
+    var listEl = document.getElementById('deptManageList');
+    if (!listEl) return;
+    try {
+      var res = await sb.from('departments').select('*').order('sort_order', { ascending: true }).order('name', { ascending: true });
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      window.__departments = rows;
+      syncProductDeptDropdown(rows);
+      if (rows.length === 0) {
+        listEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">مفيش أقسام لسه. ضيف أول قسم فوق.</p>';
+        return;
+      }
+      listEl.innerHTML = rows.map(function(d){
+        return '<div class="product-item">'
+          + '<div class="info"><h4>' + (d.icon || '✨') + ' ' + escapeHTML(d.name) + '</h4>'
+          + '<p>' + (d.active ? 'ظاهر في الموقع' : 'مخفي') + '</p></div>'
+          + '<div class="actions">'
+          + '<button class="btn btn-ghost" data-dept-toggle="' + d.id + '" data-active="' + (d.active?1:0) + '" style="font-size:0.75rem;">' + (d.active ? 'إخفاء' : 'إظهار') + '</button>'
+          + '<button class="btn btn-ghost" data-dept-del="' + d.id + '" data-name="' + escapeHTML(d.name) + '" style="font-size:0.75rem;border-color:var(--danger);color:var(--danger);">حذف</button>'
+          + '</div></div>';
+      }).join('');
+
+      listEl.querySelectorAll('[data-dept-toggle]').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          var makeActive = btn.dataset.active === '0';
+          var r = await sb.from('departments').update({ active: makeActive }).eq('id', btn.dataset.deptToggle);
+          if (r.error) { alert('مشكلة: ' + r.error.message); return; }
+          loadDepartments();
+        });
+      });
+      listEl.querySelectorAll('[data-dept-del]').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          if (!confirm('تحذف قسم "' + btn.dataset.name + '"؟\n\nملاحظة: ده مش هيمسح المنتجات اللي جواه، بس القسم مش هيظهر في الموقع.')) return;
+          var r = await sb.from('departments').delete().eq('id', btn.dataset.deptDel);
+          if (r.error) { alert('مشكلة: ' + r.error.message); return; }
+          loadDepartments();
+        });
+      });
+    } catch (e) {
+      console.error('loadDepartments failed:', e);
+      listEl.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">مشكلة في تحميل الأقسام. اتأكد إنك شغّلت ملف قاعدة البيانات.</p>';
+    }
+  }
+
+  // Keep the product form's department dropdown in sync with the table, while
+  // preserving whatever value was already selected.
+  function syncProductDeptDropdown(rows){
+    var sel = document.getElementById('pDepartmentSelect');
+    if (!sel || !rows) return;
+    var current = sel.value;
+    sel.innerHTML = rows.filter(function(d){ return d.active; }).map(function(d){
+      return '<option value="' + escapeHTML(d.name) + '">' + (d.icon || '✨') + ' ' + escapeHTML(d.name) + '</option>';
+    }).join('');
+    if (current && rows.some(function(d){ return d.name === current; })) sel.value = current;
+    if (sel.dispatchEvent) sel.dispatchEvent(new Event('change'));
+  }
+
+  try {
+    var addBtn = document.getElementById('addDeptBtn');
+    if (addBtn) {
+      addBtn.addEventListener('click', async function(){
+        var nameEl = document.getElementById('newDeptName');
+        var iconEl = document.getElementById('newDeptIcon');
+        var statusEl = document.getElementById('deptManageStatus');
+        var name = (nameEl.value || '').trim();
+        if (!name) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'اكتب اسم القسم.'; return; }
+        var icon = (iconEl.value || '').trim() || ICON_DEFAULTS[name] || '✨';
+        var r = await sb.from('departments').insert({ name: name, icon: icon, sort_order: 99 });
+        if (r.error) {
+          statusEl.style.color = 'var(--danger)';
+          statusEl.textContent = (r.error.message && r.error.message.indexOf('duplicate') !== -1)
+            ? 'القسم ده موجود بالفعل.' : ('مشكلة: ' + r.error.message);
+          return;
+        }
+        nameEl.value = ''; iconEl.value = '';
+        statusEl.style.color = 'var(--success)'; statusEl.textContent = 'اتضاف ✓';
+        loadDepartments();
+      });
+    }
+    loadDepartments();
+  } catch (e) { console.error('Department manager failed (panel still works):', e); }
 })();
 </script>
 </body>
