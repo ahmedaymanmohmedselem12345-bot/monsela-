@@ -2751,6 +2751,28 @@ async function openProductDetail(productId){
     ['العائلة العطرية', p.fragrance_family], ['الثبات', p.longevity], ['الانتشار', p.projection],
     ['الموسم', p.season], ['المناسبة', p.occasion], ['التركيز', p.concentration], ['بلد المنشأ', p.origin_country]
   ].filter(([,v]) => v);
+  // Department-specific specs (gold karat, watch movement, lens type, ...). Stored
+  // as a JSON object on the product; labels come from the same map the admin uses.
+  try {
+    const SPEC_LABELS = {
+      karat:'العيار', weight:'الوزن', metal:'نوع المعدن', stone:'الحجر', size:'المقاس',
+      certificate:'شهادة', material:'الخامة', length:'الطول', clasp:'نوع القفل',
+      movement:'نوع الحركة', case:'مادة العلبة', diameter:'قطر العلبة', water:'مقاومة الماء',
+      strap:'نوع السوار', warranty:'الضمان', frameShape:'شكل الإطار', frameMat:'مادة الإطار',
+      lens:'نوع العدسة', uv:'حماية UV', type:'النوع', lensSize:'مقاس العدسة',
+      shade:'درجة اللون', skin:'نوع البشرة', waterproof:'مقاوم للماء', expiry:'مدة الصلاحية',
+      color:'اللون', care:'طريقة العناية', origin:'بلد المنشأ', grade:'درجة الجودة',
+      burnTime:'مدة الاحتراق', longevity:'مدة الثبات', coverage:'مساحة التغطية'
+    };
+    if (p.specs && typeof p.specs === 'object') {
+      Object.keys(p.specs).forEach(k => {
+        const val = p.specs[k];
+        if (val !== null && val !== undefined && String(val).trim() !== '') {
+          attrRows.push([SPEC_LABELS[k] || k, String(val)]);
+        }
+      });
+    }
+  } catch (e) { console.error('Specs render skipped:', e); }
   const profileEl = document.getElementById('pdFragranceProfile');
   if (notesRows.length > 0 || attrRows.length > 0) {
     profileEl.style.display = 'block';

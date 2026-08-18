@@ -251,6 +251,12 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
         <textarea id="pDescriptionEn" placeholder="Description in English"></textarea>
       </details>
 
+      <div id="deptSpecsBox" style="display:none;margin:14px 0;border:1px solid var(--gold);border-radius:10px;padding:14px 16px;background:rgba(154,119,57,0.06);">
+        <p style="font-weight:700;color:var(--gold);margin-bottom:4px;font-size:0.95rem;" id="deptSpecsTitle">مواصفات القسم</p>
+        <p style="color:var(--smoke);font-size:0.76rem;margin-bottom:12px;">الخانات دي بتتغير حسب القسم اللي اخترته فوق. سيب أي خانة فاضية لو مش عارفها — الفاضي مش هيظهر للعميل.</p>
+        <div id="deptSpecsFields" class="row"></div>
+      </div>
+
       <details id="perfumeAdvancedDetails" style="margin:14px 0;border:1px solid var(--line);border-radius:10px;padding:12px 16px;">
         <summary style="cursor:pointer;font-weight:700;color:var(--gold);">+ تفاصيل متقدمة (اختياري - سيبها فاضية لو مش عايز تضيعك وقت)</summary>
         <div class="row" style="margin-top:14px;">
@@ -746,6 +752,8 @@ async function showAdmin(){
     if (perfumeDetails) {
       perfumeDetails.style.display = scentDepts.includes(deptSelect.value) ? 'block' : 'none';
     }
+    // Swap in the spec fields that belong to the newly chosen department.
+    try { renderDeptSpecs(deptSelect.value, {}); } catch (e) { console.error('Spec fields failed:', e); }
   }
   if (deptSelect) {
     deptSelect.addEventListener('change', syncDepartment);
@@ -1528,6 +1536,103 @@ function compressImage(file, maxDimension = 1000, quality = 0.82){
   });
 }
 
+
+/* ===== Per-department product specs =====
+   Each department gets its own set of fields. Values are stored together in the
+   single `specs` JSON column on products, so adding or changing a department
+   later needs no database migration — only this table. */
+const DEPT_SPECS = {
+  'دهب': [
+    { key:'karat',      label:'العيار',            placeholder:'18 / 21 / 24' },
+    { key:'weight',     label:'الوزن (جرام)',       placeholder:'مثال: 5.2' },
+    { key:'metal',      label:'نوع المعدن',         placeholder:'ذهب أصفر / أبيض / وردي' },
+    { key:'stone',      label:'الحجر',             placeholder:'ألماس / زركون / بدون' },
+    { key:'size',       label:'المقاس',            placeholder:'مثال: 17' },
+    { key:'certificate',label:'شهادة',             placeholder:'موجودة / مش موجودة' }
+  ],
+  'سلاسل': [
+    { key:'material',   label:'الخامة',            placeholder:'فضة / ذهب / ستانلس' },
+    { key:'length',     label:'الطول',             placeholder:'مثال: 45 سم' },
+    { key:'karat',      label:'العيار',            placeholder:'925 / 18' },
+    { key:'clasp',      label:'نوع القفل',          placeholder:'لوبستر / حلقة' },
+    { key:'weight',     label:'الوزن (جرام)',       placeholder:'مثال: 8' }
+  ],
+  'ساعات': [
+    { key:'movement',   label:'نوع الحركة',         placeholder:'كوارتز / أوتوماتيك' },
+    { key:'case',       label:'مادة العلبة',        placeholder:'ستانلس ستيل' },
+    { key:'diameter',   label:'قطر العلبة',         placeholder:'مثال: 42 مم' },
+    { key:'water',      label:'مقاومة الماء',       placeholder:'مثال: 5 ATM' },
+    { key:'strap',      label:'نوع السوار',         placeholder:'جلد / معدن' },
+    { key:'warranty',   label:'الضمان',            placeholder:'مثال: سنة' }
+  ],
+  'نظارات': [
+    { key:'frameShape', label:'شكل الإطار',         placeholder:'مربع / دائري / كات آي' },
+    { key:'frameMat',   label:'مادة الإطار',        placeholder:'أسيتات / معدن' },
+    { key:'lens',       label:'نوع العدسة',         placeholder:'بولارايزد / عادية' },
+    { key:'uv',         label:'حماية UV',          placeholder:'UV400' },
+    { key:'type',       label:'شمسي / طبي',        placeholder:'شمسي' },
+    { key:'lensSize',   label:'مقاس العدسة',        placeholder:'مثال: 52 مم' }
+  ],
+  'مكياج': [
+    { key:'type',       label:'النوع',             placeholder:'أحمر شفاه / كونسيلر' },
+    { key:'shade',      label:'درجة اللون',         placeholder:'مثال: 03 Nude' },
+    { key:'skin',       label:'نوع البشرة',         placeholder:'دهنية / جافة / كل الأنواع' },
+    { key:'size',       label:'الحجم',             placeholder:'مثال: 30 مل' },
+    { key:'waterproof', label:'مقاوم للماء',        placeholder:'أيوه / لأ' },
+    { key:'expiry',     label:'مدة الصلاحية',       placeholder:'مثال: سنتين' }
+  ],
+  'إكسسوارات': [
+    { key:'material',   label:'الخامة',            placeholder:'جلد طبيعي / قماش' },
+    { key:'size',       label:'المقاس',            placeholder:'مثال: 25×15 سم' },
+    { key:'color',      label:'اللون',             placeholder:'أسود' },
+    { key:'care',       label:'طريقة العناية',      placeholder:'تنظيف جاف' }
+  ],
+  'بخور': [
+    { key:'type',       label:'النوع',             placeholder:'عود / معمول / بخور مطبوخ' },
+    { key:'weight',     label:'الوزن',             placeholder:'مثال: 50 جرام' },
+    { key:'origin',     label:'بلد المنشأ',         placeholder:'كمبودي / هندي' },
+    { key:'grade',      label:'درجة الجودة',        placeholder:'ممتاز / سوبر' },
+    { key:'burnTime',   label:'مدة الاحتراق',       placeholder:'مثال: 45 دقيقة' }
+  ],
+  'عطور منزلية': [
+    { key:'size',       label:'الحجم',             placeholder:'مثال: 250 مل' },
+    { key:'type',       label:'النوع',             placeholder:'بخاخ / عود / شمعة / ديفيوزر' },
+    { key:'longevity',  label:'مدة الثبات',         placeholder:'مثال: 6 ساعات' },
+    { key:'coverage',   label:'مساحة التغطية',      placeholder:'مثال: غرفة 25 متر' }
+  ]
+};
+
+// Renders the right fields for the chosen department and (optionally) fills them
+// with the values already saved on the product being edited.
+function renderDeptSpecs(dept, values){
+  const box = document.getElementById('deptSpecsBox');
+  const fieldsEl = document.getElementById('deptSpecsFields');
+  const titleEl = document.getElementById('deptSpecsTitle');
+  if (!box || !fieldsEl) return;
+  const fields = DEPT_SPECS[dept];
+  if (!fields) { box.style.display = 'none'; fieldsEl.innerHTML = ''; return; }
+  const v = values || {};
+  if (titleEl) titleEl.textContent = 'مواصفات ' + dept;
+  fieldsEl.innerHTML = fields.map(f => `
+    <div>
+      <label>${escapeHTML(f.label)}</label>
+      <input type="text" class="dept-spec-field" data-spec-key="${f.key}"
+        placeholder="${escapeHTML(f.placeholder || '')}" value="${escapeHTML(v[f.key] != null ? String(v[f.key]) : '')}">
+    </div>`).join('');
+  box.style.display = 'block';
+}
+
+// Collects the filled-in spec fields into the object saved to products.specs.
+function collectDeptSpecs(){
+  const out = {};
+  document.querySelectorAll('.dept-spec-field').forEach(inp => {
+    const val = inp.value.trim();
+    // Empty fields are skipped so they never render as blank rows for the customer.
+    if (val) out[inp.dataset.specKey] = val;
+  });
+  return out;
+}
+
 document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('productStatus');
   const name = document.getElementById('pName').value.trim();
@@ -1583,6 +1688,7 @@ document.getElementById('saveProductBtn').addEventListener('click', async ()=>{
     original_price: document.getElementById('pOriginalPrice').value ? Number(document.getElementById('pOriginalPrice').value) : null,
     tag: document.getElementById('pTag').value.trim() || null,
     department: document.getElementById('pDepartmentVisible').value.trim() || 'عطور',
+    specs: collectDeptSpecs(),
     brand: document.getElementById('pBrand').value.trim() || null,
     stock: document.getElementById('pStock').value ? Number(document.getElementById('pStock').value) : 0,
     category: document.getElementById('pCategory').value.trim() || null,
@@ -1730,6 +1836,9 @@ function editProduct(p){
   document.getElementById('pDepartmentVisible').value = p.department || 'عطور';
   const deptSel = document.getElementById('pDepartmentSelect');
   if (deptSel) { deptSel.value = p.department || 'عطور'; deptSel.dispatchEvent(new Event('change')); }
+  // Re-render the spec fields with this product's saved values. Must run AFTER the
+  // change event above, which would otherwise redraw them empty.
+  renderDeptSpecs(p.department || 'عطور', p.specs || {});
   document.getElementById('pBrand').value = p.brand || '';
   document.getElementById('pStock').value = p.stock ?? 0;
   document.getElementById('pCategory').value = p.category || '';
