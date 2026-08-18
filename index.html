@@ -1126,9 +1126,10 @@ window.addEventListener('load', function(){
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
       </button>
       <div id="accountMenuWrap" style="position:relative;">
-        <button id="accountBtn" class="nav-icon-btn" aria-label="حسابي" title="حسابي">
+        <button id="accountBtn" class="nav-icon-btn" aria-label="حسابي" title="حسابي" style="position:relative;">
           <svg id="accountBtnIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span id="accountBtnAvatar" style="display:none;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#fff;align-items:center;justify-content:center;font-weight:700;font-size:0.95rem;"></span>
+          <span id="accountNotifBadge" style="display:none;position:absolute;top:-2px;right:-2px;background:var(--rose);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:999px;align-items:center;justify-content:center;padding:0 3px;line-height:1;">0</span>
         </button>
         <div id="accountDropdown" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,0.18);min-width:210px;z-index:80;overflow:hidden;">
           <div id="accountDropdownName" style="padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;font-size:0.9rem;"></div>
@@ -1426,6 +1427,10 @@ window.addEventListener('load', function(){
       </div>
 
       <h4 style="margin-bottom:12px;" data-i18n="my_orders">طلباتي وفواتيري</h4>
+      <div id="notificationsSection" style="margin-bottom:20px;">
+        <h4 style="font-size:1rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;">🔔 إشعاراتك</h4>
+        <div id="notificationsList"><p style="color:var(--smoke);font-size:0.85rem;">مفيش إشعارات جديدة.</p></div>
+      </div>
       <div id="myOrdersList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
       <button id="custLogoutBtn" class="btn-ghost" style="width:100%;margin-top:18px;" data-i18n="btn_logout">تسجيل الخروج</button>
     </div>
@@ -1657,6 +1662,19 @@ window.addEventListener('load', function(){
         <p style="margin:0;">أي سؤال قبل أو بعد الطلب، إحنا على بعد رسالة واتساب واحدة.</p>
       </div>
     </div>
+  </div>
+</section>
+
+
+
+<section class="section" id="customerReviews" style="display:none;background:var(--ink-3);">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">آراء عملائنا</div>
+      <h2>عملاء Monsela بيقولوا إيه</h2>
+    </div>
+    <div id="customerReviewsSummary" class="reveal" style="text-align:center;margin-bottom:24px;"></div>
+    <div id="customerReviewsGrid" class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;"></div>
   </div>
 </section>
 
@@ -2240,6 +2258,61 @@ async function loadProducts(){
       try { renderCategoryStrip(); } catch (e) { console.error('[Monsela] strip refresh failed:', e); }
     }
   }).catch(e => console.error('[Monsela] departments load failed:', e));
+  // Load the public customer-reviews section (isolated: never blocks the storefront).
+  (async function loadCustomerReviews(){
+    try {
+      const section = document.getElementById('customerReviews');
+      const grid = document.getElementById('customerReviewsGrid');
+      const summary = document.getElementById('customerReviewsSummary');
+      if (!section || !grid) return;
+
+      let reviews = [];
+      // Source 1: order-level ratings + feedback that customers left after delivery.
+      try {
+        const { data: orders } = await sb.from('store_orders')
+          .select('customer_name, order_rating, customer_feedback, created_at')
+          .not('order_rating', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(30);
+        if (orders) {
+          orders.forEach(o => {
+            if (o.order_rating) reviews.push({ name: o.customer_name || 'عميل', rating: o.order_rating, text: o.customer_feedback || '' });
+          });
+        }
+      } catch (e) { console.error('[Monsela] order reviews load failed:', e); }
+
+      // Source 2: individual product reviews (if the RPC exists).
+      try {
+        const { data: prodReviews } = await sb.from('product_reviews')
+          .select('customer_name, rating, comment, created_at')
+          .order('created_at', { ascending: false })
+          .limit(30);
+        if (prodReviews) {
+          prodReviews.forEach(r => {
+            if (r.rating) reviews.push({ name: r.customer_name || 'عميل', rating: r.rating, text: r.comment || '' });
+          });
+        }
+      } catch (e) { /* table/policy may not allow public read; ignore quietly */ }
+
+      if (reviews.length === 0) { section.style.display = 'none'; return; }
+      section.style.display = '';
+
+      const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
+      const stars = n => '★★★★★☆☆☆☆☆'.slice(5 - Math.round(n), 10 - Math.round(n));
+      summary.innerHTML = `
+        <div style="font-size:3rem;font-weight:700;color:var(--gold);line-height:1;">${avg}</div>
+        <div style="color:var(--gold);font-size:1.4rem;letter-spacing:3px;">${stars(avg)}</div>
+        <div style="color:var(--smoke);font-size:0.9rem;margin-top:6px;">من ${reviews.length} تقييم من عملائنا</div>`;
+
+      grid.innerHTML = reviews.slice(0, 12).map(r => `
+        <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:20px;">
+          <div style="color:var(--gold);font-size:1.1rem;letter-spacing:2px;margin-bottom:10px;">${stars(r.rating)}</div>
+          ${r.text ? `<p style="color:var(--cream);font-size:0.9rem;line-height:1.7;margin-bottom:12px;">"${escapeHTML(r.text)}"</p>` : '<p style="color:var(--smoke);font-size:0.85rem;margin-bottom:12px;">عميل راضٍ ⭐</p>'}
+          <div style="color:var(--gold-dark);font-weight:700;font-size:0.85rem;">— ${escapeHTML(r.name)}</div>
+        </div>`).join('');
+    } catch (e) { console.error('[Monsela] customer reviews section failed:', e); }
+  })();
+
   sb.rpc('get_product_ratings').then(({ data }) => {
     if (!data) return;
     productRatings = {};
@@ -2368,19 +2441,24 @@ function renderCategoryStrip(){
 
   // Convert the grid container into a horizontal marquee viewport.
   grid.style.cssText = 'display:block !important;overflow:hidden;position:relative;width:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);';
-  const loop = depts.concat(depts); // duplicate for a seamless loop
+  // Repeat the set enough times that even a few departments fill a wide screen,
+  // then the animation moves by exactly one set width for a seamless loop.
+  let baseSet = depts.slice();
+  while (baseSet.length < 8) baseSet = baseSet.concat(depts); // ensure enough cards
+  const loop = baseSet.concat(baseSet); // one more copy for the seamless wrap
   grid.innerHTML = `<div id="catStripTrack" style="display:flex;gap:14px;width:max-content;will-change:transform;">${loop.map(card).join('')}</div>`;
 
   const track = document.getElementById('catStripTrack');
-  // Marquee speed scales with the number of cards so it always feels steady.
-  const durationSec = Math.max(18, depts.length * 4);
+  // Faster, steady marquee. Duplicating the set and animating to exactly -50%
+  // means the second copy lines up with the first, so the loop is seamless with
+  // no pause at the reset point.
+  const durationSec = Math.max(8, depts.length * 1.4);
   try {
     if (!document.getElementById('catStripKeyframes')) {
       const st = document.createElement('style');
       st.id = 'catStripKeyframes';
-      // Moves exactly one full set of cards (50% of the doubled track), then loops.
-      st.textContent = '@keyframes catStripScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}'
-        + '#catStripTrack{animation:catStripScroll var(--cat-dur,30s) linear infinite;}'
+      st.textContent = '@keyframes catStripScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}'
+        + '#catStripTrack{animation:catStripScroll var(--cat-dur,20s) linear infinite;}'
         + '#catStripTrack:hover{animation-play-state:paused;}'
         + '@media(prefers-reduced-motion:reduce){#catStripTrack{animation:none;}#categoryStripGrid{overflow-x:auto;}}';
       document.head.appendChild(st);
@@ -4442,6 +4520,21 @@ document.querySelectorAll('.account-menu-item').forEach(item=>{
     // notifications / orders / account → open account panel
     document.getElementById('accountOverlay').style.display = 'block';
     renderWishlistInAccount();
+    // Opening the panel means the customer has seen their status updates — record
+    // the current statuses so the badge clears and they aren't re-notified.
+    try {
+      if (window.__monselaNotifs && window.__monselaNotifs.length) {
+        let seen = {};
+        try { seen = JSON.parse(localStorage.getItem('monsela_seen_status') || '{}'); } catch(e) {}
+        window.__monselaNotifs.forEach(n => { seen[n.id] = n.status; });
+        localStorage.setItem('monsela_seen_status', JSON.stringify(seen));
+        const badge = document.getElementById('accountNotifBadge');
+        if (badge) badge.style.display = 'none';
+      }
+    } catch(e) { console.error('[Monsela] mark seen failed:', e); }
+    if (action === 'notifications') {
+      setTimeout(()=>{ const n = document.getElementById('notificationsSection'); if (n) n.scrollIntoView({behavior:'smooth'}); }, 200);
+    }
     if (action === 'orders') {
       setTimeout(()=>{ const o = document.getElementById('myOrdersList'); if (o) o.scrollIntoView({behavior:'smooth'}); }, 200);
     }
@@ -4693,6 +4786,42 @@ async function refreshAccountView(){
 
   const ordersListEl = document.getElementById('myOrdersList');
   const { data: myOrders } = await sb.from('store_orders').select('*').eq('customer_id', user.id).order('created_at', { ascending: false });
+
+  // ===== In-site order notifications =====
+  // Compare each order's current status against what the customer last saw
+  // (stored locally). Anything new becomes a notification with a badge, so the
+  // customer learns their order was delivered/shipped without opening tracking.
+  try {
+    let seen = {};
+    try { seen = JSON.parse(localStorage.getItem('monsela_seen_status') || '{}'); } catch(e) {}
+    const notifs = [];
+    (myOrders || []).forEach(o => {
+      const st = o.status || '';
+      if (st && seen[o.id] !== st) {
+        let msg;
+        if (st === 'اتسلم') msg = `طلبك ${o.order_number} وصل! 🎉 قيّم تجربتك من هنا.`;
+        else if (st === 'في الطريق') msg = `طلبك ${o.order_number} في الطريق إليك 🚚`;
+        else if (st === 'قيد التجهيز') msg = `بنجهّز طلبك ${o.order_number} دلوقتي 📦`;
+        else msg = `تحديث على طلبك ${o.order_number}: ${st}`;
+        notifs.push({ id: o.id, msg, status: st });
+      }
+    });
+    window.__monselaNotifs = notifs;
+    // Badge on the account button.
+    const badge = document.getElementById('accountNotifBadge');
+    if (badge) {
+      if (notifs.length > 0) { badge.textContent = notifs.length; badge.style.display = 'flex'; }
+      else badge.style.display = 'none';
+    }
+    // Render the notifications list inside the account panel.
+    const notifList = document.getElementById('notificationsList');
+    if (notifList) {
+      notifList.innerHTML = notifs.length === 0
+        ? '<p style="color:var(--smoke);font-size:0.85rem;">مفيش إشعارات جديدة.</p>'
+        : notifs.map(n => `<div style="background:var(--ink-3);border:1px solid var(--gold);border-radius:12px;padding:12px 14px;margin-bottom:8px;font-size:0.85rem;">${n.status === 'اتسلم' ? '🎉' : '🔔'} ${escapeHTML(n.msg)}</div>`).join('');
+    }
+  } catch (e) { console.error('[Monsela] notifications failed:', e); }
+
   if (!myOrders || myOrders.length === 0) {
     ordersListEl.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه معملتش أي طلب.</p>';
     return;
