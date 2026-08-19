@@ -2538,7 +2538,7 @@ function renderOffersCarousel(){
     return `
       <div class="offer-card" data-id="${it.id != null ? escapeHTML(String(it.id)) : ''}" ${it.link ? `data-link="${escapeHTML(it.link)}"` : ''} style="flex:0 0 auto;width:200px;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s;display:flex;flex-direction:column;">
         <div style="position:relative;aspect-ratio:1;background:var(--ink-3);overflow:hidden;">
-          ${it.img ? `<img src="${escapeHTML(it.img)}" alt="${escapeHTML(it.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;">🎁</div>'}
+          ${it.img ? `<img src="${escapeHTML(it.img)}" alt="${escapeHTML(it.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;">🎁</div>'}
           ${it.pct ? `<span style="position:absolute;top:8px;right:8px;background:var(--rose);color:#fff;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:999px;">-${it.pct}%</span>` : ''}
         </div>
         <div style="padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:4px;">
@@ -3168,19 +3168,28 @@ async function openProductDetail(productId){
       <div id="pdUsageTime" style="display:none;"></div>
     </div>
 
-    <details style="margin-top:20px;">
-      <summary style="cursor:pointer;color:var(--gold);font-weight:700;" data-i18n="pd_share">شارك المنتج ده</summary>
-      <div style="display:flex;align-items:center;gap:14px;margin-top:14px;background:var(--ink-3);border:1px solid var(--line);border-radius:12px;padding:14px;flex-wrap:wrap;">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="70" height="70" alt="QR code للمنتج" style="border-radius:8px;background:#fff;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button id="pdCopyLink" class="btn-ghost" style="padding:8px 16px;font-size:0.85rem;" data-i18n="pd_copy_link">نسخ الرابط</button>
-          <a id="pdShareWa" href="#" target="_blank" rel="noopener" style="padding:8px 16px;font-size:0.85rem;background:#25D366;color:#fff;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+    <div style="margin-top:20px;background:var(--ink-3);border:1px solid var(--gold);border-radius:14px;padding:16px;">
+      <div style="font-weight:700;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:6px;" data-i18n="pd_share">📤 شارك المنتج ده مع أصحابك</div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(location.origin + location.pathname + '?product=' + p.id)}" width="64" height="64" alt="QR code للمنتج" style="border-radius:8px;background:#fff;flex:0 0 auto;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;">
+          <button id="pdShareNative" class="btn-ghost" style="padding:9px 16px;font-size:0.85rem;">📱 مشاركة</button>
+          <button id="pdCopyLink" class="btn-ghost" style="padding:9px 16px;font-size:0.85rem;" data-i18n="pd_copy_link">🔗 نسخ الرابط</button>
+          <a id="pdShareWa" href="#" target="_blank" rel="noopener" style="padding:9px 14px;font-size:0.85rem;background:#25D366;color:#fff;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-            شارك واتساب
+            واتساب
+          </a>
+          <a id="pdShareFb" href="#" target="_blank" rel="noopener" style="padding:9px 14px;font-size:0.85rem;background:#1877F2;color:#fff;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8v8.44C19.61 23.08 24 18.09 24 12.07"/></svg>
+            فيسبوك
+          </a>
+          <a id="pdShareTg" href="#" target="_blank" rel="noopener" style="padding:9px 14px;font-size:0.85rem;background:#0088cc;color:#fff;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            تيليجرام
           </a>
         </div>
       </div>
-    </details>
+    </div>
 
     <details style="margin-top:14px;">
       <summary style="cursor:pointer;color:var(--gold);font-weight:700;">المراجعات</summary>
@@ -3362,9 +3371,25 @@ async function openProductDetail(productId){
     } catch(e) { toast(url, 'info', 8000); }
   });
   const pdShareWa = document.getElementById('pdShareWa');
+  const shareUrl = location.origin + location.pathname + '?product=' + p.id;
+  const shareText = 'شوف المنتج ده من Monsela 😍: ' + p.name;
   if (pdShareWa) {
-    const url = location.origin + location.pathname + '?product=' + p.id;
-    pdShareWa.href = `https://wa.me/?text=${encodeURIComponent('شوف المنتج ده من Monsela 😍: ' + p.name + '%0a' + url)}`;
+    pdShareWa.href = `https://wa.me/?text=${encodeURIComponent(shareText + '\n' + shareUrl)}`;
+  }
+  const pdShareFb = document.getElementById('pdShareFb');
+  if (pdShareFb) pdShareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+  const pdShareTg = document.getElementById('pdShareTg');
+  if (pdShareTg) pdShareTg.href = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+  // Native share sheet (mobile) — shares via any installed app. Hidden if unsupported.
+  const pdShareNative = document.getElementById('pdShareNative');
+  if (pdShareNative) {
+    if (navigator.share) {
+      pdShareNative.addEventListener('click', () => {
+        navigator.share({ title: p.name, text: shareText, url: shareUrl }).catch(()=>{});
+      });
+    } else {
+      pdShareNative.style.display = 'none';
+    }
   }
 
   // Open the page NOW. Everything below is optional enrichment, so a slow or failing
@@ -3387,7 +3412,7 @@ async function openProductDetail(productId){
       relatedWrap.style.display = 'block';
       document.getElementById('pdRelatedGrid').innerHTML = related.map(rp => `
         <div style="text-align:center;cursor:pointer;" class="pd-related-item" data-id="${rp.id}">
-          ${rp.image_url ? `<img src="${rp.image_url}" alt="${rp.name}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;margin-bottom:6px;">` : ''}
+          ${rp.image_url ? `<img src="${rp.image_url}" alt="${rp.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;margin-bottom:6px;">` : ''}
           <p style="font-size:0.78rem;">${rp.name}</p>
         </div>
       `).join('');
@@ -3446,7 +3471,7 @@ async function loadBestSellers(){
     <div class="perfume-card" style="display:flex;flex-direction:column;position:relative;">
       <div style="position:absolute;top:12px;right:12px;z-index:2;background:var(--gold);color:#fff;font-size:var(--text-xs);font-weight:700;padding:4px 10px;border-radius:var(--r-pill);">#${idx+1}</div>
       ${p.image_url
-        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
         : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"></div>`}
       <div style="flex:1;display:flex;flex-direction:column;">
         <h3 style="font-size:var(--text-md);margin-bottom:4px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
@@ -3520,7 +3545,7 @@ async function loadNewArrivals(){
   document.getElementById('newArrivalsGrid').innerHTML = data.map(p => `
     <div class="perfume-card" style="display:flex;flex-direction:column;">
       ${p.image_url
-        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
         : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"></div>`}
       <div style="flex:1;display:flex;flex-direction:column;">
         <h3 style="font-size:var(--text-md);margin-bottom:4px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
@@ -3682,7 +3707,7 @@ function finishQuiz(){
         <div class="perfume-card" style="display:flex;flex-direction:column;position:relative;">
           <div style="position:absolute;top:12px;right:12px;z-index:2;background:var(--gold);color:#fff;font-size:0.8rem;font-weight:700;padding:5px 12px;border-radius:20px;">${percent}% مناسب</div>
           ${p.image_url
-            ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+            ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
             : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;"></div>`}
           <div style="flex:1;display:flex;flex-direction:column;">
             <h3 style="font-size:var(--text-md);margin-bottom:6px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
@@ -3947,7 +3972,7 @@ sb.from('shop_settings').select('seasonal_title, seasonal_season, seasonal_activ
     grid.innerHTML = matched.slice(0, 10).map(p => `
       <div class="perfume-card" style="display:flex;flex-direction:column;">
         ${p.image_url
-          ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-2);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+          ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-2);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
           : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;"></div>`}
         <div style="flex:1;display:flex;flex-direction:column;">
           <h3 style="font-size:var(--text-md);margin-bottom:4px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
@@ -3982,7 +4007,7 @@ function renderFeaturedCollections(){
   grid.innerHTML = allGiftPackages.map(pkg => `
     <div class="perfume-card" style="display:flex;flex-direction:column;text-align:center;">
       ${pkg.image_url
-        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${pkg.image_url}" alt="${escapeHTML(pkg.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${pkg.image_url}" alt="${escapeHTML(pkg.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
         : `<div style="aspect-ratio:3/4;margin-bottom:16px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:3rem;">🎁</div>`}
       <div style="flex:1;display:flex;flex-direction:column;">
         <h3 style="font-size:var(--text-md);margin-bottom:8px;font-family:'Aref Ruqaa',serif;">${escapeHTML(pkg.name)}</h3>
@@ -4065,7 +4090,7 @@ function showGiftPackages(){
       ${list.slice(0, 3).map(({pkg}) => `
         <div class="perfume-card" style="display:flex;flex-direction:column;text-align:center;">
           ${pkg.image_url
-            ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${pkg.image_url}" alt="${escapeHTML(pkg.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+            ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${pkg.image_url}" alt="${escapeHTML(pkg.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
             : `<div style="aspect-ratio:3/4;margin-bottom:16px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:3rem;">🎁</div>`}
           <h3 style="font-size:var(--text-md);margin-bottom:8px;font-family:'Aref Ruqaa',serif;">${escapeHTML(pkg.name)}</h3>
           ${pkg.description ? `<p style="font-size:0.84rem;color:var(--smoke);margin-bottom:10px;line-height:1.6;">${escapeHTML(pkg.description)}</p>` : ''}
@@ -4292,7 +4317,7 @@ async function loadRecentlyViewed(){
   document.getElementById('recentlyViewedGrid').innerHTML = ordered.map(p => `
     <div class="perfume-card" style="display:flex;flex-direction:column;">
       ${p.image_url
-        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;"></div>`
+        ? `<div style="overflow:hidden;border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;background:var(--ink-3);"><img src="${p.image_url}" alt="${escapeHTML(p.name)}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
         : `<div class="glass" style="border-radius:var(--r-md);margin-bottom:16px;aspect-ratio:3/4;"></div>`}
       <div style="flex:1;display:flex;flex-direction:column;">
         <h3 style="font-size:var(--text-md);margin-bottom:4px;font-family:'Aref Ruqaa',serif;">${localizedField(p,'name')}</h3>
