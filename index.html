@@ -1211,6 +1211,9 @@ window.addEventListener('load', function(){
   <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">الموسم</h4>
   <div id="filterSeasonList" style="margin-bottom:28px;"></div>
 
+  <h4 style="font-size:0.95rem;margin-bottom:10px;color:var(--gold-dark);">الحجم</h4>
+  <div id="filterSizeList" style="margin-bottom:28px;"></div>
+
   <div style="display:flex;gap:10px;">
     <button id="applyFiltersBtn" class="btn-primary" style="flex:1;">تطبيق</button>
     <button id="clearFiltersBtn" class="btn-ghost" style="flex:1;">مسح الكل</button>
@@ -1393,6 +1396,16 @@ window.addEventListener('load', function(){
     <div id="accountLoggedIn" style="display:none;">
       <p id="accountEmail" style="color:var(--smoke);margin-bottom:16px;"></p>
 
+      <!-- Account section navigation tabs -->
+      <div id="accountTabBar" style="display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto;scrollbar-width:none;">
+        <button class="account-tab-btn active" data-section="profile" style="flex:1;min-width:100px;background:none;border:none;border-bottom:2px solid var(--gold);color:var(--gold);padding:12px 8px;font-family:'Cairo';font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;">👤 حسابي</button>
+        <button class="account-tab-btn" data-section="notifs" style="flex:1;min-width:100px;background:none;border:none;border-bottom:2px solid transparent;color:var(--smoke);padding:12px 8px;font-family:'Cairo';font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;position:relative;">🔔 الإشعارات<span id="notifTabBadge" style="display:none;position:absolute;top:6px;right:8px;background:var(--rose);color:#fff;font-size:9px;font-weight:700;min-width:14px;height:14px;border-radius:999px;text-align:center;line-height:14px;">0</span></button>
+        <button class="account-tab-btn" data-section="orders" style="flex:1;min-width:100px;background:none;border:none;border-bottom:2px solid transparent;color:var(--smoke);padding:12px 8px;font-family:'Cairo';font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;">📦 طلباتي</button>
+        <button class="account-tab-btn" data-section="wishlist" style="flex:1;min-width:100px;background:none;border:none;border-bottom:2px solid transparent;color:var(--smoke);padding:12px 8px;font-family:'Cairo';font-size:0.82rem;font-weight:700;cursor:pointer;white-space:nowrap;">♥ المفضلة</button>
+      </div>
+
+      <!-- Section: profile -->
+      <div class="account-section" id="section-profile">
       <!-- Full profile form (like reference) -->
       <div style="background:var(--ink-3);border-radius:14px;padding:20px;margin-bottom:24px;">
         <h4 style="margin-bottom:16px;font-family:'Aref Ruqaa',serif;">بياناتي</h4>
@@ -1425,21 +1438,32 @@ window.addEventListener('load', function(){
         <button id="saveProfileBtn" class="btn-primary" style="width:100%;margin-top:16px;">حفظ</button>
         <div id="profileStatus" style="font-size:0.82rem;margin-top:8px;text-align:center;"></div>
       </div>
-
-      <h4 style="margin-bottom:12px;" data-i18n="my_orders">طلباتي وفواتيري</h4>
-      <div id="notificationsSection" style="margin-bottom:20px;">
-        <h4 style="font-size:1rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;">🔔 إشعاراتك</h4>
-        <div id="notificationsList"><p style="color:var(--smoke);font-size:0.85rem;">مفيش إشعارات جديدة.</p></div>
-      </div>
-      <div id="myOrdersList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
       <button id="custLogoutBtn" class="btn-ghost" style="width:100%;margin-top:18px;" data-i18n="btn_logout">تسجيل الخروج</button>
-    </div>
+      </div><!-- end section-profile -->
 
-    <h4 style="margin:20px 0 12px;display:flex;align-items:center;gap:8px;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--rose)" stroke="var(--rose)" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
-      المفضلة
-    </h4>
-    <div id="wishlistInAccount"></div>
+      <!-- Section: notifications -->
+      <div class="account-section" id="section-notifs" style="display:none;">
+        <h4 style="font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;">🔔 إشعاراتك</h4>
+        <div id="notificationsSection" style="margin-bottom:20px;">
+          <div id="notificationsList"><p style="color:var(--smoke);font-size:0.85rem;">مفيش إشعارات جديدة.</p></div>
+        </div>
+      </div><!-- end section-notifs -->
+
+      <!-- Section: orders -->
+      <div class="account-section" id="section-orders" style="display:none;">
+        <h4 style="font-size:1.1rem;margin-bottom:16px;" data-i18n="my_orders">📦 طلباتي وفواتيري</h4>
+        <div id="myOrdersList"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
+      </div><!-- end section-orders -->
+
+      <!-- Section: wishlist -->
+      <div class="account-section" id="section-wishlist" style="display:none;">
+        <h4 style="margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--rose)" stroke="var(--rose)" stroke-width="1.5"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+          ♥ المفضلة
+        </h4>
+        <div id="wishlistInAccount"></div>
+      </div><!-- end section-wishlist -->
+    </div><!-- end accountLoggedIn -->
     <div id="wishlistActions" style="display:none;gap:8px;margin-top:10px;">
       <button id="wishlistShareBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;" data-i18n="btn_share_link">مشاركة كرابط</button>
       <button id="wishlistPrintBtn" class="btn-ghost" style="flex:1;font-size:0.8rem;" data-i18n="btn_print">طباعة / PDF</button>
@@ -1483,6 +1507,23 @@ window.addEventListener('load', function(){
       <h2 style="font-size:clamp(1.5rem,4vw,2.2rem);">أقسامنا</h2>
     </div>
     <div id="categoryStripGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;"></div>
+  </div>
+</section>
+
+<!-- Offers carousel: two rows of discounted products, auto-scrolling with arrows -->
+<section class="section" id="offersCarousel" style="display:none;background:var(--ink-3);padding:40px 0;">
+  <div class="container">
+    <div class="section-head reveal" style="margin-bottom:24px;">
+      <div class="eyebrow" id="offersEyebrow">🔥 عروض حصرية</div>
+      <h2 id="offersTitle" style="font-size:clamp(1.5rem,4vw,2.2rem);">عروض المتجر</h2>
+    </div>
+    <div style="position:relative;">
+      <button id="offersPrev" aria-label="السابق" style="position:absolute;top:50%;right:-6px;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;font-size:1.2rem;box-shadow:var(--shadow-md);">‹</button>
+      <button id="offersNext" aria-label="التالي" style="position:absolute;top:50%;left:-6px;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;font-size:1.2rem;box-shadow:var(--shadow-md);">›</button>
+      <div id="offersViewport" style="overflow:hidden;margin:0 40px;">
+        <div id="offersTrack" style="display:grid;grid-auto-flow:column;grid-template-rows:1fr 1fr;gap:16px;grid-auto-columns:minmax(180px,1fr);transition:transform .5s ease;"></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1667,16 +1708,7 @@ window.addEventListener('load', function(){
 
 
 
-<section class="section" id="customerReviews" style="display:none;background:var(--ink-3);">
-  <div class="container">
-    <div class="section-head reveal">
-      <div class="eyebrow">آراء عملائنا</div>
-      <h2>عملاء Monsela بيقولوا إيه</h2>
-    </div>
-    <div id="customerReviewsSummary" class="reveal" style="text-align:center;margin-bottom:24px;"></div>
-    <div id="customerReviewsGrid" class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;"></div>
-  </div>
-</section>
+<!-- customer reviews are private now: viewed only in the admin panel -->
 
 
 
@@ -1879,6 +1911,33 @@ sb.from('shop_settings').select('announcement_text, announcement_active').eq('id
 
 // Escape any user-controlled text before putting it into innerHTML, so a customer
 // can never inject working HTML/JS via their name, comment, notes, etc.
+// Plays a short two-note chime for notifications. Uses Web Audio (no audio file).
+// Browsers block sound until the user interacts with the page at least once, so
+// this may stay silent on the very first load — that's expected and harmless.
+function playNotificationChime(){
+  try {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    var ctx = new AC();
+    function note(freq, start, dur){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc.connect(gain); gain.connect(ctx.destination);
+      var t = ctx.currentTime + start;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      osc.start(t); osc.stop(t + dur);
+    }
+    // A gentle rising two-note "ding-dong".
+    note(660, 0, 0.25);
+    note(880, 0.18, 0.35);
+    setTimeout(function(){ try { ctx.close(); } catch(e){} }, 1200);
+  } catch (e) { /* audio not allowed yet; ignore */ }
+}
+
 function escapeHTML(str){
   const div = document.createElement('div');
   div.textContent = str ?? '';
@@ -2109,6 +2168,7 @@ let productRatings = {}; // { productId: { avg, count } } — real approved revi
 let activeDepartment = 'الكل';
 let activeCategory = 'الكل';
 let selectedBrands = new Set();
+let selectedSizes = new Set();
 let selectedConcentrations = new Set();
 let selectedScents = new Set();
 let selectedSeasons = new Set();
@@ -2245,6 +2305,7 @@ async function loadProducts(){
   }
   safe('renderProducts', renderProducts);          // most important — runs first
   safe('renderCategoryStrip', renderCategoryStrip);
+  safe('renderOffersCarousel', renderOffersCarousel);
   safe('renderDepartmentFilters', renderDepartmentFilters);
   safe('renderCategoryFilters', renderCategoryFilters);
   safe('renderFilterPanelOptions', renderFilterPanelOptions);
@@ -2258,61 +2319,6 @@ async function loadProducts(){
       try { renderCategoryStrip(); } catch (e) { console.error('[Monsela] strip refresh failed:', e); }
     }
   }).catch(e => console.error('[Monsela] departments load failed:', e));
-  // Load the public customer-reviews section (isolated: never blocks the storefront).
-  (async function loadCustomerReviews(){
-    try {
-      const section = document.getElementById('customerReviews');
-      const grid = document.getElementById('customerReviewsGrid');
-      const summary = document.getElementById('customerReviewsSummary');
-      if (!section || !grid) return;
-
-      let reviews = [];
-      // Source 1: order-level ratings + feedback that customers left after delivery.
-      try {
-        const { data: orders } = await sb.from('store_orders')
-          .select('customer_name, order_rating, customer_feedback, created_at')
-          .not('order_rating', 'is', null)
-          .order('created_at', { ascending: false })
-          .limit(30);
-        if (orders) {
-          orders.forEach(o => {
-            if (o.order_rating) reviews.push({ name: o.customer_name || 'عميل', rating: o.order_rating, text: o.customer_feedback || '' });
-          });
-        }
-      } catch (e) { console.error('[Monsela] order reviews load failed:', e); }
-
-      // Source 2: individual product reviews (if the RPC exists).
-      try {
-        const { data: prodReviews } = await sb.from('product_reviews')
-          .select('customer_name, rating, comment, created_at')
-          .order('created_at', { ascending: false })
-          .limit(30);
-        if (prodReviews) {
-          prodReviews.forEach(r => {
-            if (r.rating) reviews.push({ name: r.customer_name || 'عميل', rating: r.rating, text: r.comment || '' });
-          });
-        }
-      } catch (e) { /* table/policy may not allow public read; ignore quietly */ }
-
-      if (reviews.length === 0) { section.style.display = 'none'; return; }
-      section.style.display = '';
-
-      const avg = (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1);
-      const stars = n => '★★★★★☆☆☆☆☆'.slice(5 - Math.round(n), 10 - Math.round(n));
-      summary.innerHTML = `
-        <div style="font-size:3rem;font-weight:700;color:var(--gold);line-height:1;">${avg}</div>
-        <div style="color:var(--gold);font-size:1.4rem;letter-spacing:3px;">${stars(avg)}</div>
-        <div style="color:var(--smoke);font-size:0.9rem;margin-top:6px;">من ${reviews.length} تقييم من عملائنا</div>`;
-
-      grid.innerHTML = reviews.slice(0, 12).map(r => `
-        <div style="background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:20px;">
-          <div style="color:var(--gold);font-size:1.1rem;letter-spacing:2px;margin-bottom:10px;">${stars(r.rating)}</div>
-          ${r.text ? `<p style="color:var(--cream);font-size:0.9rem;line-height:1.7;margin-bottom:12px;">"${escapeHTML(r.text)}"</p>` : '<p style="color:var(--smoke);font-size:0.85rem;margin-bottom:12px;">عميل راضٍ ⭐</p>'}
-          <div style="color:var(--gold-dark);font-weight:700;font-size:0.85rem;">— ${escapeHTML(r.name)}</div>
-        </div>`).join('');
-    } catch (e) { console.error('[Monsela] customer reviews section failed:', e); }
-  })();
-
   sb.rpc('get_product_ratings').then(({ data }) => {
     if (!data) return;
     productRatings = {};
@@ -2403,15 +2409,113 @@ function renderFilterPanelOptions(){
       }).join('');
     }
   }
-}
 
-// Icons per department (emoji-based, elegant)
+  // Size filter — sizes come from each product's variants (e.g. "100 مل").
+  const sizeWrap = document.getElementById('filterSizeList');
+  if (sizeWrap) {
+    const allSizes = new Set();
+    scoped.forEach(p => {
+      if (Array.isArray(p.variants)) p.variants.forEach(v => { if (v && v.label) allSizes.add(String(v.label).trim()); });
+    });
+    if (allSizes.size === 0) {
+      sizeWrap.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش أحجام مضافة للمنتجات.</p>';
+    } else {
+      // Sort sizes by the number inside them (100 مل before 150 مل) when possible.
+      const sorted = [...allSizes].sort((a, b) => {
+        const na = parseFloat(a), nb = parseFloat(b);
+        if (!isNaN(na) && !isNaN(nb)) return na - nb;
+        return String(a).localeCompare(String(b), 'ar');
+      });
+      sizeWrap.innerHTML = sorted.map(s => {
+        const checked = selectedSizes.has(s) ? 'checked' : '';
+        return `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:0.85rem;cursor:pointer;">
+          <input type="checkbox" class="filter-size-cb" value="${escapeHTML(s)}" ${checked} style="width:auto;"> 📏 ${escapeHTML(s)}
+        </label>`;
+      }).join('');
+    }
+  }
+}
 const departmentIcons = {
   'عطور': '🌸', 'ساعات': '⌚', 'دهب': '💛', 'سلاسل': '📿', 'مكياج': '💄',
   'إكسسوارات': '👜', 'نظارات': '🕶️', 'بخور': '🕯️', 'عطور منزلية': '🏠', 'هدايا': '🎁', 'بوكسات': '📦'
 };
 
 let customDepartments = null;
+
+// ===== Offers carousel (two rows, auto-scroll, arrows) =====
+let offersAutoTimer = null;
+function renderOffersCarousel(){
+  const section = document.getElementById('offersCarousel');
+  const track = document.getElementById('offersTrack');
+  if (!section || !track) return;
+
+  // Offer = product whose original_price is higher than its current price.
+  const offers = allProducts.filter(p => p.original_price && p.original_price > (p.price ?? 0));
+  if (offers.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+
+  // Admin-controlled title (falls back to a default).
+  try {
+    const t = document.getElementById('offersTitle');
+    if (t && window.__offersTitle) t.textContent = window.__offersTitle;
+  } catch(e){}
+
+  track.innerHTML = offers.map(p => {
+    const price = p.price ?? 0;
+    const pct = Math.round((1 - price / p.original_price) * 100);
+    const img = (Array.isArray(p.images) && p.images[0]) || p.image_url || '';
+    return `
+      <div class="offer-card" data-id="${p.id}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s;display:flex;flex-direction:column;">
+        <div style="position:relative;aspect-ratio:1;background:var(--ink-3);overflow:hidden;">
+          ${img ? `<img src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;">🌸</div>'}
+          <span style="position:absolute;top:8px;right:8px;background:var(--rose);color:#fff;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:999px;">-${pct}%</span>
+        </div>
+        <div style="padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:4px;">
+          <div style="font-weight:700;font-size:0.85rem;color:var(--cream);line-height:1.4;">${escapeHTML(p.name)}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:auto;">
+            <span style="color:var(--gold);font-weight:700;font-size:0.9rem;">${formatPrice(price)} ج</span>
+            <span style="color:var(--smoke);text-decoration:line-through;font-size:0.75rem;">${formatPrice(p.original_price)}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Clicking an offer opens that product.
+  track.querySelectorAll('.offer-card').forEach(card => {
+    card.addEventListener('mouseover', () => { card.style.transform = 'translateY(-4px)'; card.style.borderColor = 'var(--gold)'; });
+    card.addEventListener('mouseout', () => { card.style.transform = 'none'; card.style.borderColor = 'var(--line)'; });
+    card.addEventListener('click', () => { const p = allProducts.find(x => String(x.id) === String(card.dataset.id)); if (p && typeof openProductDetail === 'function') openProductDetail(p.id); });
+  });
+
+  // Arrow + auto-scroll logic. Scrolls the viewport horizontally by one "page".
+  const viewport = document.getElementById('offersViewport');
+  const prev = document.getElementById('offersPrev');
+  const next = document.getElementById('offersNext');
+  function page(dir){
+    const w = viewport.clientWidth * 0.8;
+    viewport.scrollBy({ left: dir * w, behavior: 'smooth' });
+  }
+  // Use native horizontal scroll on the viewport for reliability.
+  viewport.style.overflowX = 'auto';
+  viewport.style.scrollbarWidth = 'none';
+  track.style.transition = 'none';
+  if (prev) prev.onclick = () => page(1);   // RTL: prev goes right
+  if (next) next.onclick = () => page(-1);
+
+  // Auto-scroll every few seconds; pause on hover.
+  if (offersAutoTimer) clearInterval(offersAutoTimer);
+  let dir = -1; // move left (forward in RTL)
+  offersAutoTimer = setInterval(() => {
+    if (!document.body.contains(viewport)) { clearInterval(offersAutoTimer); return; }
+    // If we reached an edge, reverse direction so it sweeps back and forth.
+    const atStart = viewport.scrollLeft >= -2 && dir === 1;
+    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+    if (Math.abs(viewport.scrollLeft) >= maxScroll - 2 && dir === -1) dir = 1;
+    else if (viewport.scrollLeft >= -2 && dir === 1) dir = -1;
+    page(dir);
+  }, 3500);
+  viewport.addEventListener('mouseenter', () => { if (offersAutoTimer) clearInterval(offersAutoTimer); });
+}
 
 function renderCategoryStrip(){
   const grid = document.getElementById('categoryStripGrid');
@@ -2502,14 +2606,29 @@ function renderDepartmentFilters(){
   });
 }
 
+// Fixed sub-categories shown when one of these departments is selected. They
+// filter by the product's `category` field, which the admin sets per product.
+const FIXED_SUBCATEGORIES = {
+  'عطور': ['رجالي', 'نسائي', 'للجنسين'],
+  'ساعات': ['ساعات رجالي', 'ساعات حريمي', 'ساعات حائط'],
+  'نظارات': ['نظارات']
+};
+
 function renderCategoryFilters(){
   const wrap = document.getElementById('categoryFilters');
   const scoped = activeDepartment === 'الكل' ? allProducts : allProducts.filter(p => p.department === activeDepartment);
-  const cats = ['الكل', ...new Set(scoped.map(p => p.category).filter(Boolean))];
+
+  // If this department has fixed sub-categories, show those as chips.
+  const fixed = FIXED_SUBCATEGORIES[activeDepartment];
+  let cats;
+  if (fixed) {
+    cats = ['الكل', ...fixed];
+  } else {
+    cats = ['الكل', ...new Set(scoped.map(p => p.category).filter(Boolean))];
+  }
   if (cats.length <= 1) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = cats.map(c => {
-    const count = c === 'الكل' ? scoped.length : scoped.filter(p => p.category === c).length;
-    return `<button class="opt ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c}</button>`;
+    return `<button class="opt ${c === activeCategory ? 'active' : ''}" data-cat="${escapeHTML(c)}">${escapeHTML(c)}</button>`;
   }).join('');
   wrap.querySelectorAll('[data-cat]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -2537,6 +2656,11 @@ function renderProducts(){
   });
   // Season
   list = selectedSeasons.size === 0 ? list : list.filter(p => selectedSeasons.has(p.season));
+  // Size: product must have at least one variant whose label is selected
+  list = selectedSizes.size === 0 ? list : list.filter(p => {
+    if (!Array.isArray(p.variants)) return false;
+    return p.variants.some(v => v && v.label && selectedSizes.has(String(v.label).trim()));
+  });
   if (filterPriceMin != null) list = list.filter(p => (p.price ?? 0) >= filterPriceMin);
   if (filterPriceMax != null) list = list.filter(p => (p.price ?? 0) <= filterPriceMax);
   if (query) {
@@ -3523,6 +3647,13 @@ sb.from('gift_packages').select('*').eq('is_active', true).order('sort_order', {
 
 // Seasonal offers — shows products matching the admin-selected current season
 sb.from('shop_settings').select('seasonal_title, seasonal_season, seasonal_active').eq('id', 1).maybeSingle().then(({ data }) => {
+  // Load the admin-controlled offers-carousel title separately so a missing
+  // column never breaks the seasonal loader.
+  try {
+    sb.from('shop_settings').select('offers_title').eq('id', 1).maybeSingle().then(({ data: od }) => {
+      if (od && od.offers_title) { window.__offersTitle = od.offers_title; const t = document.getElementById('offersTitle'); if (t) t.textContent = od.offers_title; }
+    }).catch(()=>{});
+  } catch(e){}
   if (!data || !data.seasonal_active || !data.seasonal_season) return;
   const section = document.getElementById('seasonalOffers');
   const grid = document.getElementById('seasonalGrid');
@@ -3725,6 +3856,57 @@ function toggleWishlist(productId){
   renderWishlistInAccount();
 }
 
+
+// ===== Account panel tab switching (isolated) =====
+function switchAccountTab(name){
+  try {
+    const sections = document.querySelectorAll('.account-section');
+    const tabs = document.querySelectorAll('.account-tab-btn');
+    sections.forEach(s => s.style.display = 'none');
+    tabs.forEach(t => {
+      t.style.borderBottomColor = 'transparent';
+      t.style.color = 'var(--smoke)';
+      t.classList.remove('active');
+    });
+    const sec = document.getElementById('section-' + name);
+    const tab = document.querySelector('.account-tab-btn[data-section="' + name + '"]');
+    if (sec) sec.style.display = '';
+    if (tab) { tab.style.borderBottomColor = 'var(--gold)'; tab.style.color = 'var(--gold)'; tab.classList.add('active'); }
+    // Scroll the overlay to top when switching tabs.
+    const ov = document.getElementById('accountOverlay');
+    if (ov) ov.scrollTop = 0;
+  } catch (e) { console.error('[Monsela] switchAccountTab failed:', e); }
+}
+
+// Wire tab-bar buttons once the DOM is ready.
+(function(){
+  try {
+    document.querySelectorAll('.account-tab-btn').forEach(btn => {
+      btn.addEventListener('click', function(){
+        switchAccountTab(btn.dataset.section);
+        // Also sync the notif badge on the tab.
+        if (btn.dataset.section === 'notifs') {
+          try {
+            if (window.__monselaNotifs && window.__monselaNotifs.length) {
+              let seen = {};
+              try { seen = JSON.parse(localStorage.getItem('monsela_seen_status') || '{}'); } catch(e){}
+              window.__monselaNotifs.forEach(n=>{ seen[n.id]=n.status; });
+              localStorage.setItem('monsela_seen_status', JSON.stringify(seen));
+              const badge = document.getElementById('accountNotifBadge');
+              if (badge) badge.style.display = 'none';
+              const tb = document.getElementById('notifTabBadge');
+              if (tb) tb.style.display = 'none';
+            }
+          } catch(e){}
+        }
+      });
+    });
+  } catch(e) { console.error('[Monsela] tab wire-up failed:', e); }
+})();
+
+// Update the notification tab badge when notifs are computed.
+const _origMonselaNotifs = Object.getOwnPropertyDescriptor(window, '__monselaNotifs');
+// We can't observe the assignment, so we update the tab badge inside refreshAccountView.
 function renderWishlistInAccount(){
   const el = document.getElementById('wishlistInAccount');
   const actionsEl = document.getElementById('wishlistActions');
@@ -4510,33 +4692,27 @@ document.querySelectorAll('.account-menu-item').forEach(item=>{
       document.getElementById('trackOrderBtn').click();
       return;
     }
-    if (action === 'wishlist') {
-      // open account and scroll to wishlist
-      document.getElementById('accountOverlay').style.display = 'block';
-      renderWishlistInAccount();
-      setTimeout(()=>{ const w = document.getElementById('wishlistInAccount'); if (w) w.scrollIntoView({behavior:'smooth'}); }, 200);
-      return;
-    }
-    // notifications / orders / account → open account panel
+    // Open the account panel and navigate to the right tab.
     document.getElementById('accountOverlay').style.display = 'block';
     renderWishlistInAccount();
-    // Opening the panel means the customer has seen their status updates — record
-    // the current statuses so the badge clears and they aren't re-notified.
-    try {
-      if (window.__monselaNotifs && window.__monselaNotifs.length) {
-        let seen = {};
-        try { seen = JSON.parse(localStorage.getItem('monsela_seen_status') || '{}'); } catch(e) {}
-        window.__monselaNotifs.forEach(n => { seen[n.id] = n.status; });
-        localStorage.setItem('monsela_seen_status', JSON.stringify(seen));
-        const badge = document.getElementById('accountNotifBadge');
-        if (badge) badge.style.display = 'none';
-      }
-    } catch(e) { console.error('[Monsela] mark seen failed:', e); }
+    // Map legacy actions to the new tab names.
+    const tabMap = { 'wishlist':'wishlist', 'notifications':'notifs', 'orders':'orders', 'account':'profile' };
+    const targetTab = tabMap[action] || 'profile';
+    switchAccountTab(targetTab);
+    // Clear the notification badge when opening the notifications tab.
     if (action === 'notifications') {
-      setTimeout(()=>{ const n = document.getElementById('notificationsSection'); if (n) n.scrollIntoView({behavior:'smooth'}); }, 200);
-    }
-    if (action === 'orders') {
-      setTimeout(()=>{ const o = document.getElementById('myOrdersList'); if (o) o.scrollIntoView({behavior:'smooth'}); }, 200);
+      try {
+        if (window.__monselaNotifs && window.__monselaNotifs.length) {
+          let seen = {};
+          try { seen = JSON.parse(localStorage.getItem('monsela_seen_status') || '{}'); } catch(e) {}
+          window.__monselaNotifs.forEach(n => { seen[n.id] = n.status; });
+          localStorage.setItem('monsela_seen_status', JSON.stringify(seen));
+          const badge = document.getElementById('accountNotifBadge');
+          if (badge) badge.style.display = 'none';
+          const tabBadge = document.getElementById('notifTabBadge');
+          if (tabBadge) tabBadge.style.display = 'none';
+        }
+      } catch(e) { console.error('[Monsela] mark seen failed:', e); }
     }
   });
 });
@@ -4807,11 +4983,31 @@ async function refreshAccountView(){
       }
     });
     window.__monselaNotifs = notifs;
+    // Play a soft chime when there are new notifications, so the customer notices
+    // (e.g. their order was delivered → time to review). Uses the Web Audio API,
+    // no file needed. Wrapped so a browser that blocks audio never breaks anything.
+    // It only plays once per set of updates (guarded by a fingerprint in storage).
+    try {
+      if (notifs.length > 0) {
+        var fp = notifs.map(function(n){ return n.id + ':' + n.status; }).join('|');
+        var lastFp = '';
+        try { lastFp = localStorage.getItem('monsela_notif_fp') || ''; } catch(e){}
+        if (fp !== lastFp) {
+          try { localStorage.setItem('monsela_notif_fp', fp); } catch(e){}
+          playNotificationChime();
+        }
+      }
+    } catch (e) { console.error('[Monsela] chime failed:', e); }
     // Badge on the account button.
     const badge = document.getElementById('accountNotifBadge');
+    const tabBadge = document.getElementById('notifTabBadge');
     if (badge) {
       if (notifs.length > 0) { badge.textContent = notifs.length; badge.style.display = 'flex'; }
       else badge.style.display = 'none';
+    }
+    if (tabBadge) {
+      if (notifs.length > 0) { tabBadge.textContent = notifs.length; tabBadge.style.display = 'inline-block'; }
+      else tabBadge.style.display = 'none';
     }
     // Render the notifications list inside the account panel.
     const notifList = document.getElementById('notificationsList');
@@ -5067,7 +5263,7 @@ document.getElementById('closeFilterPanel').addEventListener('click', closeFilte
 document.getElementById('filterOverlay').addEventListener('click', closeFilterPanel);
 
 function updateActiveFilterCount(){
-  const count = selectedBrands.size + selectedConcentrations.size + selectedScents.size + selectedSeasons.size + (filterPriceMin != null ? 1 : 0) + (filterPriceMax != null ? 1 : 0);
+  const count = selectedBrands.size + selectedSizes.size + selectedConcentrations.size + selectedScents.size + selectedSeasons.size + (filterPriceMin != null ? 1 : 0) + (filterPriceMax != null ? 1 : 0);
   const badge = document.getElementById('activeFilterCount');
   badge.style.display = count > 0 ? 'inline-block' : 'none';
   badge.textContent = count;
@@ -5075,6 +5271,7 @@ function updateActiveFilterCount(){
 
 document.getElementById('applyFiltersBtn').addEventListener('click', ()=>{
   selectedBrands = new Set(Array.from(document.querySelectorAll('.filter-brand-cb:checked')).map(cb => cb.value));
+  selectedSizes = new Set(Array.from(document.querySelectorAll('.filter-size-cb:checked')).map(cb => cb.value));
   selectedConcentrations = new Set(Array.from(document.querySelectorAll('.filter-conc-cb:checked')).map(cb => cb.value));
   selectedScents = new Set(Array.from(document.querySelectorAll('.filter-scent-cb:checked')).map(cb => cb.value));
   selectedSeasons = new Set(Array.from(document.querySelectorAll('.filter-season-cb:checked')).map(cb => cb.value));
@@ -5089,6 +5286,7 @@ document.getElementById('applyFiltersBtn').addEventListener('click', ()=>{
 });
 document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
   selectedBrands = new Set();
+  selectedSizes = new Set();
   selectedConcentrations = new Set();
   selectedScents = new Set();
   selectedSeasons = new Set();

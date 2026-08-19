@@ -241,7 +241,12 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
           <div><label>البراند</label><input type="text" id="pBrand" placeholder="مثال: Ibrahim Al Qurashi"></div>
         </div>
         <div class="row">
-          <div><label>قسم الفلترة</label><input type="text" id="pCategory" placeholder="مثال: عطور رجالي"></div>
+          <div><label>القسم الفرعي (يظهر لما العميل يختار القسم)</label>
+            <select id="pCategorySelect" style="width:100%;margin-bottom:6px;">
+              <option value="">— اختار حسب القسم —</option>
+            </select>
+            <input type="text" id="pCategory" placeholder="أو اكتب قسم فرعي مخصص" style="font-size:0.85rem;">
+          </div>
           <div><label>تصنيف قصير (بادج على الكارت)</label><input type="text" id="pTag" placeholder="مثال: شرقي"></div>
         </div>
         <label>وصف تفصيلي (مش ظاهر في الكارت)</label>
@@ -417,6 +422,12 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
           <option value="forest">أخضر وخردلي</option>
         </select>
       </div>
+      <div style="background:var(--ink-3);border-radius:12px;padding:16px;margin-top:16px;">
+        <h3 style="font-size:1rem;margin-bottom:6px;">🔥 عنوان قسم العروض</h3>
+        <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:12px;">ده العنوان اللي بيظهر فوق شريط العروض المتحرك في الموقع (مثال: عروض اليوم الوطني، تخفيضات الافتتاح).</p>
+        <label>العنوان</label>
+        <input type="text" id="offersTitleInput" placeholder="مثال: عروض الافتتاح 🔥">
+      </div>
       <button class="btn" id="saveSettingsBtn">حفظ الإعدادات</button>
       <div class="status" id="settingsStatus"></div>
     </div>
@@ -486,6 +497,12 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <p style="color:var(--smoke);font-size:0.78rem;margin-bottom:16px;">⚠️ ده بيحفظ <b>البيانات</b> بس. تصميم الموقع نفسه محفوظ في GitHub تلقائيًا.</p>
       <button class="btn" id="downloadBackupBtn">تحميل نسخة احتياطية الآن</button>
       <div class="status" id="backupStatus"></div>
+    </div>
+
+    <div class="card" style="border-color:var(--gold);" data-tab="orders">
+      <h2>⭐ تقييمات العملاء (خاص — بينك وبينهم بس)</h2>
+      <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:14px;">التقييمات دي <b>مش ظاهرة في الموقع</b> — إنت بس اللي بتشوفها. راجعها وتواصل مع العميل على الواتساب لو محتاج.</p>
+      <div id="privateReviewsList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
     <div class="card" style="border-color:var(--gold);" data-tab="orders">
@@ -774,9 +791,32 @@ async function showAdmin(){
     }
     // Swap in the spec fields that belong to the newly chosen department.
     try { renderDeptSpecs(deptSelect.value, {}); } catch (e) { console.error('Spec fields failed:', e); }
+    // Populate the fixed sub-category dropdown for departments that have one.
+    try {
+      var SUBCATS = {
+        'عطور': ['رجالي', 'نسائي', 'للجنسين'],
+        'ساعات': ['ساعات رجالي', 'ساعات حريمي', 'ساعات حائط'],
+        'نظارات': ['نظارات']
+      };
+      var subSel = document.getElementById('pCategorySelect');
+      if (subSel) {
+        var opts = SUBCATS[deptSelect.value];
+        if (opts) {
+          subSel.innerHTML = '<option value="">— اختار القسم الفرعي —</option>' + opts.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
+          subSel.style.display = '';
+        } else {
+          subSel.innerHTML = '<option value="">— مفيش أقسام فرعية للقسم ده —</option>';
+        }
+      }
+    } catch (e) { console.error('Subcategory dropdown failed:', e); }
   }
   if (deptSelect) {
     deptSelect.addEventListener('change', syncDepartment);
+    // Picking from the sub-category dropdown fills the category text field.
+    var subSelEl = document.getElementById('pCategorySelect');
+    if (subSelEl) subSelEl.addEventListener('change', function(){
+      if (subSelEl.value) { var c = document.getElementById('pCategory'); if (c) c.value = subSelEl.value; }
+    });
     syncDepartment();
   }
   loadFlashSale();
@@ -802,6 +842,7 @@ async function loadShopSettings(){
     document.getElementById('announcementTextInput').value = data.announcement_text || '';
     document.getElementById('announcementActiveInput').checked = !!data.announcement_active;
     document.getElementById('siteThemeInput').value = data.site_theme || 'light';
+    if (document.getElementById('offersTitleInput')) document.getElementById('offersTitleInput').value = data.offers_title || '';
   }
 }
 
@@ -900,7 +941,8 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async ()=>{
     seasonal_active: document.getElementById('seasonalActiveInput').checked,
     announcement_text: document.getElementById('announcementTextInput').value.trim() || null,
     announcement_active: document.getElementById('announcementActiveInput').checked,
-    site_theme: document.getElementById('siteThemeInput').value
+    site_theme: document.getElementById('siteThemeInput').value,
+    offers_title: (document.getElementById('offersTitleInput') && document.getElementById('offersTitleInput').value.trim()) || 'عروض المتجر'
   }).eq('id', 1);
   statusEl.style.color = error ? 'var(--danger)' : 'var(--success)';
   statusEl.textContent = error ? 'حصلت مشكلة.' : 'اتحفظ ✓ لون الموقع هيتغير للعملاء فورًا.';
@@ -2516,6 +2558,45 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     }
     loadDepartments();
   } catch (e) { console.error('Department manager failed (panel still works):', e); }
+})();
+</script>
+
+<script>
+/* ===== Private customer reviews (admin-only, isolated) =====
+   Shows order ratings + feedback that customers left after delivery. Never shown
+   on the storefront. Read-only and wrapped so a failure can't break the panel. */
+(function(){
+  async function loadPrivateReviews(){
+    var el = document.getElementById('privateReviewsList');
+    if (!el) return;
+    try {
+      var res = await sb.from('store_orders')
+        .select('order_number, customer_name, customer_phone, order_rating, customer_feedback, created_at')
+        .not('order_rating', 'is', null)
+        .order('created_at', { ascending: false });
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      if (rows.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">لسه مفيش تقييمات من العملاء.</p>'; return; }
+      var stars = function(n){ n = Math.round(n||0); return '★★★★★☆☆☆☆☆'.slice(5-n, 10-n); };
+      el.innerHTML = rows.map(function(o){
+        var wa = o.customer_phone ? '2' + String(o.customer_phone).replace(/[^0-9]/g,'') : null;
+        return '<div class="product-item" style="align-items:flex-start;">'
+          + '<div class="info">'
+          + '<h4>' + (o.customer_name ? escapeHTML(o.customer_name) : 'عميل') + ' — ' + escapeHTML(o.order_number||'') + '</h4>'
+          + '<p style="color:var(--gold);font-size:1.1rem;letter-spacing:2px;">' + stars(o.order_rating) + ' (' + o.order_rating + '/5)</p>'
+          + (o.customer_feedback ? '<p style="background:var(--ink-3);padding:8px 12px;border-radius:8px;">💬 ' + escapeHTML(o.customer_feedback) + '</p>' : '<p style="color:var(--smoke);font-size:0.8rem;">مفيش ملاحظة مكتوبة</p>')
+          + '<p style="font-size:0.72rem;color:var(--smoke);">' + new Date(o.created_at).toLocaleString('ar-EG') + '</p>'
+          + '</div>'
+          + '<div class="actions">'
+          + (wa ? '<a class="btn btn-ghost" href="https://wa.me/' + wa + '" target="_blank" rel="noopener" style="text-decoration:none;font-size:0.75rem;">واتساب 💬</a>' : '')
+          + '</div></div>';
+      }).join('');
+    } catch (e) {
+      console.error('loadPrivateReviews failed:', e && (e.message||JSON.stringify(e)));
+      el.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">مشكلة في تحميل التقييمات.</p>';
+    }
+  }
+  try { loadPrivateReviews(); } catch(e) { console.error('private reviews block failed:', e); }
 })();
 </script>
 </body>
