@@ -1701,6 +1701,7 @@ window.addEventListener('load', function(){
       </div>
 
       <!-- Summary + price -->
+      <div id="labIncompleteHint" style="display:none;background:var(--ink-3);border:1px dashed var(--gold);border-radius:12px;padding:14px;color:var(--gold-dark);font-size:0.88rem;text-align:center;"></div>
       <div id="labSummary" style="display:none;background:var(--ink-2);border:1px solid var(--gold);border-radius:16px;padding:20px;">
         <h4 style="margin-bottom:14px;">🧾 ملخص عطرك</h4>
         <div id="labSummaryLines" style="font-size:0.9rem;line-height:2;"></div>
@@ -3757,7 +3758,7 @@ function checkPreviousQuiz(){
 // item to the cart. The order reaches the owner (via WhatsApp/checkout) who then
 // makes it by hand. Wrapped so any failure hides the lab instead of breaking the site.
 (function(){
-  const state = { bottle: null, color: null, oil: null, oilMl: 0 };
+  const state = { bottle: null, color: null, oil: null, oilMl: 0, bottleImage: null };
   let bottles = [], oils = [];
 
   async function initLab(){
@@ -3826,15 +3827,34 @@ function checkPreviousQuiz(){
     });
   }
 
-  // Shows all images of the selected bottle so the customer sees it clearly.
+  // Shows all images of the selected bottle so the customer sees it clearly and
+  // can PICK which look they want. The chosen image is recorded on the order.
   function renderBottleGallery(){
     const galleryStep = document.getElementById('labBottleGallery');
     if (!galleryStep) return;
     const imgs = bottleImages(state.bottle);
+    state.bottleImage = null;
     if (!imgs.length) { galleryStep.style.display = 'none'; galleryStep.innerHTML = ''; return; }
-    galleryStep.style.display = 'flex';
-    galleryStep.innerHTML = imgs.map((u, i) => `
-      <img src="${escapeHTML(u)}" alt="صورة ${i+1}" loading="lazy" decoding="async" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line);">`).join('');
+    galleryStep.style.display = 'block';
+    galleryStep.innerHTML =
+      '<div style="font-size:0.85rem;color:var(--gold-dark);font-weight:700;margin-bottom:8px;">اختار شكل القزازة اللي عايزها:</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px;">' +
+      imgs.map((u, i) => `
+        <button class="lab-bottle-img" data-i="${i}" style="padding:0;border:2px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;background:none;line-height:0;">
+          <img src="${escapeHTML(u)}" alt="شكل ${i+1}" loading="lazy" decoding="async" style="width:90px;height:90px;object-fit:cover;display:block;">
+        </button>`).join('') +
+      '</div>';
+    // Auto-select the first look by default.
+    state.bottleImage = imgs[0];
+    galleryStep.querySelectorAll('.lab-bottle-img').forEach((btn, idx) => {
+      if (idx === 0) btn.style.borderColor = 'var(--gold)';
+      btn.addEventListener('click', () => {
+        state.bottleImage = imgs[Number(btn.dataset.i)];
+        galleryStep.querySelectorAll('.lab-bottle-img').forEach(b => b.style.borderColor = 'var(--line)');
+        btn.style.borderColor = 'var(--gold)';
+        updateSummary();
+      });
+    });
   }
 
   function renderColors(){
@@ -3912,7 +3932,20 @@ function checkPreviousQuiz(){
 
   function updateSummary(){
     const summary = document.getElementById('labSummary');
-    if (!state.bottle || !state.oil) { summary.style.display = 'none'; return; }
+    const hint = document.getElementById('labIncompleteHint');
+    if (!state.bottle || !state.oil) {
+      summary.style.display = 'none';
+      // Tell the customer exactly what's still needed so they reach checkout.
+      if (hint) {
+        const missing = [];
+        if (!state.bottle) missing.push('القزازة');
+        if (!state.oil) missing.push('الزيت');
+        hint.style.display = 'block';
+        hint.textContent = 'كمّل اختيارك عشان تقدر تطلب: اختار ' + missing.join(' و ') + '.';
+      }
+      return;
+    }
+    if (hint) hint.style.display = 'none';
     summary.style.display = 'block';
     const def = Number(state.bottle.default_oil_ml) || 0;
     const extraMl = Math.max(0, state.oilMl - def);
@@ -3934,7 +3967,7 @@ function checkPreviousQuiz(){
     if (state.color && state.color.name) name += ` / لون ${state.color.name}`;
     // Unique key so different custom blends don't merge in the cart.
     const cartKey = `lab::${state.bottle.id}::${state.oil.id}::${state.oilMl}::${state.color ? state.color.name : ''}::${Date.now()}`;
-    cart.push({ id: 'lab-custom', cartKey, variantLabel: null, bottleColor: state.color ? state.color.name : null, name, price, qty: 1, isCustomLab: true });
+    cart.push({ id: 'lab-custom', cartKey, variantLabel: null, bottleColor: state.color ? state.color.name : null, image: state.bottleImage || null, name, price, qty: 1, isCustomLab: true });
     toast('عطرك المخصص اتضاف للسلة ✓', 'success', 2800);
     saveCart();
     openCart();

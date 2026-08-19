@@ -2829,17 +2829,27 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
 
     // Hold uploaded bottle image URLs until the bottle is saved.
     var bottleImages = [];
+    function renderBottleImagePreview(){
+      var prev = document.getElementById('bottleImagesPreview');
+      if (!prev) return;
+      prev.innerHTML = bottleImages.map(function(url, i){
+        return '<div style="position:relative;display:inline-block;">'
+          + '<img src="'+escapeHTML(url)+'" style="width:56px;height:56px;object-fit:cover;border-radius:8px;">'
+          + '<button type="button" data-rm-img="'+i+'" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:12px;line-height:1;padding:0;">×</button>'
+          + '</div>';
+      }).join('');
+      prev.querySelectorAll('[data-rm-img]').forEach(function(btn){
+        btn.addEventListener('click', function(){ bottleImages.splice(+btn.dataset.rmImg, 1); renderBottleImagePreview(); });
+      });
+    }
     var bottleImgInput = document.getElementById('bottleImages');
     if (bottleImgInput) bottleImgInput.addEventListener('change', async function(e){
       var files = Array.from(e.target.files || []);
-      var prev = document.getElementById('bottleImagesPreview');
       if (!files.length) return;
+      var st = document.getElementById('bottleStatus');
       for (var k = 0; k < files.length; k++) {
         var file = files[k];
-        var tag = document.createElement('span');
-        tag.style.cssText = 'font-size:0.72rem;color:var(--smoke);';
-        tag.textContent = 'جاري رفع صورة ' + (k+1) + '…';
-        prev.appendChild(tag);
+        if (st) { st.style.color='var(--gold)'; st.textContent = 'جاري رفع صورة ' + (k+1) + ' من ' + files.length + '…'; }
         try {
           var compressed = await compressImage(file, 1000, 0.85);
           var path = 'bottle-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.jpg';
@@ -2847,16 +2857,13 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
           if (up.error) throw up.error;
           var url = sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
           bottleImages.push(url);
-          tag.remove();
-          var im = document.createElement('img');
-          im.src = url; im.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:8px;';
-          prev.appendChild(im);
+          renderBottleImagePreview();
         } catch (err) {
           console.error('bottle image upload failed:', err);
-          tag.textContent = 'فشلت صورة';
-          tag.style.color = 'var(--danger)';
+          if (st) { st.style.color='var(--danger)'; st.textContent = 'فشلت صورة رقم ' + (k+1); }
         }
       }
+      if (st) { st.style.color='var(--success)'; st.textContent = 'الصور اترفعت ✓ — تقدر تشيل أي صورة بالـ ×'; }
       bottleImgInput.value = '';
     });
 
