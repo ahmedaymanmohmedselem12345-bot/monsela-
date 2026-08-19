@@ -1100,7 +1100,6 @@ window.addEventListener('load', function(){
     <!-- Nav links (right side in RTL) -->
     <div class="nav-links" id="navLinks">
       <a href="#gallery" data-i18n="nav_shop">المتجر</a>
-      <a href="#perfumeLab" style="color:var(--gold);">🧪 اصنع عطرك</a>
       <a href="#newArrivals" data-i18n="nav_new">وصل حديثًا</a>
       <a href="#bestSellers" data-i18n="nav_best">الأكثر مبيعًا</a>
       <a href="#about" data-i18n="nav_about">قصتنا</a>
@@ -3761,7 +3760,19 @@ function checkPreviousQuiz(){
   const state = { bottle: null, color: null, oil: null, oilMl: 0, bottleImage: null };
   let bottles = [], oils = [];
 
+  // ===== Perfume Lab temporarily DISABLED =====
+  // The owner asked to hide this feature for now (customers will build their own
+  // perfumes later, once products are stocked). All the lab code below is kept
+  // intact so it can be switched back on by changing LAB_ENABLED to true and
+  // restoring the nav link (<a href="#perfumeLab">🧪 اصنع عطرك</a>).
+  const LAB_ENABLED = false;
+
   async function initLab(){
+    if (!LAB_ENABLED) {
+      const section = document.getElementById('perfumeLab');
+      if (section) section.style.display = 'none';
+      return;
+    }
     try {
       const section = document.getElementById('perfumeLab');
       if (!section) return;
