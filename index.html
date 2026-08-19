@@ -1100,6 +1100,7 @@ window.addEventListener('load', function(){
     <!-- Nav links (right side in RTL) -->
     <div class="nav-links" id="navLinks">
       <a href="#gallery" data-i18n="nav_shop">المتجر</a>
+      <a href="#perfumeLab" style="color:var(--gold);">🧪 اصنع عطرك</a>
       <a href="#newArrivals" data-i18n="nav_new">وصل حديثًا</a>
       <a href="#bestSellers" data-i18n="nav_best">الأكثر مبيعًا</a>
       <a href="#about" data-i18n="nav_about">قصتنا</a>
@@ -1655,6 +1656,60 @@ window.addEventListener('load', function(){
 
     <!-- Results -->
     <div id="quizResults" style="display:none;margin-top:30px;"></div>
+  </div>
+</section>
+
+<!-- ===== Perfume Lab: build your own scent ===== -->
+<section class="section" id="perfumeLab" style="display:none;">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">🧪 معمل العطور</div>
+      <h2>اصنع عطرك بنفسك</h2>
+      <p style="color:var(--smoke);">اختار القزازة والزيت، وإحنا نجهّزه لك بإيدينا في المعمل.</p>
+    </div>
+
+    <div id="labNote" style="display:none;background:rgba(201,168,106,0.08);border:1px solid var(--gold);border-radius:12px;padding:16px 18px;margin-bottom:24px;color:var(--cream);font-size:0.9rem;line-height:1.7;"></div>
+
+    <div class="reveal" style="display:grid;gap:24px;">
+      <!-- Step 1: bottle -->
+      <div>
+        <h4 style="margin-bottom:12px;color:var(--gold-dark);">١. اختار القزازة</h4>
+        <div id="labBottles" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+      </div>
+
+      <!-- Step 2: bottle color -->
+      <div id="labColorStep" style="display:none;">
+        <h4 style="margin-bottom:12px;color:var(--gold-dark);">٢. لون القزازة</h4>
+        <div id="labColors" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+      </div>
+
+      <!-- Step 3: oil -->
+      <div id="labOilStep" style="display:none;">
+        <h4 style="margin-bottom:12px;color:var(--gold-dark);">٣. اختار الزيت</h4>
+        <div id="labOils" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+      </div>
+
+      <!-- Step 4: oil amount -->
+      <div id="labAmountStep" style="display:none;">
+        <h4 style="margin-bottom:6px;color:var(--gold-dark);">٤. كمية الزيت</h4>
+        <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:12px;" id="labAmountHint"></p>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <input type="range" id="labOilRange" min="0" max="30" step="1" value="10" style="flex:1;min-width:200px;accent-color:var(--gold);">
+          <span id="labOilValue" style="font-weight:700;color:var(--gold);font-size:1.1rem;min-width:70px;">10 مل</span>
+        </div>
+      </div>
+
+      <!-- Summary + price -->
+      <div id="labSummary" style="display:none;background:var(--ink-2);border:1px solid var(--gold);border-radius:16px;padding:20px;">
+        <h4 style="margin-bottom:14px;">🧾 ملخص عطرك</h4>
+        <div id="labSummaryLines" style="font-size:0.9rem;line-height:2;"></div>
+        <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:700;font-size:1.1rem;">الإجمالي</span>
+          <span id="labTotalPrice" style="font-weight:700;font-size:1.4rem;color:var(--gold);">0 جنيه</span>
+        </div>
+        <button id="labAddToCart" class="btn-primary" style="width:100%;margin-top:16px;">أضف للسلة 🛒</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -3669,6 +3724,179 @@ function checkPreviousQuiz(){
     }
   }
 }
+
+// ===== Perfume Lab (build-your-own scent) =====
+// Fully isolated. Loads admin-defined bottles + oils, lets the customer compose a
+// scent, prices any extra oil beyond the bottle's default, and adds a custom
+// item to the cart. The order reaches the owner (via WhatsApp/checkout) who then
+// makes it by hand. Wrapped so any failure hides the lab instead of breaking the site.
+(function(){
+  const state = { bottle: null, color: null, oil: null, oilMl: 0 };
+  let bottles = [], oils = [];
+
+  async function initLab(){
+    try {
+      const section = document.getElementById('perfumeLab');
+      if (!section) return;
+      // Load lab settings (note + active flag).
+      try {
+        const { data: s } = await sb.from('shop_settings').select('lab_note, lab_active').eq('id', 1).maybeSingle();
+        if (s) {
+          if (s.lab_active === false) { section.style.display = 'none'; return; }
+          if (s.lab_note) {
+            const noteEl = document.getElementById('labNote');
+            if (noteEl) { noteEl.textContent = s.lab_note; noteEl.style.display = 'block'; }
+          }
+        }
+      } catch(e){ /* column may not exist yet; ignore */ }
+
+      const [{ data: b }, { data: o }] = await Promise.all([
+        sb.from('lab_bottles').select('*').eq('active', true).order('sort_order', { ascending: true }),
+        sb.from('lab_oils').select('*').eq('active', true).order('sort_order', { ascending: true })
+      ]);
+      bottles = b || []; oils = o || [];
+      if (bottles.length === 0 || oils.length === 0) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      renderBottles();
+      renderOils();
+      wireAmount();
+      document.getElementById('labAddToCart').addEventListener('click', addLabToCart);
+    } catch (e) {
+      console.error('[Monsela] perfume lab failed:', e);
+      const section = document.getElementById('perfumeLab');
+      if (section) section.style.display = 'none';
+    }
+  }
+
+  function renderBottles(){
+    const wrap = document.getElementById('labBottles');
+    wrap.innerHTML = bottles.map(bt => `
+      <button class="lab-bottle-btn" data-id="${bt.id}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:16px 20px;cursor:pointer;font-family:'Cairo';text-align:center;min-width:120px;transition:border-color .2s;">
+        <div style="font-size:1.5rem;">🫙</div>
+        <div style="font-weight:700;color:var(--cream);margin-top:6px;">${bt.size_ml} مل</div>
+        <div style="color:var(--gold);font-size:0.85rem;">${formatPrice(bt.base_price)} ج</div>
+      </button>`).join('');
+    wrap.querySelectorAll('.lab-bottle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.bottle = bottles.find(x => String(x.id) === btn.dataset.id);
+        state.color = null;
+        wrap.querySelectorAll('.lab-bottle-btn').forEach(b => b.style.borderColor = 'var(--line)');
+        btn.style.borderColor = 'var(--gold)';
+        renderColors();
+        setupAmountForBottle();
+        updateSummary();
+      });
+    });
+  }
+
+  function renderColors(){
+    const step = document.getElementById('labColorStep');
+    const wrap = document.getElementById('labColors');
+    let colors = [];
+    try { colors = Array.isArray(state.bottle.colors) ? state.bottle.colors : JSON.parse(state.bottle.colors || '[]'); } catch(e){ colors = []; }
+    if (!colors || colors.length === 0) { step.style.display = 'none'; return; }
+    step.style.display = 'block';
+    wrap.innerHTML = colors.map((c, i) => `
+      <button class="lab-color-btn" data-i="${i}" title="${escapeHTML(c.name||'')}" style="width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:${escapeHTML(c.hex||'#ccc')};cursor:pointer;"></button>`).join('');
+    wrap.querySelectorAll('.lab-color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.color = colors[Number(btn.dataset.i)];
+        wrap.querySelectorAll('.lab-color-btn').forEach(b => b.style.borderColor = 'var(--line)');
+        btn.style.borderColor = 'var(--gold)';
+        updateSummary();
+      });
+    });
+  }
+
+  function renderOils(){
+    const step = document.getElementById('labOilStep');
+    const wrap = document.getElementById('labOils');
+    step.style.display = 'block';
+    wrap.innerHTML = oils.map(ol => `
+      <button class="lab-oil-btn" data-id="${ol.id}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer;font-family:'Cairo';text-align:right;min-width:150px;transition:border-color .2s;">
+        <div style="font-weight:700;color:var(--cream);">${escapeHTML(ol.name)}</div>
+        ${ol.description ? `<div style="color:var(--smoke);font-size:0.76rem;margin-top:3px;">${escapeHTML(ol.description)}</div>` : ''}
+        <div style="color:var(--gold);font-size:0.78rem;margin-top:4px;">المل الزيادة بـ ${formatPrice(ol.price_per_ml)} ج</div>
+      </button>`).join('');
+    wrap.querySelectorAll('.lab-oil-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.oil = oils.find(x => String(x.id) === btn.dataset.id);
+        wrap.querySelectorAll('.lab-oil-btn').forEach(b => b.style.borderColor = 'var(--line)');
+        btn.style.borderColor = 'var(--gold)';
+        updateSummary();
+      });
+    });
+  }
+
+  function setupAmountForBottle(){
+    const step = document.getElementById('labAmountStep');
+    const range = document.getElementById('labOilRange');
+    const hint = document.getElementById('labAmountHint');
+    if (!state.bottle) { step.style.display = 'none'; return; }
+    step.style.display = 'block';
+    const def = Number(state.bottle.default_oil_ml) || 0;
+    const max = state.bottle.size_ml;
+    range.min = def;                 // can't go below the standard amount
+    range.max = max;                 // can't exceed the bottle size
+    range.value = def;
+    state.oilMl = def;
+    document.getElementById('labOilValue').textContent = def + ' مل';
+    hint.textContent = `المعتاد ${def} مل زيت (داخل السعر الأساسي). لو زوّدت، بيتحسب فرق سعر على المللي الزيادة.`;
+  }
+
+  function wireAmount(){
+    const range = document.getElementById('labOilRange');
+    range.addEventListener('input', () => {
+      state.oilMl = Number(range.value);
+      document.getElementById('labOilValue').textContent = state.oilMl + ' مل';
+      updateSummary();
+    });
+  }
+
+  function computePrice(){
+    if (!state.bottle) return 0;
+    const def = Number(state.bottle.default_oil_ml) || 0;
+    const base = Number(state.bottle.base_price) || 0;
+    const extraMl = Math.max(0, state.oilMl - def);
+    const perMl = state.oil ? (Number(state.oil.price_per_ml) || 0) : 0;
+    return base + extraMl * perMl;
+  }
+
+  function updateSummary(){
+    const summary = document.getElementById('labSummary');
+    if (!state.bottle || !state.oil) { summary.style.display = 'none'; return; }
+    summary.style.display = 'block';
+    const def = Number(state.bottle.default_oil_ml) || 0;
+    const extraMl = Math.max(0, state.oilMl - def);
+    const lines = [];
+    lines.push(`قزازة: ${state.bottle.size_ml} مل`);
+    if (state.color) lines.push(`اللون: ${escapeHTML(state.color.name || '')}`);
+    lines.push(`الزيت: ${escapeHTML(state.oil.name)}`);
+    lines.push(`كمية الزيت: ${state.oilMl} مل${extraMl > 0 ? ` (زيادة ${extraMl} مل)` : ''}`);
+    document.getElementById('labSummaryLines').innerHTML = lines.map(l => `<div>• ${l}</div>`).join('');
+    document.getElementById('labTotalPrice').textContent = formatPrice(computePrice()) + ' جنيه';
+  }
+
+  function addLabToCart(){
+    if (!state.bottle || !state.oil) { toast('اختار القزازة والزيت الأول', 'error', 2500); return; }
+    const price = computePrice();
+    const def = Number(state.bottle.default_oil_ml) || 0;
+    const extraMl = Math.max(0, state.oilMl - def);
+    let name = `عطر مخصص — ${state.bottle.size_ml} مل / ${state.oil.name} ${state.oilMl} مل`;
+    if (state.color && state.color.name) name += ` / لون ${state.color.name}`;
+    // Unique key so different custom blends don't merge in the cart.
+    const cartKey = `lab::${state.bottle.id}::${state.oil.id}::${state.oilMl}::${state.color ? state.color.name : ''}::${Date.now()}`;
+    cart.push({ id: 'lab-custom', cartKey, variantLabel: null, bottleColor: state.color ? state.color.name : null, name, price, qty: 1, isCustomLab: true });
+    toast('عطرك المخصص اتضاف للسلة ✓', 'success', 2800);
+    saveCart();
+    openCart();
+  }
+
+  // Kick off after the page settles.
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLab);
+  else initLab();
+})();
+
 checkPreviousQuiz();
 
 // ============ GIFT BUILDER ============

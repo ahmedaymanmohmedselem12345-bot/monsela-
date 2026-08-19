@@ -194,6 +194,48 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <button class="admin-tab-btn" data-tab="settings">⚙️ الإعدادات</button>
     </div>
 
+    <div class="card" style="border-color:var(--gold);" data-tab="products">
+      <h2>🧪 معمل العطور (اصنع عطرك)</h2>
+      <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:16px;">هنا بتتحكم في القزايز والزيوت اللي العميل يركّب منها عطره. السعر بيتحسب تلقائي: السعر الأساسي للقزازة + فرق سعر أي زيت زيادة عن المعتاد.</p>
+
+      <div style="background:var(--ink-3);border-radius:10px;padding:14px;margin-bottom:18px;">
+        <label>📝 توصياتك للعميل (بتظهر فوق المعمل)</label>
+        <textarea id="labNoteInput" placeholder="مثال: يُفضّل ما تزودش الزيت عن 10 مل عشان تضمن أفضل ثبات. لو محتار كلّمنا على الواتساب." style="width:100%;min-height:60px;margin-top:6px;"></textarea>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:10px;cursor:pointer;font-size:0.85rem;">
+          <input type="checkbox" id="labActiveInput" checked style="width:auto;"> المعمل ظاهر في الموقع
+        </label>
+        <button class="btn btn-ghost" id="saveLabNoteBtn" style="margin-top:10px;font-size:0.8rem;">حفظ التوصيات</button>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <h3 style="font-size:1rem;margin-bottom:10px;">🫙 القزايز</h3>
+        <div class="row">
+          <div><label>الحجم (مل)</label><input type="number" id="bottleSize" placeholder="30"></div>
+          <div><label>السعر الأساسي</label><input type="number" id="bottleBasePrice" placeholder="200"></div>
+          <div><label>كمية الزيت المعتادة (مل)</label><input type="number" id="bottleDefaultOil" placeholder="10"></div>
+        </div>
+        <label>ألوان القزازة المتاحة (اختياري)</label>
+        <div id="bottleColorRows"></div>
+        <button class="btn btn-ghost" id="addBottleColorBtn" style="font-size:0.78rem;margin-bottom:10px;">+ أضف لون</button>
+        <button class="btn" id="addBottleBtn" style="display:block;">+ أضف القزازة</button>
+        <div class="status" id="bottleStatus"></div>
+        <div id="bottlesList" style="margin-top:12px;"></div>
+      </div>
+
+      <div>
+        <h3 style="font-size:1rem;margin-bottom:10px;">🧴 الزيوت</h3>
+        <div class="row">
+          <div><label>اسم الزيت</label><input type="text" id="oilName" placeholder="عود كمبودي"></div>
+          <div><label>سعر المل الزيادة</label><input type="number" id="oilPrice" placeholder="50"></div>
+        </div>
+        <label>وصف/نوتة (اختياري)</label>
+        <input type="text" id="oilDesc" placeholder="مثال: دافئ وخشبي">
+        <button class="btn" id="addOilBtn" style="margin-top:10px;display:block;">+ أضف الزيت</button>
+        <div class="status" id="oilStatus"></div>
+        <div id="oilsList" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
     <div class="card" data-tab="products">
       <h2 id="formTitle">إضافة منتج جديد</h2>
       <input type="hidden" id="productId">
@@ -2701,6 +2743,133 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
 
     loadOffers();
   } catch (e) { console.error('Offers manager failed (panel still works):', e); }
+})();
+</script>
+
+<script>
+/* ===== Perfume Lab management (admin, isolated) ===== */
+(function(){
+  var bottleColors = [];
+
+  function renderBottleColorRows(){
+    var wrap = document.getElementById('bottleColorRows');
+    if (!wrap) return;
+    wrap.innerHTML = bottleColors.map(function(c, i){
+      return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;">'
+        + '<input type="text" placeholder="اسم اللون" value="'+escapeHTML(c.name||'')+'" data-ci="'+i+'" class="bc-name" style="flex:1;">'
+        + '<input type="color" value="'+(c.hex||'#cccccc')+'" data-ci="'+i+'" class="bc-hex" style="width:44px;padding:2px;">'
+        + '<button type="button" data-del="'+i+'" class="btn btn-ghost" style="font-size:0.7rem;padding:4px 8px;">×</button>'
+        + '</div>';
+    }).join('');
+    wrap.querySelectorAll('.bc-name').forEach(function(inp){ inp.addEventListener('input', function(){ bottleColors[+inp.dataset.ci].name = inp.value; }); });
+    wrap.querySelectorAll('.bc-hex').forEach(function(inp){ inp.addEventListener('input', function(){ bottleColors[+inp.dataset.ci].hex = inp.value; }); });
+    wrap.querySelectorAll('[data-del]').forEach(function(btn){ btn.addEventListener('click', function(){ bottleColors.splice(+btn.dataset.del,1); renderBottleColorRows(); }); });
+  }
+
+  async function loadBottles(){
+    var el = document.getElementById('bottlesList');
+    if (!el) return;
+    try {
+      var res = await sb.from('lab_bottles').select('*').order('sort_order', { ascending: true });
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      if (rows.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.82rem;">مفيش قزايز مضافة.</p>'; return; }
+      el.innerHTML = rows.map(function(b){
+        var colors = [];
+        try { colors = Array.isArray(b.colors)?b.colors:JSON.parse(b.colors||'[]'); } catch(e){}
+        return '<div class="product-item"><div class="info"><h4>'+b.size_ml+' مل — '+b.base_price+' ج</h4>'
+          + '<p>زيت معتاد: '+b.default_oil_ml+' مل'+(colors.length?' • '+colors.length+' لون':'')+'</p></div>'
+          + '<div class="actions"><button class="btn btn-ghost" data-del-bottle="'+b.id+'" style="font-size:0.72rem;border-color:var(--danger);color:var(--danger);">حذف</button></div></div>';
+      }).join('');
+      el.querySelectorAll('[data-del-bottle]').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          if(!confirm('تحذف القزازة دي؟')) return;
+          var r = await sb.from('lab_bottles').delete().eq('id', btn.dataset.delBottle);
+          if (r.error){ alert('مشكلة: '+r.error.message); return; }
+          loadBottles();
+        });
+      });
+    } catch(e){ console.error('loadBottles failed:', e && (e.message||JSON.stringify(e))); el.innerHTML = '<p style="color:var(--danger);font-size:0.82rem;">مشكلة في تحميل القزايز. شغّلت ملف قاعدة البيانات؟</p>'; }
+  }
+
+  async function loadOils(){
+    var el = document.getElementById('oilsList');
+    if (!el) return;
+    try {
+      var res = await sb.from('lab_oils').select('*').order('sort_order', { ascending: true });
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      if (rows.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.82rem;">مفيش زيوت مضافة.</p>'; return; }
+      el.innerHTML = rows.map(function(o){
+        return '<div class="product-item"><div class="info"><h4>'+escapeHTML(o.name)+'</h4>'
+          + '<p>'+o.price_per_ml+' ج/مل'+(o.description?' • '+escapeHTML(o.description):'')+'</p></div>'
+          + '<div class="actions"><button class="btn btn-ghost" data-del-oil="'+o.id+'" style="font-size:0.72rem;border-color:var(--danger);color:var(--danger);">حذف</button></div></div>';
+      }).join('');
+      el.querySelectorAll('[data-del-oil]').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          if(!confirm('تحذف الزيت ده؟')) return;
+          var r = await sb.from('lab_oils').delete().eq('id', btn.dataset.delOil);
+          if (r.error){ alert('مشكلة: '+r.error.message); return; }
+          loadOils();
+        });
+      });
+    } catch(e){ console.error('loadOils failed:', e && (e.message||JSON.stringify(e))); el.innerHTML = '<p style="color:var(--danger);font-size:0.82rem;">مشكلة في تحميل الزيوت.</p>'; }
+  }
+
+  try {
+    var addColorBtn = document.getElementById('addBottleColorBtn');
+    if (addColorBtn) addColorBtn.addEventListener('click', function(){ bottleColors.push({name:'', hex:'#cccccc'}); renderBottleColorRows(); });
+
+    var addBottleBtn = document.getElementById('addBottleBtn');
+    if (addBottleBtn) addBottleBtn.addEventListener('click', async function(){
+      var st = document.getElementById('bottleStatus');
+      var size = parseInt(document.getElementById('bottleSize').value);
+      var base = parseFloat(document.getElementById('bottleBasePrice').value);
+      var def = parseFloat(document.getElementById('bottleDefaultOil').value);
+      if (!size || isNaN(base) || isNaN(def)) { st.style.color='var(--danger)'; st.textContent='املا الحجم والسعر وكمية الزيت.'; return; }
+      var cleanColors = bottleColors.filter(function(c){ return c.name && c.name.trim(); });
+      var r = await sb.from('lab_bottles').insert({ size_ml:size, base_price:base, default_oil_ml:def, colors:cleanColors, sort_order:0 });
+      if (r.error){ st.style.color='var(--danger)'; st.textContent='مشكلة: '+r.error.message; return; }
+      st.style.color='var(--success)'; st.textContent='اتضافت ✓';
+      document.getElementById('bottleSize').value=''; document.getElementById('bottleBasePrice').value=''; document.getElementById('bottleDefaultOil').value='';
+      bottleColors = []; renderBottleColorRows(); loadBottles();
+    });
+
+    var addOilBtn = document.getElementById('addOilBtn');
+    if (addOilBtn) addOilBtn.addEventListener('click', async function(){
+      var st = document.getElementById('oilStatus');
+      var name = (document.getElementById('oilName').value||'').trim();
+      var price = parseFloat(document.getElementById('oilPrice').value);
+      if (!name || isNaN(price)) { st.style.color='var(--danger)'; st.textContent='اكتب اسم الزيت وسعر المل.'; return; }
+      var desc = (document.getElementById('oilDesc').value||'').trim() || null;
+      var r = await sb.from('lab_oils').insert({ name:name, price_per_ml:price, description:desc, sort_order:0 });
+      if (r.error){ st.style.color='var(--danger)'; st.textContent='مشكلة: '+r.error.message; return; }
+      st.style.color='var(--success)'; st.textContent='اتضاف ✓';
+      document.getElementById('oilName').value=''; document.getElementById('oilPrice').value=''; document.getElementById('oilDesc').value='';
+      loadOils();
+    });
+
+    var saveLabNoteBtn = document.getElementById('saveLabNoteBtn');
+    if (saveLabNoteBtn) saveLabNoteBtn.addEventListener('click', async function(){
+      var note = document.getElementById('labNoteInput').value.trim();
+      var active = document.getElementById('labActiveInput').checked;
+      var r = await sb.from('shop_settings').update({ lab_note:note, lab_active:active }).eq('id', 1);
+      if (r.error){ alert('مشكلة: '+r.error.message); return; }
+      saveLabNoteBtn.textContent = 'اتحفظ ✓';
+      setTimeout(function(){ saveLabNoteBtn.textContent='حفظ التوصيات'; }, 1500);
+    });
+
+    // Load current lab note into the form.
+    sb.from('shop_settings').select('lab_note, lab_active').eq('id',1).maybeSingle().then(function(res){
+      if (res.data) {
+        if (document.getElementById('labNoteInput')) document.getElementById('labNoteInput').value = res.data.lab_note || '';
+        if (document.getElementById('labActiveInput') && res.data.lab_active === false) document.getElementById('labActiveInput').checked = false;
+      }
+    }).catch(function(){});
+
+    loadBottles();
+    loadOils();
+  } catch(e){ console.error('Lab management failed (panel still works):', e); }
 })();
 </script>
 </body>
