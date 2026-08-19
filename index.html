@@ -1675,6 +1675,7 @@ window.addEventListener('load', function(){
       <div>
         <h4 style="margin-bottom:12px;color:var(--gold-dark);">١. اختار القزازة</h4>
         <div id="labBottles" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+        <div id="labBottleGallery" style="display:none;flex-wrap:wrap;gap:10px;margin-top:14px;"></div>
       </div>
 
       <!-- Step 2: bottle color -->
@@ -3793,25 +3794,47 @@ function checkPreviousQuiz(){
     }
   }
 
+  function bottleImages(bt){
+    try { return Array.isArray(bt.images) ? bt.images : JSON.parse(bt.images || '[]'); } catch(e){ return []; }
+  }
+
   function renderBottles(){
     const wrap = document.getElementById('labBottles');
-    wrap.innerHTML = bottles.map(bt => `
-      <button class="lab-bottle-btn" data-id="${bt.id}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:16px 20px;cursor:pointer;font-family:'Cairo';text-align:center;min-width:120px;transition:border-color .2s;">
-        <div style="font-size:1.5rem;">🫙</div>
-        <div style="font-weight:700;color:var(--cream);margin-top:6px;">${bt.size_ml} مل</div>
+    wrap.innerHTML = bottles.map(bt => {
+      const imgs = bottleImages(bt);
+      const thumb = imgs.length
+        ? `<div style="width:100%;aspect-ratio:1;border-radius:10px;overflow:hidden;margin-bottom:8px;background:var(--ink-3);"><img src="${escapeHTML(imgs[0])}" alt="قزازة ${bt.size_ml} مل" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;"></div>`
+        : '<div style="font-size:1.5rem;">🫙</div>';
+      return `
+      <button class="lab-bottle-btn" data-id="${bt.id}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;font-family:'Cairo';text-align:center;width:150px;transition:border-color .2s;">
+        ${thumb}
+        <div style="font-weight:700;color:var(--cream);margin-top:2px;">${bt.size_ml} مل</div>
         <div style="color:var(--gold);font-size:0.85rem;">${formatPrice(bt.base_price)} ج</div>
-      </button>`).join('');
+      </button>`;
+    }).join('');
     wrap.querySelectorAll('.lab-bottle-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         state.bottle = bottles.find(x => String(x.id) === btn.dataset.id);
         state.color = null;
         wrap.querySelectorAll('.lab-bottle-btn').forEach(b => b.style.borderColor = 'var(--line)');
         btn.style.borderColor = 'var(--gold)';
+        renderBottleGallery();
         renderColors();
         setupAmountForBottle();
         updateSummary();
       });
     });
+  }
+
+  // Shows all images of the selected bottle so the customer sees it clearly.
+  function renderBottleGallery(){
+    const galleryStep = document.getElementById('labBottleGallery');
+    if (!galleryStep) return;
+    const imgs = bottleImages(state.bottle);
+    if (!imgs.length) { galleryStep.style.display = 'none'; galleryStep.innerHTML = ''; return; }
+    galleryStep.style.display = 'flex';
+    galleryStep.innerHTML = imgs.map((u, i) => `
+      <img src="${escapeHTML(u)}" alt="صورة ${i+1}" loading="lazy" decoding="async" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line);">`).join('');
   }
 
   function renderColors(){

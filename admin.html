@@ -217,6 +217,10 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
         <label>ألوان القزازة المتاحة (اختياري)</label>
         <div id="bottleColorRows"></div>
         <button class="btn btn-ghost" id="addBottleColorBtn" style="font-size:0.78rem;margin-bottom:10px;">+ أضف لون</button>
+        <label>صور القزازة 📸 (تقدر ترفع أكتر من صورة)</label>
+        <p style="color:var(--smoke);font-size:0.76rem;margin-bottom:6px;">ارفع صور للقزازة بالحجم ده عشان العميل يشوفها قبل ما يختار.</p>
+        <input type="file" id="bottleImages" accept="image/*" multiple>
+        <div id="bottleImagesPreview" style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;"></div>
         <button class="btn" id="addBottleBtn" style="display:block;">+ أضف القزازة</button>
         <div class="status" id="bottleStatus"></div>
         <div id="bottlesList" style="margin-top:12px;"></div>
@@ -2777,8 +2781,11 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
       el.innerHTML = rows.map(function(b){
         var colors = [];
         try { colors = Array.isArray(b.colors)?b.colors:JSON.parse(b.colors||'[]'); } catch(e){}
-        return '<div class="product-item"><div class="info"><h4>'+b.size_ml+' مل — '+b.base_price+' ج</h4>'
-          + '<p>زيت معتاد: '+b.default_oil_ml+' مل'+(colors.length?' • '+colors.length+' لون':'')+'</p></div>'
+        var imgs = [];
+        try { imgs = Array.isArray(b.images)?b.images:JSON.parse(b.images||'[]'); } catch(e){}
+        var thumb = imgs.length ? '<img src="'+escapeHTML(imgs[0])+'" style="width:40px;height:40px;object-fit:cover;border-radius:8px;margin-left:8px;">' : '';
+        return '<div class="product-item"><div class="info" style="display:flex;align-items:center;">'+thumb+'<div><h4>'+b.size_ml+' مل — '+b.base_price+' ج</h4>'
+          + '<p>زيت معتاد: '+b.default_oil_ml+' مل'+(colors.length?' • '+colors.length+' لون':'')+(imgs.length?' • '+imgs.length+' صورة':'')+'</p></div></div>'
           + '<div class="actions"><button class="btn btn-ghost" data-del-bottle="'+b.id+'" style="font-size:0.72rem;border-color:var(--danger);color:var(--danger);">حذف</button></div></div>';
       }).join('');
       el.querySelectorAll('[data-del-bottle]').forEach(function(btn){
@@ -2820,6 +2827,39 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     var addColorBtn = document.getElementById('addBottleColorBtn');
     if (addColorBtn) addColorBtn.addEventListener('click', function(){ bottleColors.push({name:'', hex:'#cccccc'}); renderBottleColorRows(); });
 
+    // Hold uploaded bottle image URLs until the bottle is saved.
+    var bottleImages = [];
+    var bottleImgInput = document.getElementById('bottleImages');
+    if (bottleImgInput) bottleImgInput.addEventListener('change', async function(e){
+      var files = Array.from(e.target.files || []);
+      var prev = document.getElementById('bottleImagesPreview');
+      if (!files.length) return;
+      for (var k = 0; k < files.length; k++) {
+        var file = files[k];
+        var tag = document.createElement('span');
+        tag.style.cssText = 'font-size:0.72rem;color:var(--smoke);';
+        tag.textContent = 'جاري رفع صورة ' + (k+1) + '…';
+        prev.appendChild(tag);
+        try {
+          var compressed = await compressImage(file, 1000, 0.85);
+          var path = 'bottle-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.jpg';
+          var up = await sb.storage.from('product-images').upload(path, compressed, { contentType:'image/jpeg' });
+          if (up.error) throw up.error;
+          var url = sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+          bottleImages.push(url);
+          tag.remove();
+          var im = document.createElement('img');
+          im.src = url; im.style.cssText = 'width:56px;height:56px;object-fit:cover;border-radius:8px;';
+          prev.appendChild(im);
+        } catch (err) {
+          console.error('bottle image upload failed:', err);
+          tag.textContent = 'فشلت صورة';
+          tag.style.color = 'var(--danger)';
+        }
+      }
+      bottleImgInput.value = '';
+    });
+
     var addBottleBtn = document.getElementById('addBottleBtn');
     if (addBottleBtn) addBottleBtn.addEventListener('click', async function(){
       var st = document.getElementById('bottleStatus');
@@ -2828,11 +2868,12 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
       var def = parseFloat(document.getElementById('bottleDefaultOil').value);
       if (!size || isNaN(base) || isNaN(def)) { st.style.color='var(--danger)'; st.textContent='املا الحجم والسعر وكمية الزيت.'; return; }
       var cleanColors = bottleColors.filter(function(c){ return c.name && c.name.trim(); });
-      var r = await sb.from('lab_bottles').insert({ size_ml:size, base_price:base, default_oil_ml:def, colors:cleanColors, sort_order:0 });
+      var r = await sb.from('lab_bottles').insert({ size_ml:size, base_price:base, default_oil_ml:def, colors:cleanColors, images:bottleImages, sort_order:0 });
       if (r.error){ st.style.color='var(--danger)'; st.textContent='مشكلة: '+r.error.message; return; }
       st.style.color='var(--success)'; st.textContent='اتضافت ✓';
       document.getElementById('bottleSize').value=''; document.getElementById('bottleBasePrice').value=''; document.getElementById('bottleDefaultOil').value='';
-      bottleColors = []; renderBottleColorRows(); loadBottles();
+      document.getElementById('bottleImagesPreview').innerHTML='';
+      bottleImages = []; bottleColors = []; renderBottleColorRows(); loadBottles();
     });
 
     var addOilBtn = document.getElementById('addOilBtn');
