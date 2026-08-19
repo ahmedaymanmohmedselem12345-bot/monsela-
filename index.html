@@ -1166,6 +1166,12 @@ window.addEventListener('load', function(){
 <!-- Floating WhatsApp button. Positioned clearly ABOVE the cart FAB so the two
      never overlap on mobile. The cart FAB sits at bottom ~74px (above the bottom
      nav); this WhatsApp button sits above it with a comfortable gap. -->
+<button id="musicToggle" aria-label="تشغيل الموسيقى" title="موسيقى" style="position:fixed;bottom:calc(200px + env(safe-area-inset-bottom,0px));left:24px;z-index:75;width:52px;height:52px;border-radius:50%;background:var(--ink-2);border:1px solid var(--gold);color:var(--gold);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);cursor:pointer;transition:transform .2s;">
+  <svg id="musicIconOff" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+  <svg id="musicIconOn" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke="var(--rose)"/></svg>
+</button>
+<!-- Replace the src with your own luxury track (upload it to your repo as music.mp3) -->
+<audio id="bgMusic" loop preload="none" src="music.mp3"></audio>
 <a id="floatingWhatsApp" href="#" target="_blank" rel="noopener" aria-label="تواصل معنا واتساب" style="position:fixed;bottom:calc(140px + env(safe-area-inset-bottom,0px));left:24px;z-index:75;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(37,211,102,0.35);transition:transform .2s;text-decoration:none;">
   <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
@@ -1521,7 +1527,7 @@ window.addEventListener('load', function(){
       <button id="offersPrev" aria-label="السابق" style="position:absolute;top:50%;right:-6px;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;font-size:1.2rem;box-shadow:var(--shadow-md);">‹</button>
       <button id="offersNext" aria-label="التالي" style="position:absolute;top:50%;left:-6px;transform:translateY(-50%);z-index:5;width:44px;height:44px;border-radius:50%;background:var(--ink-2);border:1px solid var(--line);color:var(--cream);cursor:pointer;font-size:1.2rem;box-shadow:var(--shadow-md);">›</button>
       <div id="offersViewport" style="overflow:hidden;margin:0 40px;">
-        <div id="offersTrack" style="display:grid;grid-auto-flow:column;grid-template-rows:1fr 1fr;gap:16px;grid-auto-columns:minmax(180px,1fr);transition:transform .5s ease;"></div>
+        <div id="offersTrack" style="display:flex;flex-direction:column;gap:16px;width:max-content;"></div>
       </div>
     </div>
   </div>
@@ -2306,6 +2312,11 @@ async function loadProducts(){
   safe('renderProducts', renderProducts);          // most important — runs first
   safe('renderCategoryStrip', renderCategoryStrip);
   safe('renderOffersCarousel', renderOffersCarousel);
+  // Load admin-managed offers (with images). Isolated: if it fails or the table
+  // doesn't exist yet, the carousel still shows discounted products.
+  sb.from('offers').select('*').eq('active', true).order('sort_order', { ascending: true }).then(({ data }) => {
+    if (data && data.length) { window.__customOffers = data; try { renderOffersCarousel(); } catch(e){} }
+  }).catch(()=>{});
   safe('renderDepartmentFilters', renderDepartmentFilters);
   safe('renderCategoryFilters', renderCategoryFilters);
   safe('renderFilterPanelOptions', renderFilterPanelOptions);
@@ -2449,72 +2460,103 @@ function renderOffersCarousel(){
   const track = document.getElementById('offersTrack');
   if (!section || !track) return;
 
-  // Offer = product whose original_price is higher than its current price.
-  const offers = allProducts.filter(p => p.original_price && p.original_price > (p.price ?? 0));
-  if (offers.length === 0) { section.style.display = 'none'; return; }
+  // Offers come from two sources:
+  //  1) discounted products (original_price > price)
+  //  2) items the admin added in the "العروض" manager (window.__customOffers)
+  const discounted = allProducts.filter(p => p.original_price && p.original_price > (p.price ?? 0));
+  const custom = Array.isArray(window.__customOffers) ? window.__customOffers : [];
+  // Build a unified list of cards.
+  const items = [];
+  discounted.forEach(p => {
+    const price = p.price ?? 0;
+    const pct = Math.round((1 - price / p.original_price) * 100);
+    const img = (Array.isArray(p.images) && p.images[0]) || p.image_url || '';
+    items.push({ id: p.id, name: p.name, img, price, original: p.original_price, pct, isProduct: true });
+  });
+  custom.forEach(o => {
+    items.push({ id: null, name: o.title, img: o.image_url || '', price: o.price, original: o.old_price, pct: (o.old_price && o.price) ? Math.round((1 - o.price / o.old_price) * 100) : null, isProduct: false, link: o.link });
+  });
+
+  if (items.length === 0) { section.style.display = 'none'; return; }
   section.style.display = '';
 
-  // Admin-controlled title (falls back to a default).
   try {
     const t = document.getElementById('offersTitle');
     if (t && window.__offersTitle) t.textContent = window.__offersTitle;
   } catch(e){}
 
-  track.innerHTML = offers.map(p => {
-    const price = p.price ?? 0;
-    const pct = Math.round((1 - price / p.original_price) * 100);
-    const img = (Array.isArray(p.images) && p.images[0]) || p.image_url || '';
+  function card(it){
     return `
-      <div class="offer-card" data-id="${p.id}" style="background:var(--ink-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s;display:flex;flex-direction:column;">
+      <div class="offer-card" data-id="${it.id != null ? escapeHTML(String(it.id)) : ''}" ${it.link ? `data-link="${escapeHTML(it.link)}"` : ''} style="flex:0 0 auto;width:200px;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .25s,border-color .25s;display:flex;flex-direction:column;">
         <div style="position:relative;aspect-ratio:1;background:var(--ink-3);overflow:hidden;">
-          ${img ? `<img src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;">🌸</div>'}
-          <span style="position:absolute;top:8px;right:8px;background:var(--rose);color:#fff;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:999px;">-${pct}%</span>
+          ${it.img ? `<img src="${escapeHTML(it.img)}" alt="${escapeHTML(it.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;">🎁</div>'}
+          ${it.pct ? `<span style="position:absolute;top:8px;right:8px;background:var(--rose);color:#fff;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:999px;">-${it.pct}%</span>` : ''}
         </div>
         <div style="padding:10px 12px;flex:1;display:flex;flex-direction:column;gap:4px;">
-          <div style="font-weight:700;font-size:0.85rem;color:var(--cream);line-height:1.4;">${escapeHTML(p.name)}</div>
+          <div style="font-weight:700;font-size:0.85rem;color:var(--cream);line-height:1.4;">${escapeHTML(it.name)}</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:auto;">
-            <span style="color:var(--gold);font-weight:700;font-size:0.9rem;">${formatPrice(price)} ج</span>
-            <span style="color:var(--smoke);text-decoration:line-through;font-size:0.75rem;">${formatPrice(p.original_price)}</span>
+            ${it.price != null ? `<span style="color:var(--gold);font-weight:700;font-size:0.9rem;">${formatPrice(it.price)} ج</span>` : ''}
+            ${it.original ? `<span style="color:var(--smoke);text-decoration:line-through;font-size:0.75rem;">${formatPrice(it.original)}</span>` : ''}
           </div>
         </div>
       </div>`;
-  }).join('');
+  }
 
-  // Clicking an offer opens that product.
-  track.querySelectorAll('.offer-card').forEach(card => {
-    card.addEventListener('mouseover', () => { card.style.transform = 'translateY(-4px)'; card.style.borderColor = 'var(--gold)'; });
-    card.addEventListener('mouseout', () => { card.style.transform = 'none'; card.style.borderColor = 'var(--line)'; });
-    card.addEventListener('click', () => { const p = allProducts.find(x => String(x.id) === String(card.dataset.id)); if (p && typeof openProductDetail === 'function') openProductDetail(p.id); });
+  // Two rows: split items into top and bottom. Duplicate the whole set for a
+  // seamless loop, then slide with requestAnimationFrame (no pause, no gap).
+  let baseSet = items.slice();
+  while (baseSet.length < 12) baseSet = baseSet.concat(items); // fill wide screens
+  const loop = baseSet.concat(baseSet);
+  const half = Math.ceil(loop.length / 2);
+  const rowTop = loop.slice(0, half);
+  const rowBottom = loop.slice(half).concat(loop.slice(0, Math.max(0, half - (loop.length - half))));
+
+  track.style.cssText = 'display:flex;flex-direction:column;gap:16px;width:max-content;will-change:transform;';
+  track.innerHTML =
+    `<div style="display:flex;gap:16px;">${rowTop.map(card).join('')}</div>` +
+    `<div style="display:flex;gap:16px;">${rowBottom.map(card).join('')}</div>`;
+
+  // Card interactions.
+  track.querySelectorAll('.offer-card').forEach(c => {
+    c.addEventListener('mouseover', () => { c.style.transform = 'translateY(-4px)'; c.style.borderColor = 'var(--gold)'; });
+    c.addEventListener('mouseout', () => { c.style.transform = 'none'; c.style.borderColor = 'var(--line)'; });
+    c.addEventListener('click', () => {
+      if (c.dataset.link) { window.open(c.dataset.link, '_blank'); return; }
+      const p = allProducts.find(x => String(x.id) === String(c.dataset.id));
+      if (p && typeof openProductDetail === 'function') openProductDetail(p.id);
+    });
   });
 
-  // Arrow + auto-scroll logic. Scrolls the viewport horizontally by one "page".
+  // Seamless marquee via requestAnimationFrame.
   const viewport = document.getElementById('offersViewport');
   const prev = document.getElementById('offersPrev');
   const next = document.getElementById('offersNext');
-  function page(dir){
-    const w = viewport.clientWidth * 0.8;
-    viewport.scrollBy({ left: dir * w, behavior: 'smooth' });
-  }
-  // Use native horizontal scroll on the viewport for reliability.
-  viewport.style.overflowX = 'auto';
-  viewport.style.scrollbarWidth = 'none';
-  track.style.transition = 'none';
-  if (prev) prev.onclick = () => page(1);   // RTL: prev goes right
-  if (next) next.onclick = () => page(-1);
-
-  // Auto-scroll every few seconds; pause on hover.
-  if (offersAutoTimer) clearInterval(offersAutoTimer);
-  let dir = -1; // move left (forward in RTL)
-  offersAutoTimer = setInterval(() => {
-    if (!document.body.contains(viewport)) { clearInterval(offersAutoTimer); return; }
-    // If we reached an edge, reverse direction so it sweeps back and forth.
-    const atStart = viewport.scrollLeft >= -2 && dir === 1;
-    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
-    if (Math.abs(viewport.scrollLeft) >= maxScroll - 2 && dir === -1) dir = 1;
-    else if (viewport.scrollLeft >= -2 && dir === 1) dir = -1;
-    page(dir);
-  }, 3500);
-  viewport.addEventListener('mouseenter', () => { if (offersAutoTimer) clearInterval(offersAutoTimer); });
+  viewport.style.overflow = 'hidden';
+  try {
+    if (window.__offersRAF) cancelAnimationFrame(window.__offersRAF);
+    let offset = 0;
+    let paused = false;
+    let manualNudge = 0; // arrows add a temporary extra push
+    const speed = 0.5;
+    function halfWidth(){ return track.scrollWidth / 2; }
+    viewport.addEventListener('mouseenter', () => { paused = true; });
+    viewport.addEventListener('mouseleave', () => { paused = false; });
+    if (prev) prev.onclick = () => { manualNudge -= viewport.clientWidth * 0.6; };  // RTL: show previous (right)
+    if (next) next.onclick = () => { manualNudge += viewport.clientWidth * 0.6; };  // show next (left)
+    function step(){
+      if (!document.body.contains(track)) { cancelAnimationFrame(window.__offersRAF); return; }
+      const hw = halfWidth();
+      if (!paused) offset += speed;
+      if (manualNudge !== 0) {
+        const jump = Math.sign(manualNudge) * Math.min(Math.abs(manualNudge), 12);
+        offset += jump; manualNudge -= jump;
+      }
+      if (hw > 0) { while (offset >= hw) offset -= hw; while (offset < 0) offset += hw; }
+      track.style.transform = 'translateX(-' + offset + 'px)';
+      window.__offersRAF = requestAnimationFrame(step);
+    }
+    window.__offersRAF = requestAnimationFrame(step);
+  } catch (e) { console.error('[Monsela] offers animation failed:', e); }
 }
 
 function renderCategoryStrip(){
@@ -2543,31 +2585,41 @@ function renderCategoryStrip(){
       </button>`;
   }
 
-  // Convert the grid container into a horizontal marquee viewport.
-  grid.style.cssText = 'display:block !important;overflow:hidden;position:relative;width:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);';
-  // Repeat the set enough times that even a few departments fill a wide screen,
-  // then the animation moves by exactly one set width for a seamless loop.
+  // Build a seamless, never-pausing marquee using requestAnimationFrame. We lay
+  // out two identical copies of the cards side by side and slide left; when we've
+  // moved past the width of one copy we snap back by that exact width — which is
+  // invisible because copy #2 is pixel-identical to copy #1 at that point. No
+  // CSS animation reset, no empty waiting gap.
+  grid.style.cssText = 'display:block !important;overflow:hidden;position:relative;width:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);';
+  // Enough copies so even a few departments fill any screen width.
   let baseSet = depts.slice();
-  while (baseSet.length < 8) baseSet = baseSet.concat(depts); // ensure enough cards
-  const loop = baseSet.concat(baseSet); // one more copy for the seamless wrap
+  while (baseSet.length < 10) baseSet = baseSet.concat(depts);
+  const loop = baseSet.concat(baseSet);
   grid.innerHTML = `<div id="catStripTrack" style="display:flex;gap:14px;width:max-content;will-change:transform;">${loop.map(card).join('')}</div>`;
 
   const track = document.getElementById('catStripTrack');
-  // Faster, steady marquee. Duplicating the set and animating to exactly -50%
-  // means the second copy lines up with the first, so the loop is seamless with
-  // no pause at the reset point.
-  const durationSec = Math.max(8, depts.length * 1.4);
   try {
-    if (!document.getElementById('catStripKeyframes')) {
-      const st = document.createElement('style');
-      st.id = 'catStripKeyframes';
-      st.textContent = '@keyframes catStripScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}'
-        + '#catStripTrack{animation:catStripScroll var(--cat-dur,20s) linear infinite;}'
-        + '#catStripTrack:hover{animation-play-state:paused;}'
-        + '@media(prefers-reduced-motion:reduce){#catStripTrack{animation:none;}#categoryStripGrid{overflow-x:auto;}}';
-      document.head.appendChild(st);
+    // Cancel any previous animation loop before starting a new one.
+    if (window.__catStripRAF) cancelAnimationFrame(window.__catStripRAF);
+    let offset = 0;
+    let paused = false;
+    const speed = 0.5; // pixels per frame (~30px/sec at 60fps) — smooth and calm
+    // One "copy" width = half the full track (since we duplicated baseSet once).
+    function halfWidth(){ return track.scrollWidth / 2; }
+    grid.addEventListener('mouseenter', () => { paused = true; });
+    grid.addEventListener('mouseleave', () => { paused = false; });
+    function step(){
+      if (!document.body.contains(track)) { cancelAnimationFrame(window.__catStripRAF); return; }
+      if (!paused) {
+        offset += speed;
+        const hw = halfWidth();
+        if (hw > 0 && offset >= hw) offset -= hw; // seamless wrap
+        // RTL page: moving the track negative shows items entering from the right.
+        track.style.transform = 'translateX(-' + offset + 'px)';
+      }
+      window.__catStripRAF = requestAnimationFrame(step);
     }
-    track.style.setProperty('--cat-dur', durationSec + 's');
+    window.__catStripRAF = requestAnimationFrame(step);
   } catch (e) { console.error('[Monsela] strip animation failed:', e); }
 
   grid.querySelectorAll('.category-card').forEach(btn => {
@@ -5449,5 +5501,42 @@ syncBottomNavCart();
 })();
 </script>
 
+
+<script>
+/* ===== Background music toggle (isolated) =====
+   Plays an optional luxury track. Off by default (browsers block autoplay and
+   surprise audio is annoying). The choice is remembered. If music.mp3 doesn't
+   exist yet, the button simply does nothing harmful. */
+(function(){
+  try {
+    var btn = document.getElementById('musicToggle');
+    var audio = document.getElementById('bgMusic');
+    if (!btn || !audio) return;
+    var iconOff = document.getElementById('musicIconOff');
+    var iconOn = document.getElementById('musicIconOn');
+    audio.volume = 0.35;
+    var playing = false;
+    function setIcons(){
+      if (iconOff) iconOff.style.display = playing ? 'none' : 'block';
+      if (iconOn) iconOn.style.display = playing ? 'block' : 'none';
+      btn.style.borderColor = playing ? 'var(--gold)' : 'var(--gold)';
+    }
+    btn.addEventListener('click', function(){
+      try {
+        if (playing) { audio.pause(); playing = false; }
+        else {
+          var pr = audio.play();
+          if (pr && pr.then) pr.then(function(){ playing = true; setIcons(); try{localStorage.setItem('monsela_music','1');}catch(e){} })
+            .catch(function(){ playing = false; setIcons(); /* file missing or blocked */ });
+          playing = true;
+        }
+        setIcons();
+        try { localStorage.setItem('monsela_music', playing ? '1' : '0'); } catch(e){}
+      } catch(e){ console.error('[Monsela] music toggle failed:', e); }
+    });
+    setIcons();
+  } catch(e){ console.error('[Monsela] music block failed:', e); }
+})();
+</script>
 </body>
 </html>

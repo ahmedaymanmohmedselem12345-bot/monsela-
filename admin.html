@@ -510,6 +510,24 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
       <div id="paymentVerificationList"><p style="color:var(--smoke);">جاري التحميل…</p></div>
     </div>
 
+    <div class="card" style="border-color:var(--gold);" data-tab="marketing">
+      <h2>🔥 العروض (الشريط المتحرك فوق)</h2>
+      <p style="color:var(--smoke);font-size:0.82rem;margin-bottom:14px;">العروض دي بتظهر في الشريط المتحرك أعلى الموقع. تقدر ترفع صورة لكل عرض. <b>ملاحظة:</b> أي منتج بسعر قبل الخصم بيظهر تلقائيًا في العروض كمان.</p>
+      <div class="row">
+        <div><label>عنوان العرض</label><input type="text" id="offerTitle" placeholder="مثال: باقة الشتاء"></div>
+        <div><label>السعر بعد الخصم</label><input type="number" id="offerPrice" placeholder="1500"></div>
+        <div><label>السعر قبل الخصم (اختياري)</label><input type="number" id="offerOldPrice" placeholder="2000"></div>
+      </div>
+      <label>صورة العرض</label>
+      <input type="file" id="offerImage" accept="image/*">
+      <div id="offerImagePreview" style="margin:8px 0;"></div>
+      <label>رابط عند الضغط (اختياري)</label>
+      <input type="text" id="offerLink" placeholder="https://... أو سيبه فاضي">
+      <button class="btn" id="addOfferBtn" style="margin-top:10px;">+ إضافة العرض</button>
+      <div class="status" id="offerStatus"></div>
+      <div id="offersManageList" style="margin-top:16px;"><p style="color:var(--smoke);font-size:0.85rem;">جاري التحميل…</p></div>
+    </div>
+
     <div class="card" data-tab="marketing">
       <h2>عرض لفترة محدودة (Flash Sale)</h2>
       <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">لو حطيت تاريخ ووقت، شريط عداد تنازلي هيظهر في الموقع لحد ما ينتهي.</p>
@@ -2597,6 +2615,92 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     }
   }
   try { loadPrivateReviews(); } catch(e) { console.error('private reviews block failed:', e); }
+})();
+</script>
+
+<script>
+/* ===== Offers manager (isolated) =====
+   Lets the admin add offers with images, shown in the storefront's top carousel.
+   Read/write to the `offers` table. Wrapped so a failure can't break the panel. */
+(function(){
+  var pendingImageUrl = null;
+
+  async function loadOffers(){
+    var el = document.getElementById('offersManageList');
+    if (!el) return;
+    try {
+      var res = await sb.from('offers').select('*').order('sort_order', { ascending: true });
+      if (res.error) throw res.error;
+      var rows = res.data || [];
+      if (rows.length === 0) { el.innerHTML = '<p style="color:var(--smoke);font-size:0.85rem;">مفيش عروض مضافة يدويًا. (المنتجات المخفّضة بتظهر تلقائيًا.)</p>'; return; }
+      el.innerHTML = rows.map(function(o){
+        return '<div class="product-item">'
+          + '<div class="info" style="display:flex;align-items:center;gap:10px;">'
+          + (o.image_url ? '<img src="'+escapeHTML(o.image_url)+'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;">' : '')
+          + '<div><h4>'+escapeHTML(o.title)+'</h4>'
+          + '<p>'+(o.price!=null?o.price+' ج':'')+(o.old_price?' <s style="color:var(--smoke);">'+o.old_price+'</s>':'')+'</p></div>'
+          + '</div>'
+          + '<div class="actions"><button class="btn btn-ghost" data-offer-del="'+o.id+'" style="font-size:0.75rem;border-color:var(--danger);color:var(--danger);">حذف</button></div>'
+          + '</div>';
+      }).join('');
+      el.querySelectorAll('[data-offer-del]').forEach(function(btn){
+        btn.addEventListener('click', async function(){
+          if (!confirm('تحذف العرض ده؟')) return;
+          var r = await sb.from('offers').delete().eq('id', btn.dataset.offerDel);
+          if (r.error) { alert('مشكلة: '+r.error.message); return; }
+          loadOffers();
+        });
+      });
+    } catch (e) {
+      console.error('loadOffers failed:', e && (e.message||JSON.stringify(e)));
+      el.innerHTML = '<p style="color:var(--danger);font-size:0.85rem;">مشكلة في تحميل العروض. اتأكد إنك شغّلت ملف قاعدة البيانات.</p>';
+    }
+  }
+
+  try {
+    var imgInput = document.getElementById('offerImage');
+    if (imgInput) imgInput.addEventListener('change', async function(e){
+      var file = e.target.files[0];
+      var prev = document.getElementById('offerImagePreview');
+      pendingImageUrl = null;
+      if (!file) { if (prev) prev.innerHTML=''; return; }
+      if (prev) prev.innerHTML = '<span style="color:var(--smoke);font-size:0.8rem;">جاري رفع الصورة…</span>';
+      try {
+        var compressed = await compressImage(file, 1200, 0.85);
+        var path = 'offer-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.jpg';
+        var up = await sb.storage.from('product-images').upload(path, compressed, { contentType:'image/jpeg' });
+        if (up.error) throw up.error;
+        pendingImageUrl = sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+        if (prev) prev.innerHTML = '<img src="'+pendingImageUrl+'" style="max-width:120px;border-radius:8px;">';
+      } catch (err) {
+        console.error('offer image upload failed:', err);
+        if (prev) prev.innerHTML = '<span style="color:var(--danger);font-size:0.8rem;">مشكلة في رفع الصورة.</span>';
+      }
+    });
+
+    var addBtn = document.getElementById('addOfferBtn');
+    if (addBtn) addBtn.addEventListener('click', async function(){
+      var statusEl = document.getElementById('offerStatus');
+      var title = (document.getElementById('offerTitle').value||'').trim();
+      if (!title) { statusEl.style.color='var(--danger)'; statusEl.textContent='اكتب عنوان العرض.'; return; }
+      var price = parseFloat(document.getElementById('offerPrice').value) || null;
+      var oldPrice = parseFloat(document.getElementById('offerOldPrice').value) || null;
+      var link = (document.getElementById('offerLink').value||'').trim() || null;
+      var r = await sb.from('offers').insert({ title:title, price:price, old_price:oldPrice, link:link, image_url:pendingImageUrl, sort_order:0 });
+      if (r.error) { statusEl.style.color='var(--danger)'; statusEl.textContent='مشكلة: '+r.error.message; return; }
+      statusEl.style.color='var(--success)'; statusEl.textContent='اتضاف ✓';
+      document.getElementById('offerTitle').value='';
+      document.getElementById('offerPrice').value='';
+      document.getElementById('offerOldPrice').value='';
+      document.getElementById('offerLink').value='';
+      document.getElementById('offerImagePreview').innerHTML='';
+      document.getElementById('offerImage').value='';
+      pendingImageUrl = null;
+      loadOffers();
+    });
+
+    loadOffers();
+  } catch (e) { console.error('Offers manager failed (panel still works):', e); }
 })();
 </script>
 </body>
