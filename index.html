@@ -3787,7 +3787,16 @@ function checkPreviousQuiz(){
       renderBottles();
       renderOils();
       wireAmount();
-      document.getElementById('labAddToCart').addEventListener('click', addLabToCart);
+      // Single delegated handler on the lab section — survives re-renders and can't
+      // double-fire. This is what makes the add-to-cart button reliably work.
+      const labSection = document.getElementById('perfumeLab');
+      if (labSection && !labSection.__labWired) {
+        labSection.__labWired = true;
+        labSection.addEventListener('click', function(ev){
+          const t = ev.target.closest && ev.target.closest('#labAddToCart');
+          if (t) { ev.preventDefault(); addLabToCart(); }
+        });
+      }
     } catch (e) {
       console.error('[Monsela] perfume lab failed:', e);
       const section = document.getElementById('perfumeLab');
@@ -3959,18 +3968,22 @@ function checkPreviousQuiz(){
   }
 
   function addLabToCart(){
-    if (!state.bottle || !state.oil) { toast('اختار القزازة والزيت الأول', 'error', 2500); return; }
-    const price = computePrice();
-    const def = Number(state.bottle.default_oil_ml) || 0;
-    const extraMl = Math.max(0, state.oilMl - def);
-    let name = `عطر مخصص — ${state.bottle.size_ml} مل / ${state.oil.name} ${state.oilMl} مل`;
-    if (state.color && state.color.name) name += ` / لون ${state.color.name}`;
-    // Unique key so different custom blends don't merge in the cart.
-    const cartKey = `lab::${state.bottle.id}::${state.oil.id}::${state.oilMl}::${state.color ? state.color.name : ''}::${Date.now()}`;
-    cart.push({ id: 'lab-custom', cartKey, variantLabel: null, bottleColor: state.color ? state.color.name : null, image: state.bottleImage || null, name, price, qty: 1, isCustomLab: true });
-    toast('عطرك المخصص اتضاف للسلة ✓', 'success', 2800);
-    saveCart();
-    openCart();
+    try {
+      if (!state.bottle || !state.oil) { toast('اختار القزازة والزيت الأول', 'error', 2500); return; }
+      const price = computePrice();
+      let name = `عطر مخصص — ${state.bottle.size_ml} مل / ${state.oil.name} ${state.oilMl} مل`;
+      if (state.color && state.color.name) name += ` / لون ${state.color.name}`;
+      const cartKey = `lab::${state.bottle.id}::${state.oil.id}::${state.oilMl}::${state.color ? state.color.name : ''}::${Date.now()}`;
+      // Guard: make sure the global cart exists before pushing.
+      if (typeof cart === 'undefined' || !Array.isArray(cart)) { console.error('[Monsela] cart not ready'); toast('حصلت مشكلة، حدّث الصفحة وجرّب تاني', 'error', 3000); return; }
+      cart.push({ id: 'lab-custom', cartKey, variantLabel: null, bottleColor: state.color ? state.color.name : null, image: state.bottleImage || null, name, price, qty: 1, isCustomLab: true });
+      toast('عطرك المخصص اتضاف للسلة ✓', 'success', 2800);
+      if (typeof saveCart === 'function') saveCart();
+      if (typeof openCart === 'function') openCart();
+    } catch (e) {
+      console.error('[Monsela] addLabToCart failed:', e);
+      toast('حصلت مشكلة في الإضافة للسلة — حدّث الصفحة وجرّب تاني', 'error', 3500);
+    }
   }
 
   // Kick off after the page settles.
