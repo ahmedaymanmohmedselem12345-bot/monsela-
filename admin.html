@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Monsela | لوحة التحكم</title>
+<meta name="robots" content="noindex,nofollow">
+<script src="assets/store-core.js"></script>
+<link rel="stylesheet" href="assets/refinements.css">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
@@ -143,7 +146,7 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
     <div class="card">
       <div class="tabs">
         <button id="tabLogin" class="active">تسجيل الدخول</button>
-        <button id="tabSignup">حساب جديد (أول مرة بس)</button>
+        <button hidden id="tabSignup">حساب جديد (أول مرة بس)</button>
       </div>
 
       <div id="loginForm">
@@ -754,15 +757,11 @@ body.tab-settings .card[data-tab="settings"]{display:block;}
 <script>
 const SUPABASE_URL = "https://oujdveezelfokelyptza.supabase.co";
 const SUPABASE_KEY = "sb_publishable__RDtZceDH1t27efsykfacQ_TosyWUfn";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {global:{fetch:MonselaCore.fetchTimed}});
 
 // Escape any user-controlled text before putting it into innerHTML, so a customer
 // can never inject working HTML/JS via their name, comment, notes, etc.
-function escapeHTML(str){
-  const div = document.createElement('div');
-  div.textContent = str ?? '';
-  return div.innerHTML;
-}
+function escapeHTML(str){ return MonselaCore.escapeHTML(str); }
 
 const authScreen = document.getElementById('authScreen');
 const adminScreen = document.getElementById('adminScreen');
@@ -775,11 +774,6 @@ tabLogin.addEventListener('click', ()=>{
   tabLogin.classList.add('active'); tabSignup.classList.remove('active');
   loginForm.style.display='block'; signupForm.style.display='none';
 });
-tabSignup.addEventListener('click', ()=>{
-  tabSignup.classList.add('active'); tabLogin.classList.remove('active');
-  signupForm.style.display='block'; loginForm.style.display='none';
-});
-
 document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -788,21 +782,11 @@ document.getElementById('loginBtn').addEventListener('click', async ()=>{
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الإيميل أو كلمة المرور غلط.'; return; }
   statusEl.textContent = '';
-  showAdmin();
+  await showAdmin();
 });
 
-document.getElementById('signupBtn').addEventListener('click', async ()=>{
-  const email = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const statusEl = document.getElementById('signupStatus');
-  if (password.length < 6) { statusEl.style.color='var(--danger)'; statusEl.textContent='كلمة المرور لازم تكون 6 حروف على الأقل.'; return; }
-  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الإنشاء...';
-  const { error } = await sb.auth.signUp({ email, password });
-  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = error.message; return; }
-  statusEl.style.color = 'var(--success)';
-  statusEl.textContent = 'تم! لو طلب تأكيد بالإيميل، افتح بريدك ودوس على الرابط، وبعدين سجّل دخول عادي.';
-});
-
+// Administrator accounts are provisioned in Supabase, never from a public form.
+document.getElementById('signupBtn').disabled=true;
 document.getElementById('logoutBtn').addEventListener('click', async ()=>{
   await sb.auth.signOut();
   location.reload();
@@ -818,9 +802,23 @@ document.querySelectorAll('.admin-tab-btn').forEach(btn=>{
   });
 });
 
+let adminReady=false;
 async function showAdmin(){
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
+  const status=document.getElementById('loginStatus');
+  let user;
+  try {
+    const result=await sb.auth.getUser();user=result.data?.user;
+    if(result.error||!user)throw new Error('سجّل دخول بحساب المدير.');
+    const permission=await sb.rpc('monsela_is_admin');
+    if(permission.error)throw new Error('تعذر التحقق من صلاحية الإدارة. يلزم تفعيل ملف إعداد صلاحيات الإدارة في Supabase.');
+    if(permission.data!==true)throw new Error('الحساب ده غير مصرح له بإدارة المتجر.');
+  } catch(e){
+    adminScreen.classList.remove('show');authScreen.classList.add('show');status.style.color='var(--danger)';status.textContent=e.message;
+    return;
+  }
+  if(adminReady)return;
+  adminReady=true;
+  window.dispatchEvent(new Event('monsela:admin-ready'));
   document.getElementById('whoami').textContent = `مسجل دخول كـ ${user.email}`;
   authScreen.classList.remove('show');
   adminScreen.classList.add('show');
@@ -1515,9 +1513,11 @@ function subscribeToNewOrders(){
 
 // Check existing session on load
 sb.auth.getSession().then(({ data }) => {
-  if (data.session) { showAdmin(); }
+  if (data.session) { showAdmin().catch(()=>{}); }
   else { authScreen.classList.add('show'); }
 });
+
+sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){adminReady=false;adminScreen.classList.remove('show');authScreen.classList.add('show');}});
 
 // ===== Product form =====
 let editingImageUrl = null;
@@ -2040,13 +2040,14 @@ let lastLoadedOrders = [];
 
 function downloadCSV(rows, filename){
   const csvContent = '\uFEFF' + rows.map(row =>
-    row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')
+    row.map(cell => { let value=String(cell ?? '');if(/^[=+@\-\t\r]/.test(value))value="'"+value;return `"${value.replace(/"/g,'""')}"`; }).join(',')
   ).join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
   link.download = filename;
   link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href),1000);
 }
 
 document.getElementById('exportProductsBtn').addEventListener('click', ()=>{
@@ -2413,6 +2414,8 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
 </script>
 
 <script>
+window.addEventListener('monsela:admin-ready',()=>{
+
 /* ===== Admin panel theme switcher (isolated on purpose) =====
    Purely cosmetic and completely separate from the storefront theme:
    it only sets data-admin-theme on <html> and remembers the choice locally.
@@ -2434,9 +2437,13 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     console.error('Admin theme switcher failed (panel still works):', e);
   }
 })();
+
+},{once:true});
 </script>
 
 <script>
+window.addEventListener('monsela:admin-ready',()=>{
+
 /* ===== One-click data backup (isolated on purpose) =====
    Reads every table and saves the result as a single JSON file on the admin's
    machine. Read-only: it never writes to the database, so it cannot damage
@@ -2447,7 +2454,7 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     'products','store_orders','order_items','customer_profiles','shop_settings',
     'coupons','gift_packages','delivery_zones','banners','hero_banners',
     'brand_logos','newsletter_subscribers','stock_notifications','price_alerts',
-    'product_reviews','search_logs'
+    'product_reviews','search_logs','departments','offers','customizer_orders','lab_bottles','lab_oils'
   ];
   try {
     var btn = document.getElementById('downloadBackupBtn');
@@ -2458,7 +2465,7 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
       var backup = { _info: {
         store: 'Monsela',
         created_at: new Date().toISOString(),
-        note: 'نسخة احتياطية للبيانات فقط. تصميم الموقع محفوظ في GitHub.'
+        note: 'تصدير بيانات مرئية لحساب المدير فقط، وليس نسخة كاملة: لا يشمل Auth أو ملفات Storage أو تعريفات SQL. الجداول المتخطاة مذكورة أدناه.'
       }, tables: {} };
       var ok = 0, skipped = [];
       for (var i = 0; i < TABLES.length; i++) {
@@ -2468,11 +2475,16 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
           statusEl.textContent = 'بيقرأ ' + t + '... (' + (i+1) + '/' + TABLES.length + ')';
         }
         try {
-          var res = await sb.from(t).select('*');
-          // A missing table just gets skipped; it must not abort the whole backup.
-          if (res.error) { skipped.push(t); continue; }
-          backup.tables[t] = res.data || [];
-          ok++;
+          var rows=[],offset=0,failed=false;
+          while(true){
+            var res=await sb.from(t).select('*').order('id',{ascending:true}).range(offset,offset+499);
+            if(res.error){failed=true;break;}
+            rows=rows.concat(res.data||[]);
+            if((res.data||[]).length<500)break;
+            offset+=500;
+          }
+          if(failed){skipped.push(t);continue;}
+          backup.tables[t]=rows;ok++;
         } catch (e) { skipped.push(t); }
       }
       backup._info.tables_saved = ok;
@@ -2505,9 +2517,13 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     console.error('Backup block failed (panel still works):', e);
   }
 })();
+
+},{once:true});
 </script>
 
 <script>
+window.addEventListener('monsela:admin-ready',()=>{
+
 /* ===== Department management (isolated) =====
    Lets the admin add/remove store departments. Departments live in their own
    table; adding one here makes it available on the storefront and in the product
@@ -2623,9 +2639,13 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     loadDepartments();
   } catch (e) { console.error('Department manager failed (panel still works):', e); }
 })();
+
+},{once:true});
 </script>
 
 <script>
+window.addEventListener('monsela:admin-ready',()=>{
+
 /* ===== Private customer reviews (admin-only, isolated) =====
    Shows order ratings + feedback that customers left after delivery. Never shown
    on the storefront. Read-only and wrapped so a failure can't break the panel. */
@@ -2662,9 +2682,13 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
   }
   try { loadPrivateReviews(); } catch(e) { console.error('private reviews block failed:', e); }
 })();
+
+},{once:true});
 </script>
 
 <script>
+window.addEventListener('monsela:admin-ready',()=>{
+
 /* ===== Offers manager (isolated) =====
    Lets the admin add offers with images, shown in the storefront's top carousel.
    Read/write to the `offers` table. Wrapped so a failure can't break the panel. */
@@ -2748,9 +2772,13 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     loadOffers();
   } catch (e) { console.error('Offers manager failed (panel still works):', e); }
 })();
+
+},{once:true});
 </script>
 
 <script>
+window.addEventListener('monsela:admin-ready',()=>{
+
 /* ===== Perfume Lab management (admin, isolated) ===== */
 (function(){
   var bottleColors = [];
@@ -2919,6 +2947,8 @@ document.getElementById('qrModal').addEventListener('click', (e)=>{
     loadOils();
   } catch(e){ console.error('Lab management failed (panel still works):', e); }
 })();
+
+},{once:true});
 </script>
 </body>
 </html>

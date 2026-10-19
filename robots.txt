@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /reset-password.html
+Disallow: /database/
+Disallow: /tests/
 
 Sitemap: https://monsela-xi.vercel.app/sitemap.xml

@@ -1,0 +1,34 @@
+// Runs the actual checkout functions with an in-memory DOM/API adapter.
+// No browser rendering or network calls; real database integration remains a deployment gate.
+const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const Core=require('../assets/store-core.js');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+const source=html.slice(html.indexOf('let deliveryZones = [];'),html.indexOf('renderCartUI();\nrenderSavedForLater();',html.indexOf('let deliveryZones = [];')));
+async function setup(options={}){
+ const elements=new Map(),listeners=new Map(),memory=new Map(),requests=[],events=[];
+ function element(id){if(!elements.has(id))elements.set(id,{id,value:'',checked:false,disabled:false,hidden:false,textContent:'',innerHTML:'',style:{},dataset:{},classList:{toggle(){},add(){},remove(){}},addEventListener(name,fn){listeners.set(id+':'+name,fn);},setAttribute(){},focus(){},remove(){}});return elements.get(id);}
+ const product={id:'p1',name:'عطر & ورد',price:1500,stock:3};
+ let catalog=options.catalog||[product];
+ const settings={free_shipping_threshold:1000,gift_wrap_price:25,vodafone_cash_number:'01012345678',instapay_info:'test@example',...options.settings};
+ const sb={from(table){const result={data:table==='products'?catalog:table==='delivery_zones'?[{id:'cairo',name:'القاهرة',fee:70}]:table==='shop_settings'?settings:null,error:null};const chain={select(){return chain},eq(){return chain},order(){return Promise.resolve(result)},maybeSingle(){return Promise.resolve(result)},upsert(){return Promise.resolve({error:null})},then(a,b){return Promise.resolve(result).then(a,b)}};return chain;},async rpc(name,payload){requests.push({name,payload});if(name==='validate_coupon')return options.couponResult||{data:{valid:true,discount_type:'percentage',discount_value:10},error:null};if(name==='place_order')return options.order?await options.order(payload):{data:{id:'o1',order_number:'TEST-001',total:payload.p_total},error:null};throw new Error('Unexpected RPC');}};
+ const ctx={MonselaCore:Core,sb,cart:[{id:'p1',name:product.name,price:1500,qty:1,cartKey:'p1',variantLabel:null,bottleColor:null}],allProducts:[product],freeShippingThreshold:1000,giftWrapPrice:25,currentCustomer:null,WHATSAPP_NUMBER:'201012345678',escapeHTML:Core.escapeHTML,formatPrice:String,saveCart(){},renderProducts(){},closeCartUI(){},toast(){},console,URL,CustomEvent:class{constructor(type,args){this.type=type;this.detail=args.detail}},window:{dispatchEvent(e){events.push(e)}},navigator:{clipboard:{writeText:async()=>{}}},document:{getElementById:element,querySelectorAll(){return []},createElement:()=>element('created-'+elements.size),body:{appendChild(){}}},sessionStorage:{getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)}};
+ vm.createContext(ctx);vm.runInContext(source,ctx);await new Promise(r=>setImmediate(r));
+ element('checkoutName').value='عميل اختبار';element('checkoutPhone').value='01012345678';element('checkoutAddress').value='عنوان اختبار محلي شارع الاختبار مبنى ١';element('checkoutZone').value='cairo';element('checkoutTerms').checked=true;
+ vm.runInContext('checkoutReady=true',ctx);
+ return {ctx,element,requests,memory,events,submit:()=>listeners.get('confirmOrderBtn:click')(),run:code=>vm.runInContext(code,ctx)};
+}
+const placed=s=>s.requests.filter(r=>r.name==='place_order');
+test('guest checkout submits correct free-shipping amount and displays receipt',async()=>{const s=await setup();await s.submit();assert.equal(placed(s).length,1);assert.equal(placed(s)[0].payload.p_customer_id,null);assert.equal(placed(s)[0].payload.p_total,1500);assert.equal(placed(s)[0].payload.p_delivery_fee,0);assert.equal(s.ctx.cart.length,0);assert.equal(s.memory.size,0);assert.ok(s.element('receiptWhatsapp').href.includes('TEST-001'));});
+test('missing zone blocks insert',async()=>{const s=await setup();s.element('checkoutZone').value='';await s.submit();assert.equal(placed(s).length,0);});
+test('invalid phone blocks insert',async()=>{const s=await setup();s.element('checkoutPhone').value='01,12345678';await s.submit();assert.equal(placed(s).length,0);});
+test('missing detailed address blocks insert',async()=>{const s=await setup();s.element('checkoutAddress').value='';await s.submit();assert.equal(placed(s).length,0);});
+test('unchecked consent blocks insert',async()=>{const s=await setup();s.element('checkoutTerms').checked=false;await s.submit();assert.equal(placed(s).length,0);});
+test('double click cannot place two requests',async()=>{let resolve;const s=await setup({order:()=>new Promise(r=>resolve=r)});const pending=s.submit();await new Promise(r=>setImmediate(r));await s.submit();assert.equal(placed(s).length,1);resolve({data:{id:'o1',order_number:'TEST-001',total:1500}});await pending;});
+test('changed stock is reconciled before insert',async()=>{const s=await setup({catalog:[{id:'p1',name:'عطر & ورد',price:1500,stock:0}]});await s.submit();assert.equal(placed(s).length,0);assert.equal(s.ctx.cart.length,0);});
+test('changed price requires explicit review',async()=>{const s=await setup({catalog:[{id:'p1',name:'عطر & ورد',price:1600,stock:3}]});await s.submit();assert.equal(placed(s).length,0);assert.equal(s.ctx.cart[0].price,1600);});
+test('coupon rechecked at submission and expiry stops insert',async()=>{const s=await setup({couponResult:{data:{valid:false,message:'انتهى الكوبون'}}});s.run("appliedCoupon={code:'TEST',type:'percentage',value:10,validatedSubtotal:1500}");await s.submit();assert.equal(placed(s).length,0);assert.equal(s.requests[0].name,'validate_coupon');});
+test('definite backend rejection preserves cart and releases pending marker',async()=>{const s=await setup({order:async()=>({error:{message:'الكمية المطلوبة أكبر من المتاح'}})});await s.submit();assert.equal(s.ctx.cart.length,1);assert.equal(s.memory.size,0);});
+test('network ambiguity blocks automatic repeat orders',async()=>{const s=await setup({order:async()=>({error:{message:'Failed to fetch'}})});await s.submit();assert.equal(s.ctx.cart.length,1);assert.equal(s.memory.size,1);await s.submit();assert.equal(placed(s).length,1);});
+test('empty backend receipt is not presented as successful order',async()=>{const s=await setup({order:async()=>({data:null,error:null})});await s.submit();assert.equal(s.ctx.cart.length,1);assert.equal(s.memory.size,1);});
+test('manual payment amount mismatch blocks insert',async()=>{const s=await setup();s.run("selectedPaymentMethod='instapay'");s.element('paymentSenderPhone').value='01012345678';s.element('paymentAmountPaid').value='5';await s.submit();assert.equal(placed(s).length,0);});
+test('Arabic phone digits normalized in submitted request',async()=>{const s=await setup();s.element('checkoutPhone').value='٠١٠١٢٣٤٥٦٧٨';await s.submit();assert.equal(placed(s)[0].payload.p_customer_phone,'01012345678');});
