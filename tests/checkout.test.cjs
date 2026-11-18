@@ -1,8 +1,8 @@
 // Runs the actual checkout functions with an in-memory DOM/API adapter.
 // No browser rendering or network calls; real database integration remains a deployment gate.
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
-const Core=require('../assets/store-core.js');
-const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),'utf8');
+const Core=require('../public/assets/store-core.js');
+const html=fs.readFileSync(require('node:path').join(__dirname,'../public/original/index.html'),'utf8');
 const source=html.slice(html.indexOf('let deliveryZones = [];'),html.indexOf('renderCartUI();\nrenderSavedForLater();',html.indexOf('let deliveryZones = [];')));
 async function setup(options={}){
  const elements=new Map(),listeners=new Map(),memory=new Map(),requests=[],events=[];

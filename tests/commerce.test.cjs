@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const C=require('../assets/store-core.js');
+const C=require('../public/assets/store-core.js');
 const products=[{id:'p1',name:'عطر & ورد',price:500,stock:3,bottle_colors:[{name:'أسود'},{name:'ذهبي'}]},{id:'p2',name:'عطر ٢',price:600,stock:9,variants:[{label:'50 ml',price:300,stock:2},{label:'100 ml',price:550,stock:4}]}];
 const item=(overrides={})=>({id:'p1',name:'عطر & ورد',price:500,qty:1,cartKey:'p1',variantLabel:null,bottleColor:null,...overrides});
 for(const [input,expected] of [['01012345678','01012345678'],['٠١٠١٢٣٤٥٦٧٨','01012345678'],['۰۱۰۱۲۳۴۵۶۷۸','01012345678'],['+20 10 1234 5678','01012345678'],['00201012345678','01012345678'],['201012345678','01012345678'],['01,12345678',''],['01312345678',''],['hello01012345678',''],['0101234567',''],['010123456789','']])test('phone '+input,()=>assert.equal(C.normalizePhone(input),expected));

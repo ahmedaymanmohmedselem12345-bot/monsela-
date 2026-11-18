@@ -1,5 +1,5 @@
 const test=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
-const html=fs.readFileSync(path.join(__dirname,'../admin.html'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'../public/admin.html'),'utf8');
 const gate=html.slice(html.indexOf('let adminReady=false;'),html.indexOf("document.getElementById('whoami').textContent",html.indexOf('let adminReady=false;')))+'return true;\n}';
 async function run({user={id:'test'},permission=true,error=null}={}){
  const events=[],status={style:{},textContent:''};let calls=0;
