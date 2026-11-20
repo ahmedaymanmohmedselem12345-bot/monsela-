@@ -14,7 +14,8 @@ export default function NavDrawer({ open, close, show, onCategory }) {
       {categories.map(({ label }) => <a key={label} href="#store" onClick={() => onCategory(label)}>{label}<ArrowLeft size={16} /></a>)}
       <a href="#quiz" onClick={close}>اختبار العطور</a>
       <button type="button" onClick={() => show('track')}>تتبع طلبك</button>
-      <a href={`${original}#giftBuilder`}>تجهيز الهدايا</a>
+      <a href={`${original}?view=account`}>المفضلة وحسابي الكامل</a>
+      <a href={`${original}#giftBuilder`}>تجهيز الهدايا</a><a href={`${original}#perfumeLab`}>معمل العطور</a><a href={`${original}#offersCarousel`}>العروض</a>
     </nav>
   </Dialog>;
 }

@@ -1,13 +1,13 @@
 {
-  "name": "Monsela | برفانات أصلية",
-  "short_name": "Monsela",
+  "name": "MonSela | برفانات أصلية",
+  "short_name": "MonSela",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1b1420",
-  "theme_color": "#1b1420",
+  "background_color": "#101D2B",
+  "theme_color": "#101D2B",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
-    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
   ]
 }

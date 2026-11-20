@@ -17,9 +17,9 @@
 /* Applies the saved admin-panel theme immediately, before the page paints. */
 (function(){
   try {
-    var t = localStorage.getItem('monsela_admin_theme');
+    var t = localStorage.getItem('monsela_admin_theme') || 'navy';
     if (t && t !== 'light') document.documentElement.setAttribute('data-admin-theme', t);
-  } catch (e) {}
+  } catch (e) { document.documentElement.setAttribute('data-admin-theme', 'navy'); }
 })();
 </script>
 <style>
@@ -50,11 +50,11 @@
   --shadow-lg:0 12px 28px rgba(0,0,0,0.55), 0 24px 56px rgba(0,0,0,0.45);
 }
 [data-admin-theme="navy"]{
-  --ink:#0d1b2a; --ink-2:#152738; --ink-3:#1e3450;
-  --amber:#d4af37; --gold:#d4af37; --gold-light:#e8ca63; --gold-dark:#a8862a;
-  --cream:#eaf0f7; --rose:#c07a6e; --smoke:#93a7bd;
+  --ink:#101d2b; --ink-2:#182737; --ink-3:#203247;
+  --amber:#d0a455; --gold:#d0a455; --gold-light:#eed6ab; --gold-dark:#b18547;
+  --cream:#f3e6d4; --rose:#c07a6e; --smoke:#c4c9d0;
   --line:rgba(212,175,55,0.20); --line-soft:rgba(212,175,55,0.10);
-  --success:#6fa37a; --danger:#d4736a;
+  --success:#9ac39d; --danger:#ffaaa0;
   --shadow-sm:0 1px 3px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.28);
   --shadow-md:0 4px 12px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.3);
   --shadow-lg:0 12px 28px rgba(0,0,0,0.5), 0 24px 56px rgba(0,0,0,0.4);
@@ -136,28 +136,41 @@ body.tab-orders .card[data-tab="orders"],
 body.tab-marketing .card[data-tab="marketing"],
 body.tab-customers .card[data-tab="customers"],
 body.tab-settings .card[data-tab="settings"]{display:block;}
+body:not(.tab-dashboard):not(.tab-products):not(.tab-orders):not(.tab-marketing):not(.tab-customers):not(.tab-settings) > .container{max-width:570px;}
+#authScreen .card{padding:clamp(16px,4vw,32px);}
+#authScreen h1{font:700 1.35rem/1.5 'Cairo',sans-serif;margin-bottom:20px;}
+#loginBtn{width:100%;min-height:48px;background:var(--gold);color:var(--ink);box-shadow:none;}
+#loginForm input:autofill{box-shadow:0 0 0 1000px var(--ink-2) inset;color:var(--cream);}
+#loginForm input:-webkit-autofill{-webkit-box-shadow:0 0 0 1000px var(--ink-2) inset;-webkit-text-fill-color:var(--cream);caret-color:var(--cream);}
+#loginStatus:empty{display:none;}
+#adminTabs{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,145px),1fr));}
+.top-bar,.top-bar > div{flex-wrap:wrap;gap:10px;}
+#whoami{overflow-wrap:anywhere;}
+@media(max-width:600px){
+  body > .container{padding:26px 14px 48px;}
+  #adminScreen .card{padding:16px;}
+  .product-item, .product-item .actions{flex-wrap:wrap;}
+  .row > *{min-width:min(100%,150px);}
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="logo">Mon<span>sela</span> — لوحة التحكم</div>
-  <div class="subtitle">من هنا تضيف وتعدّل وتشيل أي برفان بتاعك، وهيظهر على الموقع فورًا.</div>
+  <div class="logo"><bdi lang="en">Mon<span>Sela</span></bdi> — لوحة التحكم</div>
 
   <div id="authScreen" class="show">
     <div class="card">
-      <div class="tabs">
-        <button id="tabLogin" class="active">تسجيل الدخول</button>
-        <button hidden id="tabSignup">حساب جديد (أول مرة بس)</button>
-      </div>
+      <h1 id="tabLogin">تسجيل دخول الإدارة</h1>
+      <button hidden id="tabSignup" type="button">حساب جديد</button>
 
-      <div id="loginForm">
-        <label>الإيميل</label>
-        <input type="email" id="loginEmail" placeholder="you@example.com">
-        <label>كلمة المرور</label>
-        <input type="password" id="loginPassword">
-        <button class="btn" id="loginBtn">دخول</button>
-        <div class="status" id="loginStatus"></div>
-      </div>
+      <form id="loginForm">
+        <label for="loginEmail">الإيميل</label>
+        <input type="email" id="loginEmail" dir="ltr" autocomplete="username" placeholder="you@example.com" required>
+        <label for="loginPassword">كلمة المرور</label>
+        <input type="password" id="loginPassword" dir="ltr" autocomplete="current-password" required>
+        <button class="btn" id="loginBtn" type="submit">دخول</button>
+        <div class="status" id="loginStatus" role="status" aria-live="polite"></div>
+      </form>
 
       <div id="signupForm" style="display:none;">
         <p style="color:var(--smoke);font-size:0.85rem;margin-bottom:16px;">اعمل الحساب ده مرة واحدة بس أول ما تستخدم اللوحة، وبعد كده استخدم "تسجيل الدخول" دايمًا.</p>
@@ -766,24 +779,35 @@ function escapeHTML(str){ return MonselaCore.escapeHTML(str); }
 
 const authScreen = document.getElementById('authScreen');
 const adminScreen = document.getElementById('adminScreen');
-const tabLogin = document.getElementById('tabLogin');
-const tabSignup = document.getElementById('tabSignup');
 const loginForm = document.getElementById('loginForm');
-const signupForm = document.getElementById('signupForm');
 
-tabLogin.addEventListener('click', ()=>{
-  tabLogin.classList.add('active'); tabSignup.classList.remove('active');
-  loginForm.style.display='block'; signupForm.style.display='none';
-});
-document.getElementById('loginBtn').addEventListener('click', async ()=>{
+loginForm.addEventListener('submit', async (event)=>{
+  event.preventDefault();
+  const button = document.getElementById('loginBtn');
+  if (button.disabled) return;
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  const statusEl = document.getElementById('loginStatus');
-  statusEl.style.color = 'var(--gold)'; statusEl.textContent = 'جاري الدخول...';
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) { statusEl.style.color = 'var(--danger)'; statusEl.textContent = 'الإيميل أو كلمة المرور غلط.'; return; }
-  statusEl.textContent = '';
-  await showAdmin();
+  const status = document.getElementById('loginStatus');
+  button.disabled = true;
+  status.style.color = 'var(--gold)';
+  status.textContent = 'جاري تسجيل الدخول…';
+  try {
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      status.style.color = 'var(--danger)';
+      status.textContent = error.code === 'email_not_confirmed' ? 'أكّد البريد الإلكتروني الأول.'
+        : error.code === 'invalid_credentials' ? 'الإيميل أو كلمة المرور غلط.'
+        : 'تعذّر تسجيل الدخول دلوقتي. تحقّق من الاتصال وحاول تاني.';
+      return;
+    }
+    status.textContent = 'جاري التحقق من صلاحية الإدارة…';
+    await showAdmin();
+  } catch {
+    status.style.color = 'var(--danger)';
+    status.textContent = 'تعذّر تسجيل الدخول دلوقتي. تحقّق من الاتصال وحاول تاني.';
+  } finally {
+    button.disabled = false;
+  }
 });
 
 // Administrator accounts are provisioned in Supabase, never from a public form.
@@ -811,8 +835,14 @@ async function showAdmin(){
     const result=await sb.auth.getUser();user=result.data?.user;
     if(result.error||!user)throw new Error('سجّل دخول بحساب المدير.');
     const permission=await sb.rpc('monsela_is_admin');
-    if(permission.error)throw new Error('تعذر التحقق من صلاحية الإدارة. يلزم تفعيل ملف إعداد صلاحيات الإدارة في Supabase.');
-    if(permission.data!==true)throw new Error('الحساب ده غير مصرح له بإدارة المتجر.');
+    if(permission.error){
+      const code = permission.error.code;
+      const missing = ['PGRST202', '42883'].includes(code);
+      if (missing) throw new Error('دالة التحقق من صلاحية الإدارة غير متاحة. شغّل database/01-admin-access.sql في مشروع Supabase المرتبط بالمتجر.');
+      if (code === '42501') throw new Error('صلاحية استدعاء دالة الإدارة غير مفعّلة. راجع إعداد database/01-admin-access.sql في Supabase.');
+      throw new Error('تعذّر التحقق من صلاحية الإدارة دلوقتي. تحقّق من الاتصال وحاول تاني.');
+    }
+    if(permission.data!==true)throw new Error('الحساب ده غير مصرح له بإدارة المتجر. استخدم حساب المالك المضاف في Supabase.');
   } catch(e){
     adminScreen.classList.remove('show');authScreen.classList.add('show');status.style.color='var(--danger)';status.textContent=e.message;
     return;
@@ -2425,8 +2455,8 @@ window.addEventListener('monsela:admin-ready',()=>{
   try {
     var sel = document.getElementById('adminThemeSelect');
     if (!sel) return;
-    var saved = 'light';
-    try { saved = localStorage.getItem('monsela_admin_theme') || 'light'; } catch (e) {}
+    var saved = 'navy';
+    try { saved = localStorage.getItem('monsela_admin_theme') || 'navy'; } catch (e) {}
     sel.value = saved;
     sel.addEventListener('change', function(){
       var v = sel.value;

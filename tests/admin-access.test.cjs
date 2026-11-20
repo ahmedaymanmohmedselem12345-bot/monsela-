@@ -8,4 +8,11 @@ async function run({user={id:'test'},permission=true,error=null}={}){
 test('anonymous session cannot authorize admin extras',async()=>{const r=await run({user:null});assert.equal(r.events.length,0);assert.equal(r.calls,0);});
 test('customer role cannot authorize admin extras',async()=>{const r=await run({permission:false});assert.equal(r.events.length,0);assert.match(r.status.textContent,/غير مصرح/);});
 test('missing or failed permission RPC fails closed',async()=>{const r=await run({error:{message:'function not found'}});assert.equal(r.events.length,0);assert.match(r.status.textContent,/صلاحية/);});
+test('missing function and denied execution have distinct setup guidance',async()=>{
+ for(const [code,pattern] of [['PGRST202',/دالة التحقق/],['42883',/دالة التحقق/],['42501',/صلاحية استدعاء/]]){
+  const result=await run({error:{code},permission:true});
+  assert.equal(result.events.length,0);
+  assert.match(result.status.textContent,pattern);
+ }
+});
 test('verified admin initializes extras only once',async()=>{const r=await run();assert.deepEqual(r.events,['monsela:admin-ready']);await vm.runInContext('showAdmin()',r.ctx);assert.equal(r.events.length,1);});

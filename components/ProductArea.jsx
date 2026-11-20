@@ -2,33 +2,32 @@
 
 import { useState } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { categories, original, price } from '@/lib/brand';
+import { original, price } from '@/lib/brand';
 import { filterCatalog } from '@/lib/catalog';
 import Button from './Button';
 import EmptyProductState from './EmptyProductState';
 
 export default function ProductArea({ products, status, category, setCategory, query, setQuery, filters, ranking, reset, show, reload, openProduct }) {
-  const [limit, setLimit] = useState(12);
+  const [pagination, setPagination] = useState({ criteria: null, limit: 12 });
+  const criteria = JSON.stringify([category, query, filters]);
+  const limit = pagination.criteria === criteria ? pagination.limit : 12;
   const list = filterCatalog(products, { category, query, filters, ranking });
   const filterCount = Object.entries(filters).filter(([key, value]) => Array.isArray(value) ? value.length : key === 'sort' ? value !== 'default' : value !== '').length;
   const filtered = Boolean(category || query || filterCount);
   return <section id="store" className="section catalog">
     <div className="container">
-      <div className="section-heading"><h2>المتجر</h2><p>اختار القسم اللي بتحب تتصفح فيه.</p></div>
+      <div className="section-heading catalog-heading"><h2>{filtered ? category || 'نتائج المتجر' : 'مختارات مونسيلا'}</h2></div>
       <div className="catalog-controls">
-        <label className="search-field"><Search size={19} /><span className="sr-only">ابحث في المنتجات</span><input type="search" value={query} placeholder="ابحث في المنتجات" onChange={(event) => { setLimit(12); setQuery(event.target.value); }} /></label>
-        <Button tone="outline" onClick={() => show('filters')}><SlidersHorizontal size={18} /> الفلاتر والترتيب{filterCount > 0 && ` (${filterCount})`}</Button>
-      </div>
-      <div className="chips" aria-label="أقسام المنتجات" role="group">
-        {['', ...categories.map(({ label }) => label)].map((label) => <button key={label} type="button" aria-pressed={category === label}
-          onClick={() => { setLimit(12); setCategory(label); }}>{label || 'الكل'}</button>)}
+        <label className="search-field"><Search size={19} /><span className="sr-only">ابحث في المنتجات</span><input type="search" value={query} placeholder="ابحث في المنتجات" onChange={(event) => setQuery(event.target.value)} /></label>
+        {category && <button type="button" className="catalog-all" onClick={() => setCategory('')}>كل المنتجات</button>}
+        <Button tone="dark-outline" onClick={() => show('filters')}><SlidersHorizontal size={18} /> الفلاتر والترتيب{filterCount > 0 && ` (${filterCount})`}</Button>
       </div>
       {status !== 'ready' || !list.length ? <EmptyProductState
         state={status !== 'ready' ? status : products.length && filtered ? 'filtered' : 'empty'} onRetry={reload} onReset={reset} /> :
         <>
           {filtered && <p role="status">{list.length.toLocaleString('ar-EG')} منتج</p>}
           <div className="product-grid">{list.slice(0, limit).map((product) => <ProductCard key={product.id} product={product} onClick={() => openProduct(product)} />)}</div>
-          {limit < list.length && <div className="centered"><Button tone="outline" onClick={() => setLimit((previous) => previous + 12)}>شوف منتجات أكتر</Button></div>}
+          {limit < list.length && <div className="centered"><Button tone="dark-outline" onClick={() => setPagination({ criteria, limit: limit + 12 })}>شوف منتجات أكتر</Button></div>}
         </>}
     </div>
   </section>;
