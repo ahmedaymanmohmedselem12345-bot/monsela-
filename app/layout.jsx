@@ -8,10 +8,11 @@ import './globals.css';
 export const metadata = {
   title: 'MonSela | عطور فاخرة تليق بذوقك',
   description: 'اكتشف عطور وزيوت عطرية وبخور وإكسسوارات مختارة بعناية من MonSela.',
+  manifest: '/manifest.json',
   icons: { icon: '/favicon.svg' },
 };
 
-export const viewport = { themeColor: '#1B2A4A', viewportFit: 'cover' };
+export const viewport = { themeColor: '#101D2B', viewportFit: 'cover' };
 
 export default function Layout({ children }) {
   return <html lang="ar" dir="rtl"><body>{children}</body></html>;
